@@ -1,0 +1,8 @@
+{
+    "files": [
+        "main.py",
+        "main.qml",
+        "controllers/main_window_controller.py",
+        "controllers/main_window_console.py"
+    ]
+}
