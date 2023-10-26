@@ -36,7 +36,7 @@ if __name__ == "__main__":
 
     view.show()
     res = app.exec()
-    # Deleting the view before it goes out of scope is required to make sure all child QML instances
-    # are destroyed in the correct order.
+    # Deleting the view before it goes out of scope is required to make sure all child
+    # QML instances are destroyed in the correct order.
     del view
     sys.exit(res)
