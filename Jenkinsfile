@@ -8,44 +8,28 @@ pipeline {
     stages {
         stage("Test") {
             agent {
-                label {
-                    label "worker"
-                    docker "python:3.11.4"
+                docker {
+                    label 'windows-slave'
+                    image 'ingeniacontainers.azurecr.io/win-python-builder:1.1'
                 }
             }
+
+
             stages {
                 stage("Install Dependencies") {
                     steps {
-                        sh "pip install pipenv"
-                        sh "pipenv install -d --ignore-pipfile"
+                        bat """
+                            py -3.9 -m pipenv install -d --ignore-pipfile
+                        """
                     }
                 }
                 stage("Code checks") {
                     parallel {
-                        stage("Formatting") {
+                        stage('Mypy') {
                             steps {
-                                sh "pipenv run black ./src --check"
-                            }
-                        }
-                        stage("Linting") {
-                            steps {
-                                sh "pipenv run ruff ./src --output-format=junit --output-file=ruff_junit.xml"
-                            }
-                            post {
-                                always {
-                                    junit "backend/ruff_junit.xml"
-                                }
-                            }
-                        }
-                        stage("QML Linting") {
-                            steps {
-                                sh "pipenv run pyside6-project build"
-                                sh "pipenv run qmllinting.py"
-                            }
-                        }
-                        stage("Type Checking") {
-                            steps {
-                                sh "pipenv run mypy ./src --config-file mypy.ini --junit-xml=mypy_junit.xml"
+                                bat """
+                                    py -3.9 -m pipenv run mypy ./src --config-file mypy.ini --junit-xml=mypy_junit.xml
+                                """
                             }
                             post {
                                 always {
@@ -53,13 +37,45 @@ pipeline {
                                 }
                             }
                         }
+                        stage("Formatting") {
+                            steps {
+                                bat """
+                                    py -3.9 -m pipenv run black ./src --check
+                                """
+                            }
+                        }
+                        stage("Linting") {
+                            steps {
+                                bat """
+                                    py -3.9 -m pipenv run ruff ./src --output-format=junit --output-file=ruff_junit.xml
+                                """
+                            }
+                            post {
+                                always {
+                                    junit "ruff_junit.xml"
+                                }
+                            }
+                        }
+                        stage("QML Linting") {
+                            steps {
+                                bat """
+                                    py -3.9 -m pipenv run pyside6-project build
+                                """
+                                bat """
+                                    py -3.9 -m pipenv run qmllinting.py
+                                """
+                            }
+                        }
+                        
                     }
                 }                
                 stage("Tests") {
                     stages {
                         stage("Unit Tests") {
                             steps {
-                                sh "pipenv run pytest ./src/tests/unit --junitxml=pytest_unit_junit.xml"
+                                bat """
+                                    py -3.9 -m pipenv run pytest ./src/tests/unit --junitxml=pytest_unit_junit.xml
+                                """
                             }
                             post {
                                 always {
@@ -69,7 +85,9 @@ pipeline {
                         }
                         stage("GUI Tests") {
                             steps {
-                                sh "pipenv run pytest ./src/tests/gui --junitxml=pytest_gui_junit.xml"
+                                bat """
+                                    py -3.9 -m pipenv run pytest ./src/tests/gui --junitxml=pytest_gui_junit.xml
+                                """
                             }
                             post {
                                 always {

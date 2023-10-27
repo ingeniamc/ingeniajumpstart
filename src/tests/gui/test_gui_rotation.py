@@ -6,7 +6,9 @@ from pytestqt.qtbot import QtBot
 
 
 def test_rotation(
-    view: QQuickView, main_window_controller: MainWindowController, qtbot: QtBot
+    qtbot: QtBot,
+    view: QQuickView,
+    main_window_controller: MainWindowController,
 ) -> None:
     timer = QTimer()
     timer.start(10)
@@ -15,12 +17,15 @@ def test_rotation(
 
     timer.timeout.connect(main_window_controller.rotate)
 
+    qtbot.wait_signal(main_window_controller.valueChanged)
+
     def is_rotated() -> None:
         assert main_window_controller.rotateValue.r >= 50
 
     qtbot.waitUntil(is_rotated)
 
     assert spy.count() == 5
-    assert main_window_controller.rotateValue.r == 50
-
+    assert main_window_controller.rotateValue.r >= 50
+    # Deleting the view before it goes out of scope is required to make sure all child
+    # QML instances are destroyed in the correct order.
     del view

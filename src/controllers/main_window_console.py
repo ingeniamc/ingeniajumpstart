@@ -1,7 +1,8 @@
-from PySide6.QtCore import QObject, Slot
-from PySide6.QtQml import QmlElement
+from typing import Union
 
 from models.console import Console
+from PySide6.QtCore import QObject, Slot
+from PySide6.QtQml import QmlElement
 
 # To be used on the @QmlElement decorator
 # (QML_IMPORT_MINOR_VERSION is optional)
@@ -19,7 +20,7 @@ class MainWindowConsole(QObject):
 
     @Slot(str)
     @Slot(float)
-    def output(self, s: str | float) -> None:
+    def output(self, s: Union[str, float]) -> None:
         self.console.output(s)
 
     @Slot(str)
