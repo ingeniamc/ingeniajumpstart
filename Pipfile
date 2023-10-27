@@ -12,6 +12,9 @@ mypy = "*"
 black = "*"
 ruff = "*"
 sphinx = "*"
+faker = "*"
+pytest-qt = "*"
+pre-commit = "*"
 
 [requires]
 python_version = "3.11"

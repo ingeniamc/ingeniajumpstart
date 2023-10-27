@@ -21,4 +21,4 @@ command += qml_files
 
 print(f"Linting {len(qml_files)} QML files in {directory}")
 
-subprocess.run(command, stderr=subprocess.PIPE)
+subprocess.run(command, check=True)
