@@ -52,10 +52,15 @@ Documentation added to the source code can be compiled into several output forma
 
 ~~~~
 cd docs
-Pipenv run make clean
-Pipenv run make html
+pipenv run make clean
+pipenv run make html
 ~~~~
 
+### Running tests
+
+Run tests using pytest
+
+`pipenv run pytest src/tests`
 
 License
 -------
