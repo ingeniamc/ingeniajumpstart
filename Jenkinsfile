@@ -99,11 +99,6 @@ pipeline {
                     }
                 }
             }
-            post {
-                always {
-                    cleanWs()
-                }
-            }
         }
     }
 }
