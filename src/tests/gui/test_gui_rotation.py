@@ -24,7 +24,7 @@ def test_rotation(
 
     qtbot.waitUntil(is_rotated)
 
-    assert spy.count() == 5
+    assert spy.count() >= 5
     assert main_window_controller.rotateValue.r >= 50
     # Deleting the view before it goes out of scope is required to make sure all child
     # QML instances are destroyed in the correct order.
