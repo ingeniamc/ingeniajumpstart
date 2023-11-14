@@ -1,8 +1,9 @@
 from typing import Union
 
-from models.console import Console
 from PySide6.QtCore import QObject, Slot
 from PySide6.QtQml import QmlElement
+
+from src.models.console import Console
 
 # To be used on the @QmlElement decorator
 # (QML_IMPORT_MINOR_VERSION is optional)

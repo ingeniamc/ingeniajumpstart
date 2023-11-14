@@ -1,7 +1,8 @@
-from controllers.main_window_controller import MainWindowController
 from PySide6.QtCore import QTimer
 from PySide6.QtTest import QSignalSpy
 from pytestqt.qtbot import QtBot
+
+from src.controllers.main_window_controller import MainWindowController
 
 
 def test_rotation(

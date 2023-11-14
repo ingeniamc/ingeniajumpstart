@@ -1,15 +1,13 @@
-# Copyright (C) 2022 The Qt Company Ltd.
-# SPDX-License-Identifier: LicenseRef-Qt-Commercial OR BSD-3-Clause
-
 import os
 import sys
 from pathlib import Path
 
-from controllers.main_window_console import MainWindowConsole
-from controllers.main_window_controller import MainWindowController
 from PySide6.QtGui import QGuiApplication
 from PySide6.QtQml import QQmlApplicationEngine
 from PySide6.QtQuick import QQuickView
+
+from src.controllers.main_window_console import MainWindowConsole
+from src.controllers.main_window_controller import MainWindowController
 
 if __name__ == "__main__":
     app = QGuiApplication(sys.argv)
