@@ -1,4 +1,4 @@
-from controllers.main_window_controller import MainWindowController
+from src.controllers.main_window_controller import MainWindowController
 
 
 def test_rotation() -> None:

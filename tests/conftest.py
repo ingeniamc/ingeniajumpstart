@@ -3,10 +3,11 @@ import sys
 from pathlib import Path
 
 import pytest
-from controllers.main_window_console import MainWindowConsole
-from controllers.main_window_controller import MainWindowController
 from PySide6.QtCore import QUrl
 from PySide6.QtQuick import QQuickView
+
+from src.controllers.main_window_console import MainWindowConsole
+from src.controllers.main_window_controller import MainWindowController
 
 
 @pytest.fixture
@@ -30,7 +31,7 @@ def view(
             "mainWindowConsole": main_window_console,
         }
     )
-    qml_file = os.fspath(Path(__file__).resolve().parent.parent / "views/main.qml")
+    qml_file = os.fspath(Path(__file__).resolve().parent.parent / "src/views/main.qml")
     view.setSource(QUrl.fromLocalFile(qml_file))
     if view.status() == QQuickView.Status.Error:
         sys.exit(-1)
