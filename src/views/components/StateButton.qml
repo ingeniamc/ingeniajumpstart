@@ -7,7 +7,6 @@ Button {
     id: stateButton
     state: "NORMAL"
     highlighted: false
-
     states: [
         State {
             name: "NORMAL"

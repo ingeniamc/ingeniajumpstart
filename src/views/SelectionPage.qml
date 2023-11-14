@@ -1,12 +1,21 @@
 pragma ComponentBehavior: Bound
 import QtQuick.Layouts
-import QtQuick.Controls
 import "components"
 import QtQuick.Controls.Material
+import qmltypes.controllers 1.0
+import QtQuick 2.15
+import QtQuick.Controls 2.15
 
 ColumnLayout {
-    id: grid
-    signal startButtonPressed
+    id: selectionPage
+    required property DriveController driveController
+
+    Connections {
+        target: selectionPage.driveController
+        function onDriveDisconnected() {
+            connectBtn.state = "NORMAL";
+        }
+    }
 
     RowLayout {
         SpacerW {
@@ -62,11 +71,32 @@ ColumnLayout {
         SpacerW {
         }
         Button {
-            text: "Start"
+            id: connectBtn
+            text: "Connect"
             Material.background: Material.Green
             Layout.fillWidth: true
             Layout.preferredWidth: 1
-            onClicked: () => grid.startButtonPressed()
+            state: "NORMAL"
+            states: [
+                State {
+                    name: "NORMAL"
+                    PropertyChanges {
+                        target: connectBtn
+                        enabled: true
+                    }
+                },
+                State {
+                    name: "LOADING"
+                    PropertyChanges {
+                        target: connectBtn
+                        enabled: false
+                    }
+                }
+            ]
+            onClicked: () => {
+                connectBtn.state = "LOADING";
+                selectionPage.driveController.connect();
+            }
         }
         SpacerW {
         }

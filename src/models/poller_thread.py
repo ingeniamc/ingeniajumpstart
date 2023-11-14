@@ -1,0 +1,62 @@
+import time
+from typing import Union
+
+from ingeniamotion import MotionController
+from PySide6.QtCore import QThread, Signal
+
+
+class PollerThread(QThread):
+    """Thread to create a poller object."""
+
+    newDataAvailable: Signal = Signal(list, list)
+    """Signal emitted when new data is available."""
+
+    def __init__(
+        self,
+        mc: MotionController,
+        drive: str,
+        registers: list[dict[str, Union[int, str]]],
+        sampling_time: float = 0.125,
+        refresh_time: float = 0.125,
+        buffer_size: int = 100,
+    ) -> None:
+        """Constructor of the PollerThread.
+
+        Args:
+            mc: MotionController instance
+            drive: drive alias.
+            registers: Register to be read.
+            sampling_time: Sampling time.
+            buffer_size: Buffer size.
+        """
+        super().__init__()
+        self.__mc = mc
+        self.__running = False
+        self.__registers = registers
+        self.__refresh_time = refresh_time
+        self.__sampling_time = sampling_time
+        self.__buffer_size = buffer_size
+        self.__drive = drive
+
+        self.__poller = self.__mc.capture.create_poller(
+            self.__registers,
+            self.__drive,
+            sampling_time=self.__sampling_time,
+            buffer_size=self.__buffer_size,
+            start=False,
+        )
+
+    def run(self) -> None:
+        self.__poller.start()
+        self.__running = True
+        while self.__running:
+            time_vectors, data, lost_samples = self.__poller.data
+            if lost_samples:
+                print("Some poller samples were lost.")
+            if len(time_vectors) > 0 and self.__running:
+                self.newDataAvailable.emit(time_vectors, data)
+            time.sleep(self.__refresh_time)
+
+    def stop(self) -> None:
+        self.__poller.stop()
+        self.__running = False

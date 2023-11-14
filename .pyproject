@@ -2,7 +2,6 @@
     "files": [
         "src/main.py",
         "src/main.qml",
-        "src/controllers/main_window_controller.py",
-        "src/controllers/main_window_console.py"
+        "src/controllers/drive_controller.py"
     ]
 }
