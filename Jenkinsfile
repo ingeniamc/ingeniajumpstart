@@ -74,7 +74,7 @@ pipeline {
                         stage("Unit Tests") {
                             steps {
                                 bat """
-                                    py -3.9 -m pipenv run pytest ./src/tests/unit --junitxml=pytest_unit_junit.xml
+                                    py -3.9 -m pipenv run pytest ./tests/unit --junitxml=pytest_unit_junit.xml
                                 """
                             }
                             post {
@@ -86,7 +86,7 @@ pipeline {
                         stage("GUI Tests") {
                             steps {
                                 bat """
-                                    py -3.9 -m pipenv run pytest ./src/tests/gui --junitxml=pytest_gui_junit.xml
+                                    py -3.9 -m pipenv run pytest ./tests/gui --junitxml=pytest_gui_junit.xml
                                 """
                             }
                             post {

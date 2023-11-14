@@ -1,6 +1,6 @@
 {
     "files": [
-        "src/main.py",
+        "src/__main__.py",
         "src/main.qml",
         "src/controllers/drive_controller.py"
     ]

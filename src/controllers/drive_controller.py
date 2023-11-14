@@ -1,8 +1,9 @@
 from ingeniamotion.metaclass import DEFAULT_SERVO
-from models.motion_controller_service import MotionControllerService
-from models.types import thread_report
 from PySide6.QtCore import QObject, QTimer, Signal, Slot
 from PySide6.QtQml import QmlElement
+
+from src.models.motion_controller_service import MotionControllerService
+from src.models.types import thread_report
 
 # To be used on the @QmlElement decorator
 # (QML_IMPORT_MINOR_VERSION is optional)
