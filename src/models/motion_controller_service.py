@@ -2,13 +2,12 @@ from functools import wraps
 from typing import Any, Callable, Union
 
 from ingeniamotion import MotionController
-from ingeniamotion.enums import OperationMode
-from ingeniamotion.metaclass import DEFAULT_SERVO
+from ingeniamotion.enums import CAN_DEVICE, OperationMode
 from PySide6.QtCore import QObject
 
 from .mc_thread import MCThread
 from .poller_thread import PollerThread
-from .types import thread_report
+from .types import Drive, thread_report
 
 
 class MotionControllerService(QObject):
@@ -112,33 +111,59 @@ class MotionControllerService(QObject):
 
     @run_on_thread
     def connect_drive(
-        self, report_callback: Callable[[thread_report], Any], *args: Any, **kwargs: Any
+        self,
+        report_callback: Callable[[thread_report], Any],
+        *args: Any,
+        **kwargs: Any,
     ) -> Callable[..., Any]:
         def on_thread() -> Any:
             """
             [docs]
 
             """
-            self.__mc.communication.connect_servo_eoe(
-                "192.168.2.22", "eve-e-xcr-c_eth_2.4.1.xdf"
+            self.__mc.communication.connect_servo_canopen(
+                CAN_DEVICE.KVASER,
+                "eve-xcr-c_can_2.4.1.xdf",
+                31,
+                alias=Drive.LEFT.value,
             )
-            self.__mc.motion.set_operation_mode(OperationMode.PROFILE_VELOCITY)
-            self.__mc.motion.motor_enable()
+            self.__mc.communication.connect_servo_canopen(
+                CAN_DEVICE.KVASER,
+                "eve-xcr-c_can_2.4.1.xdf",
+                32,
+                alias=Drive.RIGHT.value,
+            )
+
+            # self.__mc.communication.connect_servo_eoe(
+            #    "192.168.2.22", "eve-e-xcr-c_eth_2.4.1.xdf"
+            # )
+            self.__mc.motion.set_operation_mode(
+                OperationMode.PROFILE_VELOCITY, servo=Drive.LEFT.value
+            )
+            self.__mc.motion.set_operation_mode(
+                OperationMode.PROFILE_VELOCITY, servo=Drive.RIGHT.value
+            )
 
         return on_thread
 
     @run_on_thread
     def disconnect_drive(
-        self, report_callback: Callable[[thread_report], Any], *args: Any, **kwargs: Any
+        self,
+        report_callback: Callable[[thread_report], Any],
+        *args: Any,
+        **kwargs: Any,
     ) -> Callable[..., Any]:
         def on_thread() -> Any:
             """
             [docs]
 
             """
-            self.__mc.motion.motor_disable()
-            self.stop_poller_thread(DEFAULT_SERVO)
-            self.__mc.communication.disconnect()
+            self.__mc.motion.motor_disable(servo=Drive.LEFT.value)
+            self.stop_poller_thread(Drive.LEFT.value)
+            self.__mc.communication.disconnect(servo=Drive.LEFT.value)
+            self.__mc.motion.motor_disable(servo=Drive.RIGHT.value)
+            self.stop_poller_thread(Drive.RIGHT.value)
+            self.__mc.communication.disconnect(servo=Drive.RIGHT.value)
 
         return on_thread
 

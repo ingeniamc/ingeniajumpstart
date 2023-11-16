@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from enum import Enum
 from typing import Any, Optional
 
 
@@ -9,3 +10,8 @@ class thread_report:
     timestamp: float
     duration: float
     exceptions: Optional[Exception]
+
+
+class Drive(Enum):
+    LEFT = "LEFT"
+    RIGHT = "RIGHT"

@@ -15,14 +15,19 @@ RowLayout {
 
     Connections {
         target: grid.driveController
-        function onVelocityValue(timestamp, velocity) {
-            PlotJS.updatePlot(timestamp, velocity, xAxis);
+        function onVelocityLeft(timestamp, velocity) {
+            PlotJS.updatePlot(chartL, timestamp, velocity);
+        }
+        function onVelocityRight(timestamp, velocity) {
+            PlotJS.updatePlot(chartR, timestamp, velocity);
         }
         function onDriveConnected() {
-            PlotJS.initPlot(chart, xAxis, yAxis);
+            PlotJS.initSeries(chartL, xAxisL, yAxisL, "Left");
+            PlotJS.initSeries(chartR, xAxisR, yAxisR, "Right");
         }
         function onDriveDisconnected() {
-            PlotJS.resetPlot(chart, xAxis);
+            PlotJS.resetPlot(chartL);
+            PlotJS.resetPlot(chartR);
         }
     }
 
@@ -30,22 +35,40 @@ RowLayout {
         if (event.isAutoRepeat)
             return;
         upButton.state = "ACTIVE";
-        grid.driveController.set_velocity(velocitySlider.value);
+        if (leftCheck.checked) {
+            grid.driveController.set_velocity(velocitySliderL.value, "LEFT");
+        }
+        if (rightCheck.checked) {
+            grid.driveController.set_velocity(velocitySliderR.value, "RIGHT");
+        }
     }
 
     Keys.onDownPressed: event => {
         if (event.isAutoRepeat)
             return;
         downButton.state = "ACTIVE";
-        grid.driveController.set_velocity(velocitySlider.value * -1);
+        if (leftCheck.checked) {
+            grid.driveController.set_velocity(velocitySliderL.value * -1, "LEFT");
+        }
+        if (rightCheck.checked) {
+            grid.driveController.set_velocity(velocitySliderR.value * -1, "RIGHT");
+        }
     }
 
     Keys.onLeftPressed: event => {
+        if (event.isAutoRepeat || !rightCheck.checked || !leftCheck.checked)
+            return;
         leftButton.state = "ACTIVE";
+        grid.driveController.set_velocity(velocitySliderL.value * -1, "LEFT");
+        grid.driveController.set_velocity(velocitySliderR.value, "RIGHT");
     }
 
     Keys.onRightPressed: event => {
+        if (event.isAutoRepeat || !rightCheck.checked || !leftCheck.checked)
+            return;
         rightButton.state = "ACTIVE";
+        grid.driveController.set_velocity(velocitySliderL.value, "LEFT");
+        grid.driveController.set_velocity(velocitySliderR.value * -1, "RIGHT");
     }
 
     Keys.onReleased: event => {
@@ -65,31 +88,87 @@ RowLayout {
             rightButton.state = "NORMAL";
             break;
         }
-        grid.driveController.set_velocity(0);
+        if (leftCheck.checked) {
+            grid.driveController.set_velocity(0, "LEFT");
+        }
+        if (rightCheck.checked) {
+            grid.driveController.set_velocity(0, "RIGHT");
+        }
     }
 
     ColumnLayout {
         Layout.preferredWidth: 3
-
-        Rectangle {
-            Layout.fillWidth: true
-            Layout.fillHeight: true
-            Layout.preferredHeight: 2
-            ChartView {
-                id: chart
-                anchors.fill: parent
-                axes: [
-                    ValueAxis {
-                        id: xAxis
-                        min: 1.0
-                        max: 20.0
-                    },
-                    ValueAxis {
-                        id: yAxis
-                        min: -7.5
-                        max: 7.5
+        RowLayout {
+            CheckBox {
+                id: leftCheck
+                text: qsTr("Left")
+                onToggled: () => {
+                    PlotJS.resetPlot(chartL);
+                    PlotJS.initSeries(chartL, xAxisL, yAxisL, "Left");
+                    if (leftCheck.checked) {
+                        grid.driveController.enable_motor("LEFT");
+                    } else {
+                        grid.driveController.disable_motor("LEFT");
                     }
-                ]
+                }
+            }
+            CheckBox {
+                id: rightCheck
+                text: qsTr("Right")
+                onToggled: () => {
+                    PlotJS.resetPlot(chartR);
+                    PlotJS.initSeries(chartR, xAxisR, yAxisR, "Right");
+                    if (rightCheck.checked) {
+                        grid.driveController.enable_motor("RIGHT");
+                    } else {
+                        grid.driveController.disable_motor("RIGHT");
+                    }
+                }
+            }
+        }
+        RowLayout {
+
+            Rectangle {
+                Layout.fillWidth: true
+                Layout.fillHeight: true
+                Layout.preferredHeight: 2
+                ChartView {
+                    id: chartL
+                    anchors.fill: parent
+                    axes: [
+                        ValueAxis {
+                            id: xAxisL
+                            min: 1.0
+                            max: 20.0
+                        },
+                        ValueAxis {
+                            id: yAxisL
+                            min: -7.5
+                            max: 7.5
+                        }
+                    ]
+                }
+            }
+            Rectangle {
+                Layout.fillWidth: true
+                Layout.fillHeight: true
+                Layout.preferredHeight: 2
+                ChartView {
+                    id: chartR
+                    anchors.fill: parent
+                    axes: [
+                        ValueAxis {
+                            id: xAxisR
+                            min: 1.0
+                            max: 20.0
+                        },
+                        ValueAxis {
+                            id: yAxisR
+                            min: -7.5
+                            max: 7.5
+                        }
+                    ]
+                }
             }
         }
 
@@ -156,27 +235,32 @@ RowLayout {
         Text {
             Layout.fillWidth: true
             color: "black"
-            text: "Velocity"
+            text: "Max Velocity L"
         }
         Slider {
-            id: velocitySlider
+            id: velocitySliderL
             Layout.fillWidth: true
             from: 1
             to: 10
             value: 5
             onMoved: () => {
-                yAxis.min = (velocitySlider.value * -1) - 2.5;
-                yAxis.max = velocitySlider.value + 2.5;
+                PlotJS.setMaxVelocity(chartL, velocitySliderL.value);
             }
         }
         Text {
             Layout.fillWidth: true
             color: "black"
-            text: "Speed"
+            text: "Max Velocity R"
         }
         Slider {
+            id: velocitySliderR
             Layout.fillWidth: true
-            value: 0.5
+            from: 1
+            to: 10
+            value: 5
+            onMoved: () => {
+                PlotJS.setMaxVelocity(chartR, velocitySliderR.value);
+            }
         }
         Text {
             Layout.fillWidth: true
