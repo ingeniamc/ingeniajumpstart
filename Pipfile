@@ -6,6 +6,7 @@ name = "pypi"
 [packages]
 pyside6 = "==6.6.0"
 ingeniamotion = "==0.6.3"
+ingenialogger = "==0.3.0"
 
 [dev-packages]
 pytest = "==7.4.3"

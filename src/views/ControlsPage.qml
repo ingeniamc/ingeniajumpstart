@@ -6,7 +6,7 @@ import QtQuick.Controls.Material
 import "components"
 import qmltypes.controllers 1.0
 import QtCharts 2.6
-import "plot.js" as PlotJS
+import "js/plot.js" as PlotJS
 
 RowLayout {
     id: grid
