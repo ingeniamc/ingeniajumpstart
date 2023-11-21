@@ -54,14 +54,14 @@ class DriveController(QObject):
 
     @Slot()
     def connect(self) -> None:
-        self.mcs.connect_drive(self.connect_callback, self.dictionary, self.connection)
+        self.mcs.connect_drives(self.connect_callback, self.dictionary, self.connection)
 
     def connect_callback(self, report: thread_report) -> None:
         logger.debug(report)
         if report.exceptions is None:
-            self.connection_error_triggered.emit(str(report.exceptions))
-        else:
             self.drive_connected_triggered.emit()
+        else:
+            self.connection_error_triggered.emit(str(report.exceptions))
 
     @Slot()
     def disconnect(self) -> None:
@@ -95,9 +95,9 @@ class DriveController(QObject):
     @Slot(str)
     def enable_motor(self, drive: str) -> None:
         if drive == Drive.LEFT.value:
-            self.mcs.run(self.enable_motor_l_callback, "motion.motor_enable", drive)
+            self.mcs.enable_motor(self.enable_motor_l_callback, drive)
         else:
-            self.mcs.run(self.enable_motor_r_callback, "motion.motor_enable", drive)
+            self.mcs.enable_motor(self.enable_motor_r_callback, drive)
 
     @Slot(str)
     def disable_motor(self, drive: str) -> None:

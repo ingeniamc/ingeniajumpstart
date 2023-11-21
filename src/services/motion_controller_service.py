@@ -114,7 +114,7 @@ class MotionControllerService(QObject):
         return wrap
 
     @run_on_thread
-    def connect_drive(
+    def connect_drives(
         self,
         report_callback: Callable[[thread_report], Any],
         dictionary: str,
@@ -152,13 +152,6 @@ class MotionControllerService(QObject):
                     32,
                     alias=Drive.RIGHT.value,
                 )
-
-            self.__mc.motion.set_operation_mode(
-                OperationMode.PROFILE_VELOCITY, servo=Drive.LEFT.value
-            )
-            self.__mc.motion.set_operation_mode(
-                OperationMode.PROFILE_VELOCITY, servo=Drive.RIGHT.value
-            )
 
         return on_thread
 
@@ -239,3 +232,19 @@ class MotionControllerService(QObject):
             return Connection.CANOPEN
         else:
             return Connection.ETHERCAT
+
+    @run_on_thread
+    def enable_motor(
+        self,
+        report_callback: Callable[[thread_report], Any],
+        drive: str,
+        *args: Any,
+        **kwargs: Any,
+    ) -> Callable[..., Any]:
+        def on_thread(drive: str) -> Any:
+            self.__mc.motion.set_operation_mode(
+                OperationMode.PROFILE_VELOCITY, servo=drive
+            )
+            self.__mc.motion.motor_enable(servo=drive)
+
+        return on_thread

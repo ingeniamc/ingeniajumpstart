@@ -26,6 +26,8 @@ RowLayout {
             PlotJS.initSeries(chartR, xAxisR, yAxisR, "Right");
         }
         function onDrive_disconnected_triggered() {
+            leftCheck.checked = false;
+            rightCheck.checked = false;
             PlotJS.resetPlot(chartL);
             PlotJS.resetPlot(chartR);
         }
