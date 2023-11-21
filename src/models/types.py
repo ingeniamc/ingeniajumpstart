@@ -15,3 +15,8 @@ class thread_report:
 class Drive(Enum):
     LEFT = "LEFT"
     RIGHT = "RIGHT"
+
+
+class Connection(Enum):
+    ETHERCAT = "EtherCAT"
+    CANOPEN = "CANopen"

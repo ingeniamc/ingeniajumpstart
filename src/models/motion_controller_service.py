@@ -1,13 +1,17 @@
+import xml.etree.ElementTree as ET
 from functools import wraps
 from typing import Any, Callable, Union
 
+from ingenialink.exceptions import ILError
 from ingeniamotion import MotionController
 from ingeniamotion.enums import CAN_DEVICE, OperationMode
 from PySide6.QtCore import QObject
 
 from .mc_thread import MCThread
 from .poller_thread import PollerThread
-from .types import Drive, thread_report
+from .types import Connection, Drive, thread_report
+
+CANOPEN_ADDRESS_LENGTH = 6
 
 
 class MotionControllerService(QObject):
@@ -113,30 +117,42 @@ class MotionControllerService(QObject):
     def connect_drive(
         self,
         report_callback: Callable[[thread_report], Any],
+        dictionary: str,
+        connection: Connection,
         *args: Any,
         **kwargs: Any,
     ) -> Callable[..., Any]:
-        def on_thread() -> Any:
-            """
-            [docs]
+        def on_thread(dictionary: str, connection: Connection) -> Any:
+            """Connect drives to the program.
 
-            """
-            self.__mc.communication.connect_servo_canopen(
-                CAN_DEVICE.KVASER,
-                "eve-xcr-c_can_2.4.1.xdf",
-                31,
-                alias=Drive.LEFT.value,
-            )
-            self.__mc.communication.connect_servo_canopen(
-                CAN_DEVICE.KVASER,
-                "eve-xcr-c_can_2.4.1.xdf",
-                32,
-                alias=Drive.RIGHT.value,
-            )
+            Args:
+                dictionary (str): dictionary file used for the connection
+                connection (Connection): whether to connect via ETHERcat or CANopen
 
-            # self.__mc.communication.connect_servo_eoe(
-            #    "192.168.2.22", "eve-e-xcr-c_eth_2.4.1.xdf"
-            # )
+            Raises:
+                ILError: If the connection fails
+            """
+            dictionary_type = self.__check_dictionary_format(dictionary)
+            if dictionary_type != connection:
+                raise ILError("Communication type does not match the dictionary type")
+            if connection == Connection.ETHERCAT:
+                self.__mc.communication.connect_servo_eoe(
+                    "192.168.2.22", dictionary, alias=Drive.RIGHT.value
+                )
+            else:
+                self.__mc.communication.connect_servo_canopen(
+                    CAN_DEVICE.KVASER,
+                    dictionary,
+                    31,
+                    alias=Drive.LEFT.value,
+                )
+                self.__mc.communication.connect_servo_canopen(
+                    CAN_DEVICE.KVASER,
+                    dictionary,
+                    32,
+                    alias=Drive.RIGHT.value,
+                )
+
             self.__mc.motion.set_operation_mode(
                 OperationMode.PROFILE_VELOCITY, servo=Drive.LEFT.value
             )
@@ -198,3 +214,28 @@ class MotionControllerService(QObject):
         """Stop poller thread."""
         if alias in self.__poller_threads and self.__poller_threads[alias].isRunning():
             self.__poller_threads[alias].stop()
+
+    def __check_dictionary_format(self, filepath: str) -> Connection:
+        """Identifies if the provided dictionary file is for CANopen or
+        ETHERcat connections.
+
+        Args:
+            filepath (str): path to the file to check
+
+        Raises:
+            ILError: If the provided file has the wrong format
+            FileNotFoundError: If the file was not found
+
+        Returns:
+            Connection: The connection type the file is meant for.
+        """
+        tree = ET.parse(filepath)
+        parsed_data = tree.getroot()
+
+        register_example = parsed_data.find("Body//Device//Registers//Register")
+        if not isinstance(register_example, ET.Element):
+            raise ILError("Invalid file format")
+        if len(register_example.attrib["address"]) > CANOPEN_ADDRESS_LENGTH:
+            return Connection.CANOPEN
+        else:
+            return Connection.ETHERCAT

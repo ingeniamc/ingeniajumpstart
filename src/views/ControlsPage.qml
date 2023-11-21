@@ -15,17 +15,17 @@ RowLayout {
 
     Connections {
         target: grid.driveController
-        function onVelocityLeft(timestamp, velocity) {
+        function onVelocity_left_changed(timestamp, velocity) {
             PlotJS.updatePlot(chartL, timestamp, velocity);
         }
-        function onVelocityRight(timestamp, velocity) {
+        function onVelocity_right_changed(timestamp, velocity) {
             PlotJS.updatePlot(chartR, timestamp, velocity);
         }
-        function onDriveConnected() {
+        function onDrive_connected_triggered() {
             PlotJS.initSeries(chartL, xAxisL, yAxisL, "Left");
             PlotJS.initSeries(chartR, xAxisR, yAxisR, "Right");
         }
-        function onDriveDisconnected() {
+        function onDrive_disconnected_triggered() {
             PlotJS.resetPlot(chartL);
             PlotJS.resetPlot(chartR);
         }
@@ -97,8 +97,11 @@ RowLayout {
     }
 
     ColumnLayout {
-        Layout.preferredWidth: 3
         RowLayout {
+            Layout.fillHeight: true
+
+            SpacerW {
+            }
             CheckBox {
                 id: leftCheck
                 text: qsTr("Left")
@@ -125,8 +128,11 @@ RowLayout {
                     }
                 }
             }
+            SpacerW {
+            }
         }
         RowLayout {
+            Layout.fillHeight: true
 
             Rectangle {
                 Layout.fillWidth: true
@@ -173,20 +179,14 @@ RowLayout {
         }
 
         GridLayout {
-            Layout.fillWidth: true
             Layout.fillHeight: true
-            Layout.preferredWidth: 3
             Layout.preferredHeight: 1
             rows: 2
-            columns: 4
+            columns: 5
             rowSpacing: 0
-            SpacerH {
-            }
-            SpacerH {
-            }
-            SpacerH {
-            }
-            SpacerH {
+            Item {
+                Layout.fillHeight: true
+                Layout.columnSpan: 5
             }
             SpacerW {
             }
@@ -197,14 +197,28 @@ RowLayout {
             }
             SpacerW {
             }
-            Dial {
-                Layout.fillWidth: true
-                Layout.rowSpan: 2
+            ColumnLayout {
+                Text {
+                    color: "black"
+                    text: "Max Velocity L"
+                }
+                Slider {
+                    id: velocitySliderL
+                    from: 1
+                    to: 10
+                    value: 5
+                    onMoved: () => {
+                        PlotJS.setMaxVelocity(chartL, velocitySliderL.value);
+                    }
+                }
             }
+            SpacerW {
+            }
+
             StateButton {
                 id: leftButton
                 text: "←"
-                Layout.alignment: Qt.AlignRight
+                Layout.alignment: Qt.AlignRight | Qt.AlignTop
             }
             StateButton {
                 id: downButton
@@ -214,62 +228,30 @@ RowLayout {
             StateButton {
                 id: rightButton
                 text: "→"
-                Layout.alignment: Qt.AlignLeft
+                Layout.alignment: Qt.AlignLeft | Qt.AlignTop
             }
-            SpacerH {
+            ColumnLayout {
+                Text {
+                    color: "black"
+                    text: "Max Velocity R"
+                }
+                Slider {
+                    id: velocitySliderR
+                    from: 1
+                    to: 10
+                    value: 5
+                    onMoved: () => {
+                        PlotJS.setMaxVelocity(chartR, velocitySliderR.value);
+                    }
+                }
             }
-            SpacerH {
+            SpacerW {
             }
-            SpacerH {
-            }
-            SpacerH {
-            }
-        }
-    }
 
-    ColumnLayout {
-        id: rightColumn
-        Layout.fillWidth: true
-        Layout.fillHeight: true
-        Layout.preferredWidth: 1
-        Text {
-            Layout.fillWidth: true
-            color: "black"
-            text: "Max Velocity L"
-        }
-        Slider {
-            id: velocitySliderL
-            Layout.fillWidth: true
-            from: 1
-            to: 10
-            value: 5
-            onMoved: () => {
-                PlotJS.setMaxVelocity(chartL, velocitySliderL.value);
+            Item {
+                Layout.fillHeight: true
+                Layout.columnSpan: 5
             }
-        }
-        Text {
-            Layout.fillWidth: true
-            color: "black"
-            text: "Max Velocity R"
-        }
-        Slider {
-            id: velocitySliderR
-            Layout.fillWidth: true
-            from: 1
-            to: 10
-            value: 5
-            onMoved: () => {
-                PlotJS.setMaxVelocity(chartR, velocitySliderR.value);
-            }
-        }
-        Text {
-            Layout.fillWidth: true
-            color: "black"
-            text: "Lorem"
-        }
-        Slider {
-            Layout.fillWidth: true
-            value: 0.5
         }
     }
 }

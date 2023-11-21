@@ -8,7 +8,7 @@ from PySide6.QtCore import QThread, Signal
 class PollerThread(QThread):
     """Thread to create a poller object."""
 
-    newDataAvailable: Signal = Signal(list, list)
+    new_data_available_triggered: Signal = Signal(list, list)
     """Signal emitted when new data is available."""
 
     def __init__(
@@ -54,7 +54,7 @@ class PollerThread(QThread):
             if lost_samples:
                 print("Some poller samples were lost.")
             if len(time_vectors) > 0 and self.__running:
-                self.newDataAvailable.emit(time_vectors, data)
+                self.new_data_available_triggered.emit(time_vectors, data)
             time.sleep(self.__refresh_time)
 
     def stop(self) -> None:

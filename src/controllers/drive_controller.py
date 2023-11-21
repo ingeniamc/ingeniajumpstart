@@ -1,8 +1,10 @@
+import os
+
 from PySide6.QtCore import QObject, QTimer, Signal, Slot
 from PySide6.QtQml import QmlElement
 
 from src.models.motion_controller_service import MotionControllerService
-from src.models.types import Drive, thread_report
+from src.models.types import Connection, Drive, thread_report
 
 # To be used on the @QmlElement decorator
 # (QML_IMPORT_MINOR_VERSION is optional)
@@ -12,41 +14,60 @@ QML_IMPORT_MAJOR_VERSION = 1
 
 @QmlElement
 class DriveController(QObject):
-    driveConnected: Signal = Signal()
+    drive_connected_triggered: Signal = Signal()
     """Triggers when a drive is connected"""
 
-    driveDisconnected: Signal = Signal()
+    drive_disconnected_triggered: Signal = Signal()
     """Triggers when a drive is disconnected"""
 
-    velocityLeft = Signal(float, float, arguments=["timestamp", "velocity"])
+    velocity_left_changed = Signal(float, float, arguments=["timestamp", "velocity"])
     """Triggers when the poller returns a new value"""
 
-    velocityRight = Signal(float, float, arguments=["timestamp", "velocity"])
+    velocity_right_changed = Signal(float, float, arguments=["timestamp", "velocity"])
     """Triggers when the poller returns a new value"""
+
+    dictionary_changed = Signal(str, arguments=["dictionary"])
+    """Triggers when the dictionary file was selected"""
+
+    connection_error_triggered = Signal(str, arguments=["error_message"])
+    """Triggers when the connection failed"""
 
     def __init__(self) -> None:
         super().__init__()
         self.mcs = MotionControllerService()
         self.value = 0
         self.timer = QTimer()
+        self.connection = Connection.ETHERCAT
+
+    @Slot(str)
+    def select_dictionary(self, dictionary: str) -> None:
+        self.dictionary = dictionary.removeprefix("file:///")
+        self.dictionary_changed.emit(os.path.basename(self.dictionary))
+
+    @Slot(str)
+    def select_connection(self, connection: str) -> None:
+        if connection == Connection.ETHERCAT.value:
+            self.connection = Connection.ETHERCAT
+        else:
+            self.connection = Connection.CANOPEN
 
     @Slot()
     def connect(self) -> None:
-        self.mcs.connect_drive(self.connect_callback)
+        self.mcs.connect_drive(self.connect_callback, self.dictionary, self.connection)
 
     def connect_callback(self, report: thread_report) -> None:
-        print(report)
-        if not report.exceptions:
-            self.driveConnected.emit()
+        if report.exceptions:
+            self.connection_error_triggered.emit(str(report.exceptions))
+        else:
+            self.drive_connected_triggered.emit()
 
     @Slot()
     def disconnect(self) -> None:
         self.mcs.disconnect_drive(self.disconnect_callback)
 
     def disconnect_callback(self, report: thread_report) -> None:
-        print(report)
         if not report.exceptions:
-            self.driveDisconnected.emit()
+            self.drive_disconnected_triggered.emit()
 
     @Slot(float, str)
     def set_velocity(self, velocity: float, drive: str) -> None:
@@ -61,13 +82,12 @@ class DriveController(QObject):
         self, timestamps: list[float], data: list[list[float]]
     ) -> None:
         print(timestamps, data)
-        self.velocityRight.emit(timestamps[0], data[0][0])
+        self.velocity_right_changed.emit(timestamps[0], data[0][0])
 
     def get_velocities_l(
         self, timestamps: list[float], data: list[list[float]]
     ) -> None:
-        print(timestamps, data)
-        self.velocityLeft.emit(timestamps[0], data[0][0])
+        self.velocity_left_changed.emit(timestamps[0], data[0][0])
 
     @Slot(str)
     def enable_motor(self, drive: str) -> None:
@@ -87,29 +107,25 @@ class DriveController(QObject):
         print(report)
 
     def enable_motor_l_callback(self, report: thread_report) -> None:
-        print(report)
         if not report.exceptions:
             pollerThread = self.mcs.create_poller_thread(
                 Drive.LEFT.value, [{"name": "CL_VEL_FBK_VALUE", "axis": 1}]
             )
-            pollerThread.newDataAvailable.connect(self.get_velocities_l)
+            pollerThread.new_data_available_triggered.connect(self.get_velocities_l)
             pollerThread.start()
 
     def disable_motor_l_callback(self, report: thread_report) -> None:
-        print(report)
         if not report.exceptions:
             self.mcs.stop_poller_thread(Drive.LEFT.value)
 
     def enable_motor_r_callback(self, report: thread_report) -> None:
-        print(report)
         if not report.exceptions:
             pollerThread = self.mcs.create_poller_thread(
                 Drive.RIGHT.value, [{"name": "CL_VEL_FBK_VALUE", "axis": 1}]
             )
-            pollerThread.newDataAvailable.connect(self.get_velocities_r)
+            pollerThread.new_data_available_triggered.connect(self.get_velocities_r)
             pollerThread.start()
 
     def disable_motor_r_callback(self, report: thread_report) -> None:
-        print(report)
         if not report.exceptions:
             self.mcs.stop_poller_thread(Drive.RIGHT.value)

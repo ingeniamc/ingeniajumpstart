@@ -62,12 +62,7 @@ class MCThread(QThread):
         output = None
         try:
             output = self.__callback(*self.__args, **self.__kwargs)
-        except (
-            IMException,
-            ILError,
-            ValueError,
-            KeyError,
-        ) as e:
+        except (IMException, ILError, ValueError, KeyError, FileNotFoundError) as e:
             raised_exception = e
         duration = time.time() - timestamp
         report = thread_report(
