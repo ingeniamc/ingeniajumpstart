@@ -1,8 +1,11 @@
 import time
 from typing import Union
 
+import ingenialogger
 from ingeniamotion import MotionController
 from PySide6.QtCore import QThread, Signal
+
+logger = ingenialogger.get_logger(__name__)
 
 
 class PollerThread(QThread):
@@ -52,7 +55,7 @@ class PollerThread(QThread):
         while self.__running:
             time_vectors, data, lost_samples = self.__poller.data
             if lost_samples:
-                print("Some poller samples were lost.")
+                logger.error("Some poller samples were lost.")
             if len(time_vectors) > 0 and self.__running:
                 self.new_data_available_triggered.emit(time_vectors, data)
             time.sleep(self.__refresh_time)

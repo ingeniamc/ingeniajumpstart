@@ -1,15 +1,18 @@
 import os
 
-from PySide6.QtCore import QObject, QTimer, Signal, Slot
+import ingenialogger
+from PySide6.QtCore import QObject, Signal, Slot
 from PySide6.QtQml import QmlElement
 
-from src.models.motion_controller_service import MotionControllerService
-from src.models.types import Connection, Drive, thread_report
+from src.services.motion_controller_service import MotionControllerService
+from src.services.types import Connection, Drive, thread_report
 
 # To be used on the @QmlElement decorator
 # (QML_IMPORT_MINOR_VERSION is optional)
 QML_IMPORT_NAME = "qmltypes.controllers"
 QML_IMPORT_MAJOR_VERSION = 1
+
+logger = ingenialogger.get_logger(__name__)
 
 
 @QmlElement
@@ -35,8 +38,6 @@ class DriveController(QObject):
     def __init__(self) -> None:
         super().__init__()
         self.mcs = MotionControllerService()
-        self.value = 0
-        self.timer = QTimer()
         self.connection = Connection.ETHERCAT
 
     @Slot(str)
@@ -56,7 +57,8 @@ class DriveController(QObject):
         self.mcs.connect_drive(self.connect_callback, self.dictionary, self.connection)
 
     def connect_callback(self, report: thread_report) -> None:
-        if report.exceptions:
+        logger.debug(report)
+        if report.exceptions is None:
             self.connection_error_triggered.emit(str(report.exceptions))
         else:
             self.drive_connected_triggered.emit()
@@ -66,7 +68,8 @@ class DriveController(QObject):
         self.mcs.disconnect_drive(self.disconnect_callback)
 
     def disconnect_callback(self, report: thread_report) -> None:
-        if not report.exceptions:
+        logger.debug(report)
+        if report.exceptions is None:
             self.drive_disconnected_triggered.emit()
 
     @Slot(float, str)
