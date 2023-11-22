@@ -205,9 +205,15 @@ RowLayout {
             SpacerW {
             }
             ColumnLayout {
-                Text {
-                    color: "black"
-                    text: "Max Velocity L"
+                RowLayout {
+                    Text {
+                        color: "black"
+                        text: "Max Velocity L -"
+                    }
+                    Text {
+                        id: velocitySliderLValue
+                        text: "5.00"
+                    }
                 }
                 Slider {
                     id: velocitySliderL
@@ -216,6 +222,7 @@ RowLayout {
                     value: 5
                     onMoved: () => {
                         PlotJS.setMaxVelocity(chartL, velocitySliderL.value);
+                        velocitySliderLValue.text = velocitySliderL.value.toFixed(2);
                     }
                 }
             }
@@ -238,9 +245,15 @@ RowLayout {
                 Layout.alignment: Qt.AlignLeft | Qt.AlignTop
             }
             ColumnLayout {
-                Text {
-                    color: "black"
-                    text: "Max Velocity R"
+                RowLayout {
+                    Text {
+                        color: "black"
+                        text: "Max Velocity R -"
+                    }
+                    Text {
+                        id: velocitySliderRValue
+                        text: "5.00"
+                    }
                 }
                 Slider {
                     id: velocitySliderR
@@ -249,6 +262,7 @@ RowLayout {
                     value: 5
                     onMoved: () => {
                         PlotJS.setMaxVelocity(chartR, velocitySliderR.value);
+                        velocitySliderRValue.text = velocitySliderR.value.toFixed(2);
                     }
                 }
             }

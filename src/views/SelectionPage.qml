@@ -78,12 +78,19 @@ ColumnLayout {
                 }]
             Layout.fillWidth: true
             Layout.preferredWidth: 2
-            onActivated: () => selectionPage.driveController.select_connection(currentValue)
+            onActivated: () => {
+                selectionPage.driveController.select_connection(currentValue);
+                selectCANdevice.visible = currentValue == Enums.Connection.CANopen;
+                selectBaudrate.visible = currentValue == Enums.Connection.CANopen;
+                selectNodeIDs.visible = currentValue == Enums.Connection.CANopen;
+            }
         }
         SpacerW {
         }
     }
+
     RowLayout {
+        id: selectCANdevice
         SpacerW {
         }
         Text {
@@ -104,10 +111,7 @@ ColumnLayout {
                 }, {
                     value: Enums.CanDevice.IXXAT,
                     text: qsTr("IXXAT")
-                }, {
-                    value: Enums.CanDevice.VIRTUAL,
-                    text: qsTr("VIRTUAL")
-                },]
+                }]
             Layout.fillWidth: true
             Layout.preferredWidth: 2
             onActivated: () => selectionPage.driveController.select_can_device(currentValue)
@@ -116,6 +120,7 @@ ColumnLayout {
         }
     }
     RowLayout {
+        id: selectBaudrate
         SpacerW {
         }
         Text {
@@ -155,6 +160,7 @@ ColumnLayout {
     }
 
     RowLayout {
+        id: selectNodeIDs
         SpacerW {
         }
         Text {

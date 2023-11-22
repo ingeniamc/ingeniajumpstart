@@ -22,7 +22,6 @@ class CanDevice(Enum):
     KVASER = auto()
     PCAN = auto()
     IXXAT = auto()
-    VIRTUAL = auto()
 
 
 def stringify_can_device_enum(device: CanDevice) -> CAN_DEVICE:
@@ -43,8 +42,6 @@ def stringify_can_device_enum(device: CanDevice) -> CAN_DEVICE:
         return CAN_DEVICE.PCAN
     elif device == CanDevice.IXXAT:
         return CAN_DEVICE.IXXAT
-    elif device == CanDevice.VIRTUAL:
-        return CAN_DEVICE.VIRTUAL
 
 
 # To be used on the @QmlElement decorator
