@@ -136,11 +136,11 @@ class DriveController(QObject):
 
     def enable_motor_l_callback(self, report: thread_report) -> None:
         if not report.exceptions:
-            pollerThread = self.mcs.create_poller_thread(
+            poller_thread = self.mcs.create_poller_thread(
                 Drive.Left.name, [{"name": "CL_VEL_FBK_VALUE", "axis": 1}]
             )
-            pollerThread.new_data_available_triggered.connect(self.get_velocities_l)
-            pollerThread.start()
+            poller_thread.new_data_available_triggered.connect(self.get_velocities_l)
+            poller_thread.start()
 
     def disable_motor_l_callback(self, report: thread_report) -> None:
         if not report.exceptions:
@@ -148,11 +148,11 @@ class DriveController(QObject):
 
     def enable_motor_r_callback(self, report: thread_report) -> None:
         if not report.exceptions:
-            pollerThread = self.mcs.create_poller_thread(
+            poller_thread = self.mcs.create_poller_thread(
                 Drive.Right.name, [{"name": "CL_VEL_FBK_VALUE", "axis": 1}]
             )
-            pollerThread.new_data_available_triggered.connect(self.get_velocities_r)
-            pollerThread.start()
+            poller_thread.new_data_available_triggered.connect(self.get_velocities_r)
+            poller_thread.start()
 
     def disable_motor_r_callback(self, report: thread_report) -> None:
         if not report.exceptions:

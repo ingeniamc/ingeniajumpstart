@@ -16,7 +16,9 @@ from .types import (
     thread_report,
 )
 
-CANOPEN_ADDRESS_LENGTH = 6
+DEVICE_NODE = "Body//Device"
+INTERFACE_CAN = "CAN"
+INTERFACE_ETH = "ETH"
 
 
 class MotionControllerService(QObject):
@@ -243,13 +245,16 @@ class MotionControllerService(QObject):
         tree = ET.parse(filepath)
         parsed_data = tree.getroot()
 
-        register_example = parsed_data.find("Body//Device//Registers//Register")
-        if not isinstance(register_example, ET.Element):
+        device = parsed_data.find(DEVICE_NODE)
+        if not isinstance(device, ET.Element):
             raise ILError("Invalid file format")
-        if len(register_example.attrib["address"]) > CANOPEN_ADDRESS_LENGTH:
+        interface = device.attrib["Interface"]
+        if interface == INTERFACE_CAN:
             return Connection.CANopen
-        else:
+        elif interface == INTERFACE_ETH:
             return Connection.EtherCAT
+        else:
+            raise ILError("Connection type not supported.")
 
     @run_on_thread
     def enable_motor(
