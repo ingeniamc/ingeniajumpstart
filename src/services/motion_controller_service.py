@@ -2,14 +2,19 @@ import xml.etree.ElementTree as ET
 from functools import wraps
 from typing import Any, Callable, Union
 
+from ingenialink import CAN_BAUDRATE
 from ingenialink.exceptions import ILError
 from ingeniamotion import MotionController
-from ingeniamotion.enums import CAN_DEVICE, OperationMode
+from ingeniamotion.enums import OperationMode
 from PySide6.QtCore import QObject
+
+from src.enums import CanDevice, Connection, Drive, stringify_can_device_enum
 
 from .mc_thread import MCThread
 from .poller_thread import PollerThread
-from .types import Connection, Drive, thread_report
+from .types import (
+    thread_report,
+)
 
 CANOPEN_ADDRESS_LENGTH = 6
 
@@ -119,10 +124,21 @@ class MotionControllerService(QObject):
         report_callback: Callable[[thread_report], Any],
         dictionary: str,
         connection: Connection,
+        can_device: CanDevice,
+        baudrate: CAN_BAUDRATE,
+        node_id_l: int,
+        node_id_r: int,
         *args: Any,
         **kwargs: Any,
     ) -> Callable[..., Any]:
-        def on_thread(dictionary: str, connection: Connection) -> Any:
+        def on_thread(
+            dictionary: str,
+            connection: Connection,
+            can_device: CanDevice,
+            baudrate: CAN_BAUDRATE,
+            node_id_l: int,
+            node_id_r: int,
+        ) -> Any:
             """Connect drives to the program.
 
             Args:
@@ -134,24 +150,26 @@ class MotionControllerService(QObject):
             """
             dictionary_type = self.__check_dictionary_format(dictionary)
             if dictionary_type != connection:
-                raise ILError("Communication type does not match the dictionary type")
-            if connection == Connection.ETHERCAT:
-                self.__mc.communication.connect_servo_eoe(
-                    "192.168.2.22", dictionary, alias=Drive.RIGHT.value
-                )
-            else:
-                self.__mc.communication.connect_servo_canopen(
-                    CAN_DEVICE.KVASER,
-                    dictionary,
-                    31,
-                    alias=Drive.LEFT.value,
-                )
-                self.__mc.communication.connect_servo_canopen(
-                    CAN_DEVICE.KVASER,
-                    dictionary,
-                    32,
-                    alias=Drive.RIGHT.value,
-                )
+                raise ILError("Communication type does not match the dictionary type.")
+            if connection == Connection.EtherCAT:
+                raise ILError("Not (yet) implemented.")
+            if node_id_l == node_id_r:
+                raise ILError("Node IDs cannot be the same.")
+
+            self.__mc.communication.connect_servo_canopen(
+                baudrate=baudrate,
+                can_device=stringify_can_device_enum(can_device),
+                dict_path=dictionary,
+                node_id=node_id_l,
+                alias=Drive.Left.name,
+            )
+            self.__mc.communication.connect_servo_canopen(
+                baudrate=baudrate,
+                can_device=stringify_can_device_enum(can_device),
+                dict_path=dictionary,
+                node_id=node_id_r,
+                alias=Drive.Right.name,
+            )
 
         return on_thread
 
@@ -167,12 +185,12 @@ class MotionControllerService(QObject):
             [docs]
 
             """
-            self.__mc.motion.motor_disable(servo=Drive.LEFT.value)
-            self.stop_poller_thread(Drive.LEFT.value)
-            self.__mc.communication.disconnect(servo=Drive.LEFT.value)
-            self.__mc.motion.motor_disable(servo=Drive.RIGHT.value)
-            self.stop_poller_thread(Drive.RIGHT.value)
-            self.__mc.communication.disconnect(servo=Drive.RIGHT.value)
+            self.__mc.motion.motor_disable(servo=Drive.Left.name)
+            self.stop_poller_thread(Drive.Left.name)
+            self.__mc.communication.disconnect(servo=Drive.Left.name)
+            self.__mc.motion.motor_disable(servo=Drive.Right.name)
+            self.stop_poller_thread(Drive.Right.name)
+            self.__mc.communication.disconnect(servo=Drive.Right.name)
 
         return on_thread
 
@@ -229,22 +247,22 @@ class MotionControllerService(QObject):
         if not isinstance(register_example, ET.Element):
             raise ILError("Invalid file format")
         if len(register_example.attrib["address"]) > CANOPEN_ADDRESS_LENGTH:
-            return Connection.CANOPEN
+            return Connection.CANopen
         else:
-            return Connection.ETHERCAT
+            return Connection.EtherCAT
 
     @run_on_thread
     def enable_motor(
         self,
         report_callback: Callable[[thread_report], Any],
-        drive: str,
+        drive: Drive,
         *args: Any,
         **kwargs: Any,
     ) -> Callable[..., Any]:
-        def on_thread(drive: str) -> Any:
+        def on_thread(drive: Drive) -> Any:
             self.__mc.motion.set_operation_mode(
-                OperationMode.PROFILE_VELOCITY, servo=drive
+                OperationMode.PROFILE_VELOCITY, servo=drive.name
             )
-            self.__mc.motion.motor_enable(servo=drive)
+            self.__mc.motion.motor_enable(servo=drive.name)
 
         return on_thread

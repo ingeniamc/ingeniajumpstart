@@ -8,6 +8,12 @@ import qmltypes.controllers 1.0
 import QtCharts 2.6
 import "js/plot.js" as PlotJS
 
+// QEnum() does not seem to work properly with qmllint,
+// which is why we disable this warning for this file.
+// This only applies to the usage of Enums, if that is
+// no longer used, the warning can be re-enabled.
+// qmllint disable missing-property
+
 RowLayout {
     id: grid
     signal cancelButtonPressed
@@ -32,16 +38,15 @@ RowLayout {
             PlotJS.resetPlot(chartR);
         }
     }
-
     Keys.onUpPressed: event => {
         if (event.isAutoRepeat)
             return;
         upButton.state = "ACTIVE";
         if (leftCheck.checked) {
-            grid.driveController.set_velocity(velocitySliderL.value, "LEFT");
+            grid.driveController.set_velocity(velocitySliderL.value, Enums.Drive.Left);
         }
         if (rightCheck.checked) {
-            grid.driveController.set_velocity(velocitySliderR.value, "RIGHT");
+            grid.driveController.set_velocity(velocitySliderR.value, Enums.Drive.Right);
         }
     }
 
@@ -50,10 +55,10 @@ RowLayout {
             return;
         downButton.state = "ACTIVE";
         if (leftCheck.checked) {
-            grid.driveController.set_velocity(velocitySliderL.value * -1, "LEFT");
+            grid.driveController.set_velocity(velocitySliderL.value * -1, Enums.Drive.Left);
         }
         if (rightCheck.checked) {
-            grid.driveController.set_velocity(velocitySliderR.value * -1, "RIGHT");
+            grid.driveController.set_velocity(velocitySliderR.value * -1, Enums.Drive.Right);
         }
     }
 
@@ -61,16 +66,16 @@ RowLayout {
         if (event.isAutoRepeat || !rightCheck.checked || !leftCheck.checked)
             return;
         leftButton.state = "ACTIVE";
-        grid.driveController.set_velocity(velocitySliderL.value * -1, "LEFT");
-        grid.driveController.set_velocity(velocitySliderR.value, "RIGHT");
+        grid.driveController.set_velocity(velocitySliderL.value * -1, Enums.Drive.Left);
+        grid.driveController.set_velocity(velocitySliderR.value, Enums.Drive.Right);
     }
 
     Keys.onRightPressed: event => {
         if (event.isAutoRepeat || !rightCheck.checked || !leftCheck.checked)
             return;
         rightButton.state = "ACTIVE";
-        grid.driveController.set_velocity(velocitySliderL.value, "LEFT");
-        grid.driveController.set_velocity(velocitySliderR.value * -1, "RIGHT");
+        grid.driveController.set_velocity(velocitySliderL.value, Enums.Drive.Left);
+        grid.driveController.set_velocity(velocitySliderR.value * -1, Enums.Drive.Right);
     }
 
     Keys.onReleased: event => {
@@ -91,10 +96,10 @@ RowLayout {
             break;
         }
         if (leftCheck.checked) {
-            grid.driveController.set_velocity(0, "LEFT");
+            grid.driveController.set_velocity(0, Enums.Drive.Left);
         }
         if (rightCheck.checked) {
-            grid.driveController.set_velocity(0, "RIGHT");
+            grid.driveController.set_velocity(0, Enums.Drive.Right);
         }
     }
 
@@ -111,9 +116,9 @@ RowLayout {
                     PlotJS.resetPlot(chartL);
                     PlotJS.initSeries(chartL, xAxisL, yAxisL, "Left");
                     if (leftCheck.checked) {
-                        grid.driveController.enable_motor("LEFT");
+                        grid.driveController.enable_motor(Enums.Drive.Left);
                     } else {
-                        grid.driveController.disable_motor("LEFT");
+                        grid.driveController.disable_motor(Enums.Drive.Left);
                     }
                 }
             }
@@ -124,9 +129,9 @@ RowLayout {
                     PlotJS.resetPlot(chartR);
                     PlotJS.initSeries(chartR, xAxisR, yAxisR, "Right");
                     if (rightCheck.checked) {
-                        grid.driveController.enable_motor("RIGHT");
+                        grid.driveController.enable_motor(Enums.Drive.Right);
                     } else {
-                        grid.driveController.disable_motor("RIGHT");
+                        grid.driveController.disable_motor(Enums.Drive.Right);
                     }
                 }
             }
