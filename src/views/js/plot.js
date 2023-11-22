@@ -10,11 +10,6 @@ function updatePlot(chart, timestamp, velocity) {
     series.append(timestamp, velocity);
 }
 
-function initPlot(chart, xAxis, yAxis) {
-    initSeries(chart, xAxis, yAxis, "LEFT");
-    initSeries(chart, xAxis, yAxis, "RIGHT");
-}
-
 function initSeries(chart, xAxis, yAxis, label) {
     const series = chart.createSeries(ChartView.SeriesTypeSpline, label, xAxis, yAxis);
     series.pointsVisible = true;

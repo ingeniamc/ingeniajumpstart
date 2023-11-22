@@ -127,9 +127,13 @@ class DriveController(QObject):
     @Slot(int)
     def disable_motor(self, drive: int) -> None:
         if drive == Drive.Left.value:
-            self.mcs.run(self.disable_motor_l_callback, "motion.motor_enable", drive)
+            self.mcs.run(
+                self.disable_motor_l_callback, "motion.motor_disable", Drive.Left.name
+            )
         else:
-            self.mcs.run(self.disable_motor_r_callback, "motion.motor_enable", drive)
+            self.mcs.run(
+                self.disable_motor_r_callback, "motion.motor_disable", Drive.Right.name
+            )
 
     def log_report(self, report: thread_report) -> None:
         logger.debug(report)
