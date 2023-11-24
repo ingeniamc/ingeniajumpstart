@@ -1,5 +1,4 @@
 from PySide6.QtCore import QTimer
-from PySide6.QtQuick import QQuickView
 from PySide6.QtTest import QSignalSpy
 from pytestqt.qtbot import QtBot
 
@@ -8,7 +7,6 @@ from src.controllers.main_window_controller import MainWindowController
 
 def test_rotation(
     qtbot: QtBot,
-    view: QQuickView,
     main_window_controller: MainWindowController,
 ) -> None:
     timer = QTimer()
@@ -27,6 +25,3 @@ def test_rotation(
 
     assert spy.count() >= 5
     assert main_window_controller.rotateValue.r >= 50
-    # Deleting the view before it goes out of scope is required to make sure all child
-    # QML instances are destroyed in the correct order.
-    del view
