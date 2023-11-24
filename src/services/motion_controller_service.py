@@ -6,15 +6,13 @@ from ingenialink import CAN_BAUDRATE
 from ingenialink.exceptions import ILError
 from ingeniamotion import MotionController
 from ingeniamotion.enums import OperationMode
-from PySide6.QtCore import QObject
+from PySide6.QtCore import QObject, Signal, Slot
 
 from src.enums import CanDevice, Connection, Drive, stringify_can_device_enum
+from src.services.motion_controller_thread import MotionControllerThread
 
-from .mc_thread import MCThread
 from .poller_thread import PollerThread
-from .types import (
-    thread_report,
-)
+from .types import motion_controller_task, thread_report
 
 DEVICE_NODE = "Body//Device"
 INTERFACE_CAN = "CAN"
@@ -28,14 +26,20 @@ class MotionControllerService(QObject):
 
     """
 
+    error_triggered = Signal(str, arguments=["error_message"])
+    """Triggers when an error occurs while communicating with the drive"""
+
     def __init__(self) -> None:
         """The constructor for MotionControllerService class"""
         super().__init__()
-        self.__threads: dict[int, MCThread] = {}
-        self.__total_threads: int = 0
         self.__mc: MotionController = MotionController()
         self.registers_cache: dict[str, dict[int, dict[str, Any]]] = {}
         self.__poller_threads: dict[str, PollerThread] = {}
+        # Create a thread to communicate with the drive
+        self.__motion_controller_thread = MotionControllerThread()
+        self.__motion_controller_thread.task_completed.connect(self.execute_callback)
+        self.__motion_controller_thread.task_errored.connect(self.error_triggered)
+        self.__motion_controller_thread.start()
 
     def run(
         self,
@@ -45,11 +49,11 @@ class MotionControllerService(QObject):
         **kwargs: Any,
     ) -> None:
         """
-        Run an ingeniamotion method or a custom method in a thread. The thread is
-        removed once it finishes.
+        Add an ingeniamotion method or a custom method to the MotionControllerThread
+        task queue.
 
         Args:
-            report_callback: When the thread finishes, the report is sent back emitting
+            report_callback: When the task finishes, the report is sent back emitting
                 a signal to the callback.
             command: Method to run in the thread. Could be either a ingeniamotion method
                 using a str including the module and method name, e.g.,
@@ -66,31 +70,21 @@ class MotionControllerService(QObject):
         else:
             method = command
 
-        thread_id = self.__total_threads
-        self.__total_threads += 1
-        thread = MCThread(method, thread_id, *args, **kwargs)
-
-        thread.thread_finished.connect(self.remove_thread)
-        thread.thread_report.connect(report_callback)
-
-        self.__threads[thread_id] = thread
-        thread.start()
-
-    def remove_thread(self, thread_id: int) -> None:
-        """Remove a thread
-
-        Args:
-            thread_id: Thread identifier.
-
-        """
-        if self.__threads[thread_id].isRunning():
-            self.__threads[thread_id].wait()
-        self.__threads.pop(thread_id)
+        thread = self.__motion_controller_thread
+        thread.queue.put(
+            motion_controller_task(
+                action=method,
+                callback=report_callback,
+                args=args,
+                kwargs=kwargs,
+            )
+        )
 
     def run_on_thread(func: Callable[..., Any]) -> Callable[..., None]:  # type: ignore
         """
-        Decorator that runs a method on a thread. To use this decorator, an inner
-        function should be included and returned in the function to be wrapped (`func`).
+        Decorator that wraps a method to be passed to the MotionControllerThread. To use
+        this decorator, an inner function should be included and returned in the
+        function to be wrapped (`func`).
         This inner function includes everything that runs in the thread. The `func`
         signature should be always the same:
         `function_name(self, report_callback, *args, **kwargs)`. See an example below:
@@ -146,6 +140,10 @@ class MotionControllerService(QObject):
             Args:
                 dictionary (str): dictionary file used for the connection
                 connection (Connection): whether to connect via ETHERcat or CANopen
+                can_device (CanDevice): configuration for CANopen
+                baudrate (CAN_BAUDRATE): configuration for CANopen
+                node_id_l (int): configuration for CANopen
+                node_id_r (int): configuration for CANopen
 
             Raises:
                 ILError: If the connection fails
@@ -176,25 +174,35 @@ class MotionControllerService(QObject):
         return on_thread
 
     @run_on_thread
-    def disconnect_drive(
+    def disconnect_drives(
         self,
         report_callback: Callable[[thread_report], Any],
         *args: Any,
         **kwargs: Any,
     ) -> Callable[..., Any]:
         def on_thread() -> Any:
-            """
-            [docs]
-
-            """
-            self.__mc.motion.motor_disable(servo=Drive.Left.name)
-            self.stop_poller_thread(Drive.Left.name)
-            self.__mc.communication.disconnect(servo=Drive.Left.name)
-            self.__mc.motion.motor_disable(servo=Drive.Right.name)
-            self.stop_poller_thread(Drive.Right.name)
-            self.__mc.communication.disconnect(servo=Drive.Right.name)
+            """Disconnect the drives if they are connected."""
+            for servo in [Drive.Left.name, Drive.Right.name]:
+                if self.__mc.is_alive(servo):
+                    self.__mc.motion.motor_disable(servo=servo)
+                    self.stop_poller_thread(servo)
+                    self.__mc.communication.disconnect(servo=servo)
 
         return on_thread
+
+    @Slot()
+    def execute_callback(
+        self, callback: Callable[..., Any], thread_report: thread_report
+    ) -> None:
+        """Helper function to execute a callback function. Used when the
+        MotionControllerThread sends the task_completed signal.
+
+        Args:
+            callback (Callable[..., Any]): the callback to execute
+            thread_report (thread_report): the thread_report that serves as parameter to
+                the callback function.
+        """
+        callback(thread_report)
 
     def create_poller_thread(
         self,
@@ -265,6 +273,12 @@ class MotionControllerService(QObject):
         **kwargs: Any,
     ) -> Callable[..., Any]:
         def on_thread(drive: Drive) -> Any:
+            """Enables the motor of a given drive
+
+            Args:
+                drive (Drive): The drive
+
+            """
             self.__mc.motion.set_operation_mode(
                 OperationMode.PROFILE_VELOCITY, servo=drive.name
             )

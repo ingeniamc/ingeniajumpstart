@@ -25,24 +25,9 @@ ColumnLayout {
         function onDictionary_changed(dictionary) {
             dictionaryFile.text = dictionary;
         }
-        function onConnection_error_triggered(error_message) {
-            errorMessageDialogLabel.text = error_message;
-            errorMessageDialog.open();
+        function onError_triggered(error_message) {
             connectBtn.state = "NORMAL";
         }
-    }
-
-    Dialog {
-        id: errorMessageDialog
-        modal: true
-        title: qsTr("Connection failed")
-        x: (parent.width - width) / 2
-        y: (parent.height - height) / 2
-        Label {
-            id: errorMessageDialogLabel
-            text: "Lorem ipsum..."
-        }
-        standardButtons: Dialog.Ok
     }
 
     FileDialog {
