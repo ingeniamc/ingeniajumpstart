@@ -1,0 +1,9 @@
+select = [
+    "E",
+    "F",
+    "W",
+]
+
+# Ignore `F401` (unused imports) in all `__init__.py` files.
+[per-file-ignores]
+"__init__.py" = ["F401"]
