@@ -5,6 +5,11 @@ from PySide6.QtCore import QEnum, QObject
 from PySide6.QtQml import QmlElement
 
 
+class ConnectButtonState(Enum):
+    Enabled = auto()
+    Disabled = auto()
+
+
 class Drive(Enum):
     Left = auto()
     Right = auto()
@@ -58,3 +63,4 @@ class Enums(QObject):
     QEnum(Connection)
     QEnum(CanDevice)
     QEnum(CAN_BAUDRATE)
+    QEnum(ConnectButtonState)

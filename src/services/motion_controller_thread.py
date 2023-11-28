@@ -65,7 +65,14 @@ class MotionControllerThread(QThread):
             output = None
             try:
                 output = task.action(*task.args, **task.kwargs)
-            except (IMException, ILError, ValueError, KeyError, FileNotFoundError) as e:
+            except (
+                IMException,
+                ILError,
+                ValueError,
+                KeyError,
+                FileNotFoundError,
+                ConnectionError,
+            ) as e:
                 raised_exception = e
             duration = time.time() - timestamp
             report = thread_report(
