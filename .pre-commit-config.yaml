@@ -32,6 +32,7 @@ repos:
           - mypy
           - pytest
           - pyside6
+          - ingeniamotion
   - repo: local
     hooks:
       - id: qmllint
