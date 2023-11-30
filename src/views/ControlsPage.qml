@@ -39,13 +39,13 @@ RowLayout {
             PlotJS.resetPlot(chartR);
         }
     }
-    Keys.onUpPressed: event => ControlsJS.handleButtonPressed(upButton, 1, 1, event)
+    Keys.onUpPressed: event => ControlsJS.handleButtonPressed(upButton, -1, 1, event)
 
-    Keys.onDownPressed: event => ControlsJS.handleButtonPressed(downButton, -1, -1, event)
+    Keys.onDownPressed: event => ControlsJS.handleButtonPressed(downButton, 1, -1, event)
 
-    Keys.onLeftPressed: event => ControlsJS.handleButtonPressed(leftButton, -1, 1, event)
+    Keys.onLeftPressed: event => ControlsJS.handleButtonPressed(leftButton, 1, 1, event)
 
-    Keys.onRightPressed: event => ControlsJS.handleButtonPressed(rightButton, 1, -1, event)
+    Keys.onRightPressed: event => ControlsJS.handleButtonPressed(rightButton, -1, -1, event)
 
     Keys.onReleased: event => {
         if (event.isAutoRepeat)
@@ -157,7 +157,7 @@ RowLayout {
         GridLayout {
             Layout.fillHeight: true
             Layout.preferredHeight: 1
-            rows: 2
+            rows: 4
             columns: 5
             rowSpacing: 0
             Item {
@@ -170,7 +170,7 @@ RowLayout {
                 id: upButton
                 text: "↑"
                 Layout.alignment: Qt.AlignBottom
-                leftFactor: 1
+                leftFactor: -1
                 rightFactor: 1
             }
             SpacerW {
@@ -179,7 +179,23 @@ RowLayout {
                 RowLayout {
                     Text {
                         color: "#e0e0e0"
-                        text: "Max Velocity L -"
+                        text: "Maximum Velocity L"
+                    }
+                }
+                SpinBox {
+                    from: 0
+                    value: 10
+                    editable: true
+                    onValueModified: () => {
+                        grid.driveController.set_register_max_velocity(value, Enums.Drive.Left);
+                    }
+                }
+            }
+            ColumnLayout {
+                RowLayout {
+                    Text {
+                        color: "#e0e0e0"
+                        text: "Target Velocity L -"
                     }
                     Text {
                         id: velocitySliderLValue
@@ -198,35 +214,50 @@ RowLayout {
                     }
                 }
             }
-            SpacerW {
-            }
 
             StateButton {
                 id: leftButton
                 text: "←"
                 Layout.alignment: Qt.AlignRight | Qt.AlignTop
-                leftFactor: -1
+                leftFactor: 1
                 rightFactor: 1
             }
             StateButton {
                 id: downButton
                 text: "↓"
                 Layout.alignment: Qt.AlignTop
-                leftFactor: -1
+                leftFactor: 1
                 rightFactor: -1
             }
             StateButton {
                 id: rightButton
                 text: "→"
                 Layout.alignment: Qt.AlignLeft | Qt.AlignTop
-                leftFactor: 1
+                leftFactor: -1
                 rightFactor: -1
             }
             ColumnLayout {
                 RowLayout {
                     Text {
                         color: "#e0e0e0"
-                        text: "Max Velocity R -"
+                        text: "Maximum Velocity R"
+                    }
+                }
+                SpinBox {
+                    from: 0
+                    value: 10
+                    editable: true
+                    onValueModified: () => {
+                        grid.driveController.set_register_max_velocity(value, Enums.Drive.Right);
+                    }
+                }
+            }
+
+            ColumnLayout {
+                RowLayout {
+                    Text {
+                        color: "#e0e0e0"
+                        text: "Target Velocity R -"
                     }
                     Text {
                         id: velocitySliderRValue
@@ -244,8 +275,6 @@ RowLayout {
                         velocitySliderRValue.text = velocitySliderR.value.toFixed(2);
                     }
                 }
-            }
-            SpacerW {
             }
 
             Item {
