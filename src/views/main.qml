@@ -11,12 +11,15 @@ ApplicationWindow {
     height: 480
     visible: true
 
-    required property MainWindowController mainWindowController
-    required property MainWindowConsole mainWindowConsole
+    required property DriveController driveController
+
     Connections {
-        target: page.mainWindowController
-        function onValueChanged(val) {
-            stack.rotation = val;
+        target: page.driveController
+        function onDriveConnected() {
+            stack.push(controlsPage);
+        }
+        function onDriveDisconnected() {
+            stack.pop();
         }
     }
     header: ToolBar {
@@ -25,7 +28,7 @@ ApplicationWindow {
             ToolButton {
                 enabled: stack.depth > 1
                 text: qsTr("‹")
-                onClicked: stack.pop()
+                onClicked: () => page.driveController.disconnect()
                 Layout.preferredWidth: 50
             }
             Label {
@@ -51,12 +54,12 @@ ApplicationWindow {
     SelectionPage {
         id: selectionPage
         visible: false
-        onStartButtonPressed: () => stack.push(controlsPage)
+        driveController: page.driveController
     }
 
     ControlsPage {
         id: controlsPage
         visible: false
-        onCancelButtonPressed: () => stack.pop()
+        driveController: page.driveController
     }
 }

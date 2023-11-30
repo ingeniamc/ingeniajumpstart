@@ -161,3 +161,6 @@ cython_debug/
 
 # QML types generated for linting purposes
 qmltypes/
+
+# dictionary files
+*.xdf

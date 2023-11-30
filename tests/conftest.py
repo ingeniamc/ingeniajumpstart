@@ -1,14 +1,8 @@
 import pytest
 
-from src.controllers.main_window_console import MainWindowConsole
-from src.controllers.main_window_controller import MainWindowController
+from src.controllers.drive_controller import DriveController
 
 
 @pytest.fixture
-def main_window_controller() -> MainWindowController:
-    return MainWindowController()
-
-
-@pytest.fixture
-def main_window_console() -> MainWindowConsole:
-    return MainWindowConsole()
+def drive_controller() -> DriveController:
+    return DriveController()
