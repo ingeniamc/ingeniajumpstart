@@ -41,11 +41,24 @@ ApplicationWindow {
     }
 
     header: ToolBar {
+        background: Rectangle {
+            color: '#1b1b1b'
+        }
         RowLayout {
             anchors.fill: parent
             ToolButton {
+                id: backButton
                 enabled: stack.depth > 1
                 text: qsTr("‹")
+                contentItem: Text {
+                    text: backButton.text
+                    font: backButton.font
+                    opacity: enabled ? 1.0 : 0.3
+                    color: backButton.down ? "#009688" : "#e0e0e0"
+                    horizontalAlignment: Text.AlignHCenter
+                    verticalAlignment: Text.AlignVCenter
+                    elide: Text.ElideRight
+                }
                 onClicked: () => page.driveController.disconnect()
                 Layout.preferredWidth: 50
             }
@@ -55,6 +68,7 @@ ApplicationWindow {
                 horizontalAlignment: Qt.AlignHCenter
                 verticalAlignment: Qt.AlignVCenter
                 Layout.fillWidth: true
+                color: "#e0e0e0"
             }
             Item {
                 Layout.preferredWidth: 50

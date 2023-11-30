@@ -6,7 +6,7 @@ from ingenialink import CAN_BAUDRATE
 from PySide6.QtCore import QJsonArray, QObject, Signal, Slot
 from PySide6.QtQml import QmlElement
 
-from src.enums import CanDevice, ConnectButtonState, Connection, Drive
+from src.enums import ButtonState, CanDevice, Connection, Drive
 from src.services.motion_controller_service import MotionControllerService
 from src.services.types import thread_report
 
@@ -65,7 +65,7 @@ class DriveController(QObject):
             self.connect_button_state_canopen().value
         )
 
-    def connect_button_state_canopen(self) -> ConnectButtonState:
+    def connect_button_state_canopen(self) -> ButtonState:
         if (
             self.dictionary is None
             or self.dictionary_type is None
@@ -74,14 +74,14 @@ class DriveController(QObject):
             or self.right_id is None
             or self.left_id == self.right_id
         ):
-            return ConnectButtonState.Disabled
+            return ButtonState.Disabled
         if self.connection == Connection.CANopen and (
             self.can_device is None or self.baudrate is None
         ):
-            return ConnectButtonState.Disabled
+            return ButtonState.Disabled
         if self.connect == Connection.EtherCAT and (self.interface_index is None):
-            return ConnectButtonState.Disabled
-        return ConnectButtonState.Enabled
+            return ButtonState.Disabled
+        return ButtonState.Enabled
 
     def error_message_callback(self, error_message: str) -> None:
         self.error_triggered.emit(error_message)

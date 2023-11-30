@@ -7,6 +7,7 @@ from PySide6.QtQml import QQmlApplicationEngine
 from PySide6.QtQuick import QQuickView
 from PySide6.QtWidgets import QApplication
 
+import resources  # noqa: F401
 from src.controllers.drive_controller import DriveController
 
 if __name__ == "__main__":
