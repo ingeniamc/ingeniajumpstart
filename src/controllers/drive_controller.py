@@ -73,13 +73,15 @@ class DriveController(QObject):
             or self.left_id is None
             or self.right_id is None
             or self.left_id == self.right_id
+            or (
+                self.connection == Connection.CANopen
+                and (self.can_device is None or self.baudrate is None)
+            )
+            or (
+                self.connection == Connection.EtherCAT
+                and (self.interface_index is None)
+            )
         ):
-            return ConnectButtonState.Disabled
-        if self.connection == Connection.CANopen and (
-            self.can_device is None or self.baudrate is None
-        ):
-            return ConnectButtonState.Disabled
-        if self.connect == Connection.EtherCAT and (self.interface_index is None):
             return ConnectButtonState.Disabled
         return ConnectButtonState.Enabled
 

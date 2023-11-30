@@ -139,12 +139,13 @@ class MotionControllerService(QObject):
             """Connect drives to the program.
 
             Args:
-                dictionary (str): dictionary file used for the connection
-                connection (Connection): whether to connect via ETHERcat or CANopen
-                can_device (CanDevice): configuration for CANopen
-                baudrate (CAN_BAUDRATE): configuration for CANopen
-                id_l (int): configuration for CANopen
-                id_r (int): configuration for CANopen
+                dictionary: dictionary file used for the connection
+                connection: whether to connect via EtherCAT or CANopen
+                can_device: configuration for CANopen
+                baudrate: configuration for CANopen
+                id_l: configuration for CANopen & EtherCAT
+                id_r: configuration for CANopen & EtherCAT
+                interface_index: configuration for EtherCAT
 
             Raises:
                 ILError: If the connection fails
@@ -154,60 +155,26 @@ class MotionControllerService(QObject):
                 raise ILError("Communication type does not match the dictionary type.")
             if id_l == id_r:
                 raise ILError("Node IDs cannot be the same.")
-            if connection == Connection.EtherCAT:
-                self.connect_drives_ethercat(
-                    interface_index,
-                    dictionary,
-                    id_l,
-                    id_r,
-                )
-            elif connection == Connection.CANopen:
-                self.connect_drives_canopen(
-                    dictionary, can_device, baudrate, id_l, id_r
-                )
-            else:
-                raise ILError("Connection type not implemented.")
+            for drive, id in [(Drive.Left.name, id_l), (Drive.Right.name, id_r)]:
+                if connection == Connection.EtherCAT:
+                    self.__mc.communication.connect_servo_ethercat_interface_index(
+                        if_index=interface_index,
+                        slave_id=id,
+                        dict_path=dictionary,
+                        alias=drive,
+                    )
+                elif connection == Connection.CANopen:
+                    self.__mc.communication.connect_servo_canopen(
+                        baudrate=baudrate,
+                        can_device=stringify_can_device_enum(can_device),
+                        dict_path=dictionary,
+                        node_id=id,
+                        alias=drive,
+                    )
+                else:
+                    raise ILError("Connection type not implemented.")
 
         return on_thread
-
-    def connect_drives_ethercat(
-        self, interface_index: int, dictionary: str, id_l: int, id_r: int
-    ) -> None:
-        self.__mc.communication.connect_servo_ethercat_interface_index(
-            if_index=interface_index,
-            slave_id=id_l,
-            dict_path=dictionary,
-            alias=Drive.Left.name,
-        )
-        self.__mc.communication.connect_servo_ethercat_interface_index(
-            if_index=interface_index,
-            slave_id=id_r,
-            dict_path=dictionary,
-            alias=Drive.Right.name,
-        )
-
-    def connect_drives_canopen(
-        self,
-        dictionary: str,
-        can_device: CanDevice,
-        baudrate: CAN_BAUDRATE,
-        id_l: int,
-        id_r: int,
-    ) -> None:
-        self.__mc.communication.connect_servo_canopen(
-            baudrate=baudrate,
-            can_device=stringify_can_device_enum(can_device),
-            dict_path=dictionary,
-            node_id=id_l,
-            alias=Drive.Left.name,
-        )
-        self.__mc.communication.connect_servo_canopen(
-            baudrate=baudrate,
-            can_device=stringify_can_device_enum(can_device),
-            dict_path=dictionary,
-            node_id=id_r,
-            alias=Drive.Right.name,
-        )
 
     def get_interface_name_list(self) -> list[str]:
         return self.__mc.communication.get_interface_name_list()  # type: ignore
@@ -229,7 +196,6 @@ class MotionControllerService(QObject):
             baudrate: CAN_BAUDRATE,
             interface_index: int,
         ) -> Any:
-            result = []
             if connection == Connection.CANopen:
                 result = self.__mc.communication.scan_servos_canopen(
                     can_device=stringify_can_device_enum(can_device), baudrate=baudrate
@@ -240,10 +206,10 @@ class MotionControllerService(QObject):
                 )
             else:
                 raise ILError("Connection type not implemented.")
-            if len(result) != 2:
+            if len(result) < 2:
                 nodes_found = result if len(result) > 0 else "(none)"
                 raise ILError(
-                    f"Scan expected to find exactly 2 nodes. Nodes found: {nodes_found}"
+                    f"Scan expected to find at least 2 nodes. Nodes found:{nodes_found}"
                 )
             return result
 
@@ -317,7 +283,7 @@ class MotionControllerService(QObject):
         ETHERcat connections.
 
         Args:
-            filepath (str): path to the file to check
+            filepath: path to the file to check
 
         Raises:
             ILError: If the provided file has the wrong format
@@ -352,7 +318,7 @@ class MotionControllerService(QObject):
             """Enables the motor of a given drive
 
             Args:
-                drive (Drive): The drive
+                drive: The drive
 
             """
             self.__mc.motion.set_operation_mode(
