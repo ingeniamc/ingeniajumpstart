@@ -177,7 +177,7 @@ class MotionControllerService(QObject):
         return on_thread
 
     def get_interface_name_list(self) -> list[str]:
-        return self.__mc.communication.get_interface_name_list()  # type: ignore
+        return self.__mc.communication.get_interface_name_list()
 
     @run_on_thread
     def scan_servos(
