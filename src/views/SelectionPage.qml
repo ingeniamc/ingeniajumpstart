@@ -35,6 +35,7 @@ ColumnLayout {
             idRightAutomatic.incrementCurrentIndex();
             idLeftAutomatic.enabled = true;
             idRightAutomatic.enabled = true;
+            idsAutomatic.visible = true;
         }
     }
 
@@ -129,7 +130,57 @@ ColumnLayout {
     }
 
     RowLayout {
+        Components.SpacerW {
+        }
+        Text {
+            text: "Connection mode:"
+            font.pointSize: 12
+            Layout.fillWidth: true
+            Layout.preferredWidth: 2
+            color: "#e0e0e0"
+        }
+        ComboBox {
+            id: control
+            textRole: "text"
+            valueRole: "value"
+            model: [{
+                value: "Scan",
+                text: "Scan"
+            },
+            {
+                value: "Manual",
+                text: "Manual"
+            }]
+            Layout.fillWidth: true
+            Layout.preferredWidth: 2
+            Material.foreground: Material.foreground
+            onActivated: () => {
+                scanButton.visible = (currentValue == "Scan");
+                idsAutomatic.visible = (currentValue == "Scan" && idLeftAutomatic.model?.length > 0);
+                idsManual.visible = (currentValue == "Manual");
+            }
+        }
+        Components.SpacerW {
+        }
+        Components.Button {
+            id: scanButton
+            text: "Scan"
+            Layout.fillWidth: true
+            Layout.preferredWidth: 1
+            Material.background: '#007acc'
+            Material.foreground: '#FFFFFF'
+            hoverColor: '#85ceff'
+            onClicked: () => {
+                selectionPage.driveController.scan_servos();
+            }
+        }
+        Components.SpacerW {
+        }
+    }
+
+    RowLayout {
         id: idsManual
+        visible: false
         Components.SpacerW {
         }
         Text {
@@ -210,59 +261,6 @@ ColumnLayout {
             Layout.preferredWidth: 2
             Material.foreground: Material.foreground
             onActivated: () => selectionPage.driveController.select_node_id(currentValue, Enums.Drive.Right)
-        }
-        Components.SpacerW {
-        }
-    }
-
-    RowLayout {
-        id: scanBtn
-        Components.SpacerW {
-        }
-        Components.Button {
-            text: "Scan for IDs.."
-            Layout.fillWidth: true
-            Layout.preferredWidth: 1
-            onClicked: () => {
-                selectionPage.driveController.scan_servos();
-                manualBtn.visible = true
-                scanBtn.visible = false
-                idsAutomatic.visible = true
-                idsManual.visible = false
-            }
-        }
-        Components.SpacerW {
-        }
-    }
-
-    RowLayout {
-        id: manualBtn
-        visible: false
-        Components.SpacerW {
-        }
-        Components.Button {
-            text: "Select IDs manually.."
-            Layout.fillWidth: true
-            Layout.preferredWidth: 2
-            onClicked: () => {
-                manualBtn.visible = false
-                scanBtn.visible = true
-                idsAutomatic.visible = false
-                idsManual.visible = true
-            }
-        }
-        Components.SpacerW {
-        }
-        Components.Button {
-            text: "Scan"
-            Layout.fillWidth: true
-            Layout.preferredWidth: 2
-            Material.background: '#007acc'
-            Material.foreground: '#FFFFFF'
-            hoverColor: '#85ceff'
-            onClicked: () => {
-                selectionPage.driveController.scan_servos();
-            }
         }
         Components.SpacerW {
         }
