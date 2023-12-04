@@ -224,7 +224,7 @@ class MotionControllerService(QObject):
     ) -> Callable[..., Any]:
         def on_thread() -> Any:
             """Disconnect the drives if they are connected."""
-            for servo in self.__mc.servos:
+            for servo in list(self.__mc.servos):
                 if self.__mc.is_alive(servo):
                     self.__mc.motion.motor_disable(servo=servo)
                     self.stop_poller_thread(servo)
