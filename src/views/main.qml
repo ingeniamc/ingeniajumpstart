@@ -3,6 +3,7 @@ import QtQuick
 import QtQuick.Controls.Material
 import QtQuick.Layouts
 import qmltypes.controllers 1.0
+import "components" as Components
 
 ApplicationWindow {
     id: page
@@ -10,7 +11,6 @@ ApplicationWindow {
     width: 800
     height: 600
     visible: true
-
     required property DriveController driveController
 
     Connections {
@@ -26,6 +26,13 @@ ApplicationWindow {
             errorMessageDialogLabel.text = error_message;
             errorMessageDialog.open();
         }
+    }
+
+    Shortcut {
+        sequence: "F12"
+        context: Qt.ApplicationShortcut
+        autoRepeat: false
+        onActivated: () => page.driveController.emergency_stop()
     }
 
     Dialog {
@@ -60,18 +67,37 @@ ApplicationWindow {
                     elide: Text.ElideRight
                 }
                 onClicked: () => page.driveController.disconnect()
-                Layout.preferredWidth: 50
+                Layout.preferredWidth: 1
+                Layout.fillWidth: true
             }
+            Item {
+                Layout.fillWidth: true
+                Layout.preferredWidth: 8
+            }
+
             Label {
                 text: stack.depth > 1 ? "Controls" : "Connection"
                 elide: Label.ElideRight
                 horizontalAlignment: Qt.AlignHCenter
                 verticalAlignment: Qt.AlignVCenter
                 Layout.fillWidth: true
+                Layout.preferredWidth: 4
                 color: "#e0e0e0"
             }
+
             Item {
-                Layout.preferredWidth: 50
+                Layout.fillWidth: true
+                Layout.preferredWidth: 6
+            }
+
+            Components.Button {
+                text: "Stop (F12)"
+                Layout.preferredWidth: 3
+                Layout.fillWidth: true
+                Material.background: '#b5341b'
+                Material.foreground: '#ffffff'
+                hoverColor: '#efa496'
+                onClicked: () => page.driveController.emergency_stop()
             }
         }
     }
