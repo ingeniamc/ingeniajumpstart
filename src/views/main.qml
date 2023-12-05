@@ -91,6 +91,7 @@ ApplicationWindow {
             }
 
             Components.Button {
+                objectName: "emergencyStopBtn"
                 text: "Stop (F12)"
                 Layout.preferredWidth: 3
                 Layout.fillWidth: true

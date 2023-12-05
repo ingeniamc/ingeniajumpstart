@@ -61,11 +61,9 @@ class DriveController(QObject):
         self.dictionary_type: Union[Connection, None] = None
 
     def update_connect_button_state(self) -> None:
-        self.connect_button_state_changed.emit(
-            self.connect_button_state_canopen().value
-        )
+        self.connect_button_state_changed.emit(self.connect_button_state().value)
 
-    def connect_button_state_canopen(self) -> ButtonState:
+    def connect_button_state(self) -> ButtonState:
         if (
             self.dictionary is None
             or self.dictionary_type is None

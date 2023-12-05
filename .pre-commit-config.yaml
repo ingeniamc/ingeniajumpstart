@@ -33,6 +33,7 @@ repos:
           - pytest
           - pyside6
           - ingeniamotion
+          - pytest-mock
   - repo: local
     hooks:
       - id: qmllint
