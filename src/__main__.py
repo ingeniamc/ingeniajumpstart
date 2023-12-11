@@ -14,7 +14,13 @@ from src.controllers.drive_controller import DriveController
 if __name__ == "__main__":
     ingenialogger.configure_logger(level=ingenialogger.LoggingLevel.INFO)
     app = QApplication(sys.argv)
-    app.setWindowIcon(QIcon(os.path.abspath("assets/novantaMotionFavicon.png")))
+    app.setWindowIcon(
+        QIcon(
+            os.fspath(
+                Path(__file__).resolve().parent / "assets/novantaMotionFavicon.png"
+            )
+        )
+    )
 
     view = QQuickView()
     qml_file = os.fspath(Path(__file__).resolve().parent / "views/main.qml")
