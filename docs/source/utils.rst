@@ -1,21 +1,21 @@
-models package
-==============
+utils package
+=============
 
 Submodules
 ----------
 
-models.console module
----------------------
+utils.enums module
+------------------
 
-.. automodule:: models.console
+.. automodule:: utils.enums
    :members:
    :undoc-members:
    :show-inheritance:
 
-models.rotate module
---------------------
+utils.types module
+------------------
 
-.. automodule:: models.rotate
+.. automodule:: utils.types
    :members:
    :undoc-members:
    :show-inheritance:
@@ -23,7 +23,7 @@ models.rotate module
 Module contents
 ---------------
 
-.. automodule:: models
+.. automodule:: utils
    :members:
    :undoc-members:
    :show-inheritance:

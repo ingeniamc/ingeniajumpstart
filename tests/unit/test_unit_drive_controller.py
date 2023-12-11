@@ -1,13 +1,12 @@
+from controllers.drive_controller import DriveController
 from ingenialink import CAN_BAUDRATE
 from PySide6.QtTest import QSignalSpy
-
-from src.controllers.drive_controller import DriveController
-from src.enums import ButtonState, CanDevice, Connection, Drive
+from utils.enums import ButtonState, CanDevice, ConnectionProtocol, Drive
 
 
 def test_select(drive_controller: DriveController) -> None:
     connect_button_spy = QSignalSpy(drive_controller.connect_button_state_changed)
-    connection = Connection.CANopen
+    connection = ConnectionProtocol.CANopen
     drive_controller.select_connection(connection.value)
     assert drive_controller.connection == connection
 
@@ -41,7 +40,7 @@ def test_select(drive_controller: DriveController) -> None:
     ethercat_dict = "tests/assets/cap-net-e_eoe_2.4.1.xdf"
     drive_controller.select_dictionary(ethercat_dict)
     assert drive_controller.dictionary == ethercat_dict
-    assert drive_controller.dictionary_type == Connection.EtherCAT
+    assert drive_controller.dictionary_type == ConnectionProtocol.EtherCAT
     assert dict_signal_spy.at(dict_signal_spy.size() - 1)[
         0
     ] == ethercat_dict.removeprefix("tests/assets/")
@@ -49,7 +48,7 @@ def test_select(drive_controller: DriveController) -> None:
     canopen_dict = "tests/assets/eve-xcr-c_can_2.4.1.xdf"
     drive_controller.select_dictionary(canopen_dict)
     assert drive_controller.dictionary == canopen_dict
-    assert drive_controller.dictionary_type == Connection.CANopen  # type: ignore
+    assert drive_controller.dictionary_type == ConnectionProtocol.CANopen  # type: ignore
     assert dict_signal_spy.at(dict_signal_spy.size() - 1)[
         0
     ] == canopen_dict.removeprefix("tests/assets/")

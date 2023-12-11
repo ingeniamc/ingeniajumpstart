@@ -3,13 +3,12 @@ import sys
 from pathlib import Path
 
 import ingenialogger
+from controllers.drive_controller import DriveController
 from PySide6.QtCore import QPointF, Qt
 from PySide6.QtQml import QQmlApplicationEngine
 from PySide6.QtQuick import QQuickItem
 from pytest_mock import MockerFixture
 from pytestqt.qtbot import QtBot
-
-from src.controllers.drive_controller import DriveController
 
 
 def test_emergency_button(qtbot: QtBot, mocker: MockerFixture) -> None:

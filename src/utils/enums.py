@@ -16,7 +16,7 @@ class Drive(Enum):
     Right = auto()
 
 
-class Connection(Enum):
+class ConnectionProtocol(Enum):
     EtherCAT = auto()
     CANopen = auto()
 
@@ -61,7 +61,7 @@ class Enums(QObject):
     """Register enums for use in QML."""
 
     QEnum(Drive)
-    QEnum(Connection)
+    QEnum(ConnectionProtocol)
     QEnum(CanDevice)
     QEnum(CAN_BAUDRATE)
     QEnum(ButtonState)

@@ -4,18 +4,10 @@ controllers package
 Submodules
 ----------
 
-controllers.main\_window\_console module
-----------------------------------------
+controllers.drive\_controller module
+------------------------------------
 
-.. automodule:: controllers.main_window_console
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-controllers.main\_window\_controller module
--------------------------------------------
-
-.. automodule:: controllers.main_window_controller
+.. automodule:: controllers.drive_controller
    :members:
    :undoc-members:
    :show-inheritance:

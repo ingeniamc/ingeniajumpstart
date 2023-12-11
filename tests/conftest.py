@@ -1,6 +1,5 @@
 import pytest
-
-from src.controllers.drive_controller import DriveController
+from controllers.drive_controller import DriveController
 
 
 @pytest.fixture

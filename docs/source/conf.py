@@ -11,7 +11,7 @@ sys.path.insert(0, os.path.abspath("../../src/"))
 # -- Project information -----------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
-project = "k2-base-camp"
+project = "K2 Base Camp"
 copyright = "2023, Ingenia Motion Control"
 author = "Ingenia Motion Control"
 release = "unreleased"
@@ -19,7 +19,7 @@ release = "unreleased"
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
 
-extensions = ["sphinx.ext.napoleon"]
+extensions = ["sphinx.ext.autodoc", "sphinx.ext.napoleon"]
 
 templates_path = ["_templates"]
 exclude_patterns: list[str] = []

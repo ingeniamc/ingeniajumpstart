@@ -5,8 +5,7 @@ import ingenialogger
 from ingenialink.exceptions import ILError, ILIOError
 from ingeniamotion.exceptions import IMException
 from PySide6.QtCore import QThread, Signal
-
-from .types import motion_controller_task, thread_report
+from utils.types import motion_controller_task, thread_report
 
 logger = ingenialogger.get_logger(__name__)
 

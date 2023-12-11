@@ -5,10 +5,9 @@ import ingenialogger
 from ingenialink import CAN_BAUDRATE
 from PySide6.QtCore import QJsonArray, QObject, Signal, Slot
 from PySide6.QtQml import QmlElement
-
-from src.enums import ButtonState, CanDevice, Connection, Drive
-from src.services.motion_controller_service import MotionControllerService
-from src.services.types import thread_report
+from services.motion_controller_service import MotionControllerService
+from utils.enums import ButtonState, CanDevice, ConnectionProtocol, Drive
+from utils.types import thread_report
 
 # To be used on the @QmlElement decorator
 # (QML_IMPORT_MINOR_VERSION is optional)
@@ -51,14 +50,14 @@ class DriveController(QObject):
         super().__init__()
         self.mcs = MotionControllerService()
         self.mcs.error_triggered.connect(self.error_message_callback)
-        self.connection = Connection.CANopen
+        self.connection = ConnectionProtocol.CANopen
         self.can_device = CanDevice.KVASER
         self.baudrate = CAN_BAUDRATE.Baudrate_1M
         self.left_id: Union[int, None] = None
         self.right_id: Union[int, None] = None
         self.interface_index = 0
         self.dictionary: Union[str, None] = None
-        self.dictionary_type: Union[Connection, None] = None
+        self.dictionary_type: Union[ConnectionProtocol, None] = None
 
     def update_connect_button_state(self) -> None:
         self.connect_button_state_changed.emit(self.connect_button_state().value)
@@ -72,11 +71,11 @@ class DriveController(QObject):
             or self.right_id is None
             or self.left_id == self.right_id
             or (
-                self.connection == Connection.CANopen
+                self.connection == ConnectionProtocol.CANopen
                 and (self.can_device is None or self.baudrate is None)
             )
             or (
-                self.connection == Connection.EtherCAT
+                self.connection == ConnectionProtocol.EtherCAT
                 and (self.interface_index is None)
             )
         ):
@@ -96,7 +95,7 @@ class DriveController(QObject):
 
     @Slot(int)
     def select_connection(self, connection: int) -> None:
-        self.connection = Connection(connection)
+        self.connection = ConnectionProtocol(connection)
         self.update_connect_button_state()
 
     @Slot(int)
