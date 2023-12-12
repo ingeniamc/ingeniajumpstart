@@ -5,6 +5,11 @@ import QtQuick.Controls.impl
 import QtQuick.Controls.Material
 import QtQuick.Controls.Material.impl
 
+/** Overwriting default button in order to make some changes to styling.
+ * No changes to the actual logic from the default has been made.
+ */ 
+
+
 T.Button {
     id: control
 
@@ -28,6 +33,7 @@ T.Button {
     Material.elevation: control.down ? 8 : 2
     Material.roundedScale: Material.FullScale
     Material.background: '#808080'
+    // Custom property to set the color of the button on hover.
     property string hoverColor
 
     contentItem: IconLabel {

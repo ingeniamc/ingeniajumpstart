@@ -12,6 +12,13 @@ from pytestqt.qtbot import QtBot
 
 
 def test_emergency_button(qtbot: QtBot, mocker: MockerFixture) -> None:
+    """Start the UI and press the emergency button. Confirm that the expected signal is
+    emitted.
+
+    Args:
+        qtbot (QtBot): see https://pytest-qt.readthedocs.io/en/latest/reference.html
+        mocker (MockerFixture): Used to spy on a signal
+    """
     ingenialogger.configure_logger(level=ingenialogger.LoggingLevel.DEBUG)
 
     engine = QQmlApplicationEngine()

@@ -14,6 +14,7 @@ ApplicationWindow {
     required property DriveController driveController
 
     Connections {
+        // Receive signals coming from the controllers.
         target: page.driveController
         function onDrive_connected_triggered() {
             if (stack.depth <= 1)
@@ -29,6 +30,7 @@ ApplicationWindow {
     }
 
     Shortcut {
+        // Binds the emergency shutdown command to a keyboard key.
         sequence: "F12"
         context: Qt.ApplicationShortcut
         autoRepeat: false
@@ -36,6 +38,7 @@ ApplicationWindow {
     }
 
     Dialog {
+        // Error messages are displayed in this dialog.
         id: errorMessageDialog
         modal: true
         title: qsTr("An error occured")
@@ -104,6 +107,7 @@ ApplicationWindow {
     }
 
     StackView {
+        // Handles multiple pages layout.
         id: stack
         initialItem: selectionPage
         anchors.fill: parent
@@ -111,12 +115,14 @@ ApplicationWindow {
     }
 
     SelectionPage {
+        // The first page is an interface to establish the connection with the drive.
         id: selectionPage
         visible: false
         driveController: page.driveController
     }
 
     ControlsPage {
+        // The second page is an interface that allows manipulating the velocity of the connected motors.
         id: controlsPage
         visible: false
         driveController: page.driveController

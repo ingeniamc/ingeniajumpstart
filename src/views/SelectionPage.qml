@@ -40,6 +40,7 @@ ColumnLayout {
     }
 
     FileDialog {
+        // Input for dictionairy file.
         id: fileDialog
         title: "Please choose a file"
         defaultSuffix: "xdf"
@@ -179,6 +180,7 @@ ColumnLayout {
     }
 
     RowLayout {
+        // Manual input for slave / node IDs.
         id: idsManual
         visible: false
         Components.SpacerW {
@@ -220,6 +222,7 @@ ColumnLayout {
     }
 
     RowLayout {
+        // Slave / node IDs returned from a scan.
         id: idsAutomatic
         visible: false
         Components.SpacerW {
@@ -267,6 +270,7 @@ ColumnLayout {
     }
 
     RowLayout {
+        // Button for dictionairy file upload & display of currently selected file.
         Components.SpacerW {
         }
         ColumnLayout {

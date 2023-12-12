@@ -5,5 +5,6 @@ src
    :maxdepth: 4
 
    controllers
+   models
    services
    utils

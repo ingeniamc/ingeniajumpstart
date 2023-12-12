@@ -1,12 +1,12 @@
 import os
-from typing import Union
 
 import ingenialogger
 from ingenialink import CAN_BAUDRATE
+from models.drive_model import DriveModel
 from PySide6.QtCore import QJsonArray, QObject, Signal, Slot
 from PySide6.QtQml import QmlElement
 from services.motion_controller_service import MotionControllerService
-from utils.enums import ButtonState, CanDevice, ConnectionProtocol, Drive
+from utils.enums import CanDevice, ConnectionProtocol, Drive
 from utils.types import thread_report
 
 # To be used on the @QmlElement decorator
@@ -19,6 +19,16 @@ logger = ingenialogger.get_logger(__name__)
 
 @QmlElement
 class DriveController(QObject):
+    """The connection between the buisiness logic (BL) and the user interface (UI).
+    Emits signals that the UI can respond to (BL -> UI).
+    Defines slots that can then be accessed directly in the UI (UI -> BL).
+    Creates and updates an instance of DriveModel to store the application state.
+    Creates an instance of MotionControllerService that is used to connect to and
+    communicate with the drives.
+    Defines callback functions that are invoked after a task delegated to the
+    MotionControllerService was completed.
+    """
+
     drive_connected_triggered: Signal = Signal()
     """Triggers when a drive is connected"""
 
@@ -50,134 +60,30 @@ class DriveController(QObject):
         super().__init__()
         self.mcs = MotionControllerService()
         self.mcs.error_triggered.connect(self.error_message_callback)
-        self.connection = ConnectionProtocol.CANopen
-        self.can_device = CanDevice.KVASER
-        self.baudrate = CAN_BAUDRATE.Baudrate_1M
-        self.left_id: Union[int, None] = None
-        self.right_id: Union[int, None] = None
-        self.interface_index = 0
-        self.dictionary: Union[str, None] = None
-        self.dictionary_type: Union[ConnectionProtocol, None] = None
-
-    def update_connect_button_state(self) -> None:
-        self.connect_button_state_changed.emit(self.connect_button_state().value)
-
-    def connect_button_state(self) -> ButtonState:
-        if (
-            self.dictionary is None
-            or self.dictionary_type is None
-            or self.connection != self.dictionary_type
-            or self.left_id is None
-            or self.right_id is None
-            or self.left_id == self.right_id
-            or (
-                self.connection == ConnectionProtocol.CANopen
-                and (self.can_device is None or self.baudrate is None)
-            )
-            or (
-                self.connection == ConnectionProtocol.EtherCAT
-                and (self.interface_index is None)
-            )
-        ):
-            return ButtonState.Disabled
-        return ButtonState.Enabled
-
-    def error_message_callback(self, error_message: str) -> None:
-        self.error_triggered.emit(error_message)
-        self.update_connect_button_state()
-
-    @Slot(str)
-    def select_dictionary(self, dictionary: str) -> None:
-        self.dictionary = dictionary.removeprefix("file:///")
-        self.dictionary_type = self.mcs.check_dictionary_format(self.dictionary)
-        self.dictionary_changed.emit(os.path.basename(self.dictionary))
-        self.update_connect_button_state()
-
-    @Slot(int)
-    def select_connection(self, connection: int) -> None:
-        self.connection = ConnectionProtocol(connection)
-        self.update_connect_button_state()
-
-    @Slot(int)
-    def select_interface(self, interface: int) -> None:
-        self.interface_index = interface
-        self.update_connect_button_state()
-
-    @Slot(int)
-    def select_can_device(self, can_device: int) -> None:
-        self.can_device = CanDevice(can_device)
-        self.update_connect_button_state()
-
-    @Slot(int)
-    def select_can_baudrate(self, baudrate: int) -> None:
-        self.baudrate = CAN_BAUDRATE(baudrate)
-        self.update_connect_button_state()
-
-    @Slot(int, int)
-    def select_node_id(self, node_id: int, drive: int) -> None:
-        if drive == Drive.Left.value:
-            self.left_id = node_id
-        else:
-            self.right_id = node_id
-        self.update_connect_button_state()
+        self.drive_model = DriveModel()
 
     @Slot()
     def connect(self) -> None:
+        """Connect to the drives using the MotionControllerService and the currently
+        selected configuration stored in the DriveModel.
+        """
         self.mcs.connect_drives(
             self.connect_callback,
-            self.dictionary,
-            self.connection,
-            self.can_device,
-            self.baudrate,
-            self.left_id,
-            self.right_id,
-            self.interface_index,
+            self.drive_model,
         )
-
-    def connect_callback(self, report: thread_report) -> None:
-        self.drive_connected_triggered.emit()
 
     @Slot()
     def disconnect(self) -> None:
+        """Disconnect the drives using the MotionControllerService."""
         self.mcs.disconnect_drives(self.disconnect_callback)
-
-    def disconnect_callback(self, report: thread_report) -> None:
-        self.drive_disconnected_triggered.emit()
-        self.update_connect_button_state()
-
-    @Slot(float, int)
-    def set_velocity(self, velocity: float, drive: int) -> None:
-        self.mcs.run(
-            self.log_report,
-            "motion.set_velocity",
-            velocity,
-            servo=Drive(drive).name,
-        )
-
-    @Slot(float, int)
-    def set_register_max_velocity(self, max_velocity: float, drive: int) -> None:
-        self.mcs.run(
-            self.log_report,
-            "communication.set_register",
-            "CL_VEL_REF_MAX",
-            max_velocity,
-            Drive(drive).name,
-        )
-
-    @Slot()
-    def get_velocities_r(
-        self, timestamps: list[float], data: list[list[float]]
-    ) -> None:
-        self.velocity_right_changed.emit(timestamps[0], data[0][0])
-
-    @Slot()
-    def get_velocities_l(
-        self, timestamps: list[float], data: list[list[float]]
-    ) -> None:
-        self.velocity_left_changed.emit(timestamps[0], data[0][0])
 
     @Slot(int)
     def enable_motor(self, drive: int) -> None:
+        """Enable the motor of a given drive using the MotionControllerService.
+
+        Args:
+            drive (int): the drive to enable
+        """
         target = Drive(drive)
         if target == Drive.Left:
             self.mcs.enable_motor(self.enable_motor_l_callback, target)
@@ -186,6 +92,11 @@ class DriveController(QObject):
 
     @Slot(int)
     def disable_motor(self, drive: int) -> None:
+        """Enable the motor of a given drive using the MotionControllerService.
+
+        Args:
+            drive (int): the drive to disable
+        """
         if drive == Drive.Left.value:
             self.mcs.run(
                 self.disable_motor_l_callback,
@@ -199,51 +110,277 @@ class DriveController(QObject):
                 Drive.Right.name,
             )
 
-    def log_report(self, report: thread_report) -> None:
-        logger.debug(report)
+    @Slot()
+    def handle_new_velocity_data_r(
+        self, timestamps: list[float], data: list[list[float]]
+    ) -> None:
+        """Handles new velocity data coming from a PollerThread. Emits a signal with the
+        data prepared in a format that the UI can handle.
 
-    def enable_motor_l_callback(self, report: thread_report) -> None:
-        poller_thread = self.mcs.create_poller_thread(
-            Drive.Left.name, [{"name": "CL_VEL_FBK_VALUE", "axis": 1}]
-        )
-        poller_thread.new_data_available_triggered.connect(self.get_velocities_l)
-        poller_thread.start()
+        Args:
+            timestamps (list[float]): contains the timestamp of the new data point.
+            data (list[list[float]]): contains the value of the new data point.
+        """
+        self.velocity_right_changed.emit(timestamps[0], data[0][0])
 
-    def disable_motor_l_callback(self, report: thread_report) -> None:
-        self.mcs.stop_poller_thread(Drive.Left.name)
+    @Slot()
+    def handle_new_velocity_data_l(
+        self, timestamps: list[float], data: list[list[float]]
+    ) -> None:
+        """Handles new velocity data coming from a PollerThread. Emits a signal with the
+        data prepared in a format that the UI can handle.
 
-    def enable_motor_r_callback(self, report: thread_report) -> None:
-        poller_thread = self.mcs.create_poller_thread(
-            Drive.Right.name, [{"name": "CL_VEL_FBK_VALUE", "axis": 1}]
-        )
-        poller_thread.new_data_available_triggered.connect(self.get_velocities_r)
-        poller_thread.start()
-
-    def disable_motor_r_callback(self, report: thread_report) -> None:
-        self.mcs.stop_poller_thread(Drive.Right.name)
+        Args:
+            timestamps (list[float]): contains the timestamp of the new data point.
+            data (list[list[float]]): contains the value of the new data point.
+        """
+        self.velocity_left_changed.emit(timestamps[0], data[0][0])
 
     @Slot(result=QJsonArray)
     def get_interface_name_list(self) -> QJsonArray:
+        """Get a list of available interfaces from the MotionControllerService.
+
+        Returns:
+            QJsonArray: the available interfaces in JSON format.
+        """
         return QJsonArray.fromStringList(self.mcs.get_interface_name_list())
 
     @Slot()
     def scan_servos(self) -> None:
+        """Scan for servos in the network."""
         self.mcs.scan_servos(
             self.scan_servos_callback,
-            self.connection,
-            self.can_device,
-            self.baudrate,
-            self.interface_index,
+            self.drive_model,
         )
 
-    def scan_servos_callback(self, thread_report: thread_report) -> None:
-        if thread_report.output is not None:
-            servo_ids: list[int] = thread_report.output
-            self.left_id = servo_ids[0]
-            self.right_id = servo_ids[1]
-            self.servo_ids_changed.emit(QJsonArray.fromVariantList(servo_ids))
-            self.update_connect_button_state()
+    @Slot(float, int)
+    def set_velocity(self, velocity: float, drive: int) -> None:
+        """Set the target velocity of a given drive using the MotionControllerService.
+
+        Args:
+            velocity (float): the velocity
+            drive (int): the drive
+        """
+        self.mcs.run(
+            self.log_report,
+            "motion.set_velocity",
+            velocity,
+            servo=Drive(drive).name,
+        )
+
+    @Slot(float, int)
+    def set_register_max_velocity(self, max_velocity: float, drive: int) -> None:
+        """Set a specific register - in this case the one that controls the maximum
+        velocity - of a given drive using the MotionControllerService.
+
+        Args:
+            max_velocity (float): the value to set the register to
+            drive (int): the drive
+        """
+        self.mcs.run(
+            self.log_report,
+            "communication.set_register",
+            "CL_VEL_REF_MAX",
+            max_velocity,
+            Drive(drive).name,
+        )
+
+    @Slot(str)
+    def select_dictionary(self, dictionary: str) -> None:
+        """Update the DriveModel, setting the dictionnary property to the url of the
+        file that was uploaded in the UI.
+        Also identifies which connection protocol the dictionary belongs to and sets the
+        corresponding property in the DriveModel.
+
+        Args:
+            dictionary (str): the url of the dictionary file
+        """
+        self.drive_model.dictionary = dictionary.removeprefix("file:///")
+        self.drive_model.dictionary_type = self.mcs.check_dictionary_format(
+            self.drive_model.dictionary
+        )
+        self.dictionary_changed.emit(os.path.basename(self.drive_model.dictionary))
+        self.update_connect_button_state()
+
+    @Slot(int)
+    def select_connection(self, connection: int) -> None:
+        """Update the DriveModel, setting the connection property to the value that was
+        selected in the UI.
+
+        Args:
+            connection (int): the selected connection
+        """
+        self.drive_model.connection = ConnectionProtocol(connection)
+        self.update_connect_button_state()
+
+    @Slot(int)
+    def select_interface(self, interface: int) -> None:
+        """Update the DriveModel, setting the interface property to the value that was
+        selected in the UI.
+
+        Args:
+            interface (int): the selected interface
+        """
+        self.drive_model.interface_index = interface
+        self.update_connect_button_state()
+
+    @Slot(int)
+    def select_can_device(self, can_device: int) -> None:
+        """Update the DriveModel, setting the can device property to the value that was
+        selected in the UI.
+
+        Args:
+            can_device (int): the selected can device
+        """
+        self.drive_model.can_device = CanDevice(can_device)
+        self.update_connect_button_state()
+
+    @Slot(int)
+    def select_can_baudrate(self, baudrate: int) -> None:
+        """Update the DriveModel, setting the can baudrate property to the value that
+        was selected in the UI.
+
+        Args:
+            can_baudrate (int): the selected can baudrate
+        """
+        self.drive_model.can_baudrate = CAN_BAUDRATE(baudrate)
+        self.update_connect_button_state()
+
+    @Slot(int, int)
+    def select_node_id(self, node_id: int, drive: int) -> None:
+        """Update the DriveModel, setting the can node / slave ID property to the value
+        that was selected in the UI (which property is set depends on the drive).
+
+        Args:
+            node_id (int): the selected node / slave ID
+            drive (int): the drive the ID belongs to
+        """
+        if drive == Drive.Left.value:
+            self.drive_model.left_id = node_id
+        else:
+            self.drive_model.right_id = node_id
+        self.update_connect_button_state()
 
     @Slot()
     def emergency_stop(self) -> None:
+        """Immediately disables the motors of all connected drives."""
         self.mcs.emergency_stop(self.log_report)
+
+    def connect_callback(self, thread_report: thread_report) -> None:
+        """Callback after the drives where connected. Emits a signal to the UI.
+
+        Args:
+            thread_report (thread_report): the result of the operation that triggered
+                the callback
+        """
+        self.drive_connected_triggered.emit()
+
+    def disconnect_callback(self, thread_report: thread_report) -> None:
+        """Callback after the drives where disconnected. Emits a signal to the UI.
+
+        Args:
+            thread_report (thread_report): the result of the operation that triggered
+                the callback
+        """
+
+        self.drive_disconnected_triggered.emit()
+        self.update_connect_button_state()
+
+    def enable_motor_l_callback(self, thread_report: thread_report) -> None:
+        """Callback after the motor of a drive was enabled.
+        Starts an instance of PollerThread to continuously monitor the velocity of the
+        motor.
+        Binds the new_data_available_triggered signal of the new PollerThread to a
+        function that handles the communication with the UI.
+
+        Args:
+            thread_report (thread_report): the result of the operation that triggered
+                the callback
+        """
+        poller_thread = self.mcs.create_poller_thread(
+            Drive.Left.name, [{"name": "CL_VEL_FBK_VALUE", "axis": 1}]
+        )
+        poller_thread.new_data_available_triggered.connect(
+            self.handle_new_velocity_data_l
+        )
+        poller_thread.start()
+
+    def enable_motor_r_callback(self, thread_report: thread_report) -> None:
+        """Callback after the motor of a drive was enabled.
+        Starts an instance of PollerThread to continuously monitor the velocity of the
+        motor.
+        Emits a signal to the UI.
+
+        Args:
+            thread_report (thread_report): the result of the operation that triggered
+                the callback
+        """
+        poller_thread = self.mcs.create_poller_thread(
+            Drive.Right.name, [{"name": "CL_VEL_FBK_VALUE", "axis": 1}]
+        )
+        poller_thread.new_data_available_triggered.connect(
+            self.handle_new_velocity_data_r
+        )
+        poller_thread.start()
+
+    def disable_motor_l_callback(self, thread_report: thread_report) -> None:
+        """Callback after the motor of a drive was disabled.
+        Stops the corresponding poller thread.
+
+        Args:
+            thread_report (thread_report): the result of the operation that triggered
+                the callback
+        """
+        self.mcs.stop_poller_thread(Drive.Left.name)
+
+    def disable_motor_r_callback(self, thread_report: thread_report) -> None:
+        """Callback after the motor of a drive was disabled.
+        Stops the corresponding poller thread.
+
+        Args:
+            thread_report (thread_report): the result of the operation that triggered
+                the callback
+        """
+        self.mcs.stop_poller_thread(Drive.Right.name)
+
+    def scan_servos_callback(self, thread_report: thread_report) -> None:
+        """Callback after the scan operation was completed. If values where returned,
+        updates the DriveModel state and emits a signal to the UI.
+
+        Args:
+            thread_report (thread_report): the result of the operation that triggered
+                the callback
+        """
+        if thread_report.output is not None:
+            servo_ids: list[int] = thread_report.output
+            self.drive_model.left_id = servo_ids[0]
+            self.drive_model.right_id = servo_ids[1]
+            self.servo_ids_changed.emit(QJsonArray.fromVariantList(servo_ids))
+            self.update_connect_button_state()
+
+    def error_message_callback(self, error_message: str) -> None:
+        """Callback when an error occured in a MotionControllerThread.
+        Emits a signal to the UI that contains the error message.
+
+        Args:
+            error_message (str): _description_
+        """
+        self.error_triggered.emit(error_message)
+        self.update_connect_button_state()
+
+    def log_report(self, report: thread_report) -> None:
+        """Generic callback that simply logs the result of the operation.
+
+        Args:
+            report (thread_report): the result of the operation that triggered
+                the callback
+        """
+        logger.debug(report)
+
+    def update_connect_button_state(self) -> None:
+        """Helper function that calculates the state of the connect button using the
+        DriveModel and emits a signal to the UI with the resulting state.
+        """
+        self.connect_button_state_changed.emit(
+            self.drive_model.connect_button_state().value
+        )

@@ -1,29 +1,18 @@
 utils package
 =============
 
-Submodules
-----------
-
-utils.enums module
-------------------
+Enums Module
+------------
 
 .. automodule:: utils.enums
    :members:
    :undoc-members:
    :show-inheritance:
 
-utils.types module
-------------------
+Utils Module
+------------
 
 .. automodule:: utils.types
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-Module contents
----------------
-
-.. automodule:: utils
    :members:
    :undoc-members:
    :show-inheritance:
