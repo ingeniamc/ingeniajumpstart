@@ -1,5 +1,5 @@
-src
-===
+K2 Base Camp
+============
 
 .. toctree::
    :maxdepth: 4

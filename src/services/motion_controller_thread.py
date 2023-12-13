@@ -48,7 +48,7 @@ class MotionControllerThread(QThread):
     def run(self) -> None:
         """Run function.
         Emit a signal when it starts (started). Emits a report of
-        :class:`~motionlab3.dataclasses.thread_report` type using the task_completed
+        :class:`~utils.types.thread_report` type using the task_completed
         signal. This report includes the method name, the output of the callback
         function, a timestamp, the duration and the exception raised during the
         callback, if any.

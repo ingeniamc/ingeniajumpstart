@@ -121,23 +121,20 @@ class MotionControllerService(QObject):
         *args: Any,
         **kwargs: Any,
     ) -> Callable[..., Any]:
+        """Connect drives to the program.
+
+        Args:
+            report_callback (Callable[[thread_report], Any]): callback to invoke after
+                completing the operation.
+            drive_model (DriveModel): model containing the application state.
+
+        Raises:
+            ingenialink.exceptions.ILError: If the connection fails
+        """
+
         def on_thread(
             drive_model: DriveModel,
         ) -> Any:
-            """Connect drives to the program.
-
-            Args:
-                dictionary: dictionary file used for the connection
-                connection: whether to connect via EtherCAT or CANopen
-                can_device: configuration for CANopen
-                baudrate: configuration for CANopen
-                id_l: configuration for CANopen & EtherCAT
-                id_r: configuration for CANopen & EtherCAT
-                interface_index: configuration for EtherCAT
-
-            Raises:
-                ILError: If the connection fails
-            """
             if not drive_model.dictionary:
                 raise ILError("No dictionary selected.")
             dictionary_type = self.check_dictionary_format(drive_model.dictionary)
@@ -187,21 +184,24 @@ class MotionControllerService(QObject):
         *args: Any,
         **kwargs: Any,
     ) -> Callable[..., list[int]]:
+        """Scan for servos in the network.
+
+        Args:
+            report_callback (Callable[[thread_report], Any]): callback to invoke after
+                completing the operation.
+            drive_model (DriveModel): Contains information about the connection
+
+        Raises:
+            ingenialink.exceptions.ILError: If we find less than 2 servos in the network
+                or the connection protocol is not implemented.
+
+        Returns:
+            list[int]: All slave / node IDs that are found.
+        """
+
         def on_thread(
             drive_model: DriveModel,
         ) -> list[int]:
-            """Scan for servos in the network.
-
-            Args:
-                drive_model (DriveModel): Contains information about the connection
-
-            Raises:
-                ILError: If we find less than 2 servos in the network or the connection
-                    protocol is not implemented.
-
-            Returns:
-                list[int]: All slave / node IDs that are found.
-            """
             if drive_model.connection == ConnectionProtocol.CANopen:
                 result = self.__mc.communication.scan_servos_canopen(
                     can_device=stringify_can_device_enum(drive_model.can_device),
@@ -229,8 +229,14 @@ class MotionControllerService(QObject):
         *args: Any,
         **kwargs: Any,
     ) -> Callable[..., Any]:
+        """Disconnect the drives if they are connected.
+
+        Args:
+            report_callback (Callable[[thread_report], Any]): callback to invoke after
+                completing the operation.
+        """
+
         def on_thread() -> Any:
-            """Disconnect the drives if they are connected."""
             for servo in list(self.__mc.servos):
                 if self.__mc.is_alive(servo):
                     self.__mc.motion.motor_disable(servo=servo)
@@ -246,8 +252,14 @@ class MotionControllerService(QObject):
         *args: Any,
         **kwargs: Any,
     ) -> Callable[..., Any]:
+        """Disable the motors of the drives that are connected.
+
+        Args:
+            report_callback (Callable[[thread_report], Any]): callback to invoke after
+                completing the operation.
+        """
+
         def on_thread() -> Any:
-            """Disable the motors of the drives that are connected."""
             for servo in self.__mc.servos:
                 if self.__mc.is_alive(servo):
                     self.__mc.motion.motor_disable(servo=servo)
@@ -279,11 +291,14 @@ class MotionControllerService(QObject):
         """Create an instance of the PollerThread.
 
         Args:
-            alias: Drive alias.
-            registers: Register to be read.
-            sampling_time: Poller sampling time.
-            refresh_time: Poller refresh period.
-            buffer_size: Poller buffer size.
+            alias (str):  Drive alias.
+            registers (list[dict[str, Union[int, str]]]): Register to be read.
+            sampling_time (float, optional): Poller sampling time. Defaults to 0.125.
+            refresh_time (float, optional): Poller refresh period. Defaults to 0.125.
+            buffer_size (int, optional): Poller buffer size. Defaults to 100.
+
+        Returns:
+            PollerThread: the newly created PollerThread
         """
         self.__poller_threads[alias] = PollerThread(
             self.__mc,
@@ -305,14 +320,14 @@ class MotionControllerService(QObject):
         ETHERcat connections.
 
         Args:
-            filepath: path to the file to check
+            filepath (str): path to the file to check
 
         Raises:
-            ILError: If the provided file has the wrong format
+            ingenialink.exceptions.ILError: If the provided file has the wrong format
             FileNotFoundError: If the file was not found
 
         Returns:
-            Connection: The connection type the file is meant for.
+            utils.enums.ConnectionProtocol: The connection type the file is meant for.
         """
         tree = ET.parse(filepath)
         parsed_data = tree.getroot()
@@ -336,13 +351,15 @@ class MotionControllerService(QObject):
         *args: Any,
         **kwargs: Any,
     ) -> Callable[..., Any]:
+        """Enables the motor of a given drive
+
+        Args:
+            report_callback (Callable[[thread_report], Any]): callback to invoke after
+                completing the operation.
+            drive (utils.enum.Drive): the drive to enable
+        """
+
         def on_thread(drive: Drive) -> Any:
-            """Enables the motor of a given drive
-
-            Args:
-                drive: The drive
-
-            """
             self.__mc.motion.set_operation_mode(
                 OperationMode.PROFILE_VELOCITY, servo=drive.name
             )

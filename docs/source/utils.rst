@@ -1,16 +1,16 @@
-utils package
-=============
+Utils
+=====
 
-Enums Module
-------------
+Enums
+-----
 
 .. automodule:: utils.enums
    :members:
    :undoc-members:
    :show-inheritance:
 
-Utils Module
-------------
+Utils
+-----
 
 .. automodule:: utils.types
    :members:

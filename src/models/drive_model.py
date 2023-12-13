@@ -36,7 +36,7 @@ class DriveModel(QObject):
         application state.
 
         Returns:
-            ButtonState: the new button state
+            utils.enums.ButtonState: the new button state
         """
         if (
             self.dictionary is None

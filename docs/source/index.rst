@@ -10,6 +10,8 @@ Welcome to K2 Base Camp's documentation!
    :maxdepth: 2
    :caption: Contents:
 
+   what_is_k2_base_camp
+   quickstart
    modules
 
 

@@ -30,31 +30,55 @@ class DriveController(QObject):
     """
 
     drive_connected_triggered: Signal = Signal()
-    """Triggers when a drive is connected"""
+    """Triggers when a drive is connected."""
 
     drive_disconnected_triggered: Signal = Signal()
-    """Triggers when a drive is disconnected"""
+    """Triggers when a drive is disconnected."""
 
     velocity_left_changed = Signal(float, float, arguments=["timestamp", "velocity"])
-    """Triggers when the poller returns a new value"""
+    """Triggers when the poller returns a new value.
+
+    Args:
+        timestamp (float): timestamp of the new data point.
+        velocity (float): velocity of the new data point.
+    """
 
     velocity_right_changed = Signal(float, float, arguments=["timestamp", "velocity"])
-    """Triggers when the poller returns a new value"""
+    """Triggers when the poller returns a new value.
+
+    Args:
+        timestamp (float): timestamp of the new data point.
+        velocity (float): velocity of the new data point.
+    """
 
     dictionary_changed = Signal(str, arguments=["dictionary"])
-    """Triggers when the dictionary file was selected"""
+    """Triggers when the dictionary file was selected.
 
-    connection_error_triggered = Signal(str, arguments=["error_message"])
-    """Triggers when the connection failed"""
+    Args:
+        dictionary (str): the path of the selected file.
+    """
 
     error_triggered = Signal(str, arguments=["error_message"])
-    """Triggers when an error occurs while communicating with the drive"""
+    """Triggers when an error occurs while communicating with the drive.
+
+    Args:
+        error_message (str): the error message.
+    """
 
     connect_button_state_changed = Signal(int, arguments=["button_state"])
-    """Triggers when the state of the connect button changes"""
+    """Triggers when the state of the connect button changes.
+
+    Args:
+        buttons_state (int): the new button state.
+    """
 
     servo_ids_changed = Signal(QJsonArray, arguments=["servo_ids"])
-    """Triggers when the scan returned new values for the servo connections"""
+    """Triggers when the scan returned new values for the servo connections.
+
+    Args:
+        servo_ids (PySide6.QtCore.QJsonArray): the slave / node IDs identified by the
+            scan.
+    """
 
     def __init__(self) -> None:
         super().__init__()

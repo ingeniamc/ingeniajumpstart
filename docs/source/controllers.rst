@@ -1,8 +1,8 @@
-controllers package
-===================
+Controllers
+===========
 
-Drive Controller Module
------------------------
+Drive Controller
+----------------
 
 .. automodule:: controllers.drive_controller
    :members:

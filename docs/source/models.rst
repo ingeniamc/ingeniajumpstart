@@ -1,8 +1,8 @@
-models package
-==============
+Models
+======
 
-Drive Model Module
-------------------
+Drive Model
+-----------
 
 .. automodule:: models.drive_model
    :members:
