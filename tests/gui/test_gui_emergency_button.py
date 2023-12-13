@@ -42,3 +42,5 @@ def test_emergency_button(qtbot: QtBot, mocker: MockerFixture) -> None:
     )
     qtbot.wait(10)
     assert spy.call_count == 1
+
+    drive_controller.mcs.stop_motion_controller_thread()

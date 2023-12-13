@@ -342,3 +342,6 @@ class MotionControllerService(QObject):
             self.__mc.motion.motor_enable(servo=drive.name)
 
         return on_thread
+
+    def stop_motion_controller_thread(self) -> None:
+        self.__motion_controller_thread.stop()

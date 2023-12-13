@@ -11,7 +11,7 @@ sys.path.insert(0, os.path.abspath("../../src/"))
 # -- Project information -----------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
-project = "ingeniajumpstart"
+project = "k2-base-camp"
 copyright = "2023, Ingenia Motion Control"
 author = "Ingenia Motion Control"
 release = "unreleased"
