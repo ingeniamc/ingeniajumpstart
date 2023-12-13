@@ -2,7 +2,6 @@
     "files": [
         "src/__main__.py",
         "src/controllers/drive_controller.py",
-        "src/services/mc_thread.py",
         "src/services/motion_controller_service.py",
         "src/services/poller_thread.py",
         "src/enums.py",
