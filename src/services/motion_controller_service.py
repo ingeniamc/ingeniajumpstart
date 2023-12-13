@@ -1,14 +1,24 @@
+import xml.etree.ElementTree as ET
 from functools import wraps
 from typing import Any, Callable, Union
 
+from ingenialink import CAN_BAUDRATE
+from ingenialink.exceptions import ILError
 from ingeniamotion import MotionController
 from ingeniamotion.enums import OperationMode
-from ingeniamotion.metaclass import DEFAULT_SERVO
 from PySide6.QtCore import QObject
+
+from src.enums import CanDevice, Connection, Drive, stringify_can_device_enum
 
 from .mc_thread import MCThread
 from .poller_thread import PollerThread
-from .types import thread_report
+from .types import (
+    thread_report,
+)
+
+DEVICE_NODE = "Body//Device"
+INTERFACE_CAN = "CAN"
+INTERFACE_ETH = "ETH"
 
 
 class MotionControllerService(QObject):
@@ -111,34 +121,78 @@ class MotionControllerService(QObject):
         return wrap
 
     @run_on_thread
-    def connect_drive(
-        self, report_callback: Callable[[thread_report], Any], *args: Any, **kwargs: Any
+    def connect_drives(
+        self,
+        report_callback: Callable[[thread_report], Any],
+        dictionary: str,
+        connection: Connection,
+        can_device: CanDevice,
+        baudrate: CAN_BAUDRATE,
+        node_id_l: int,
+        node_id_r: int,
+        *args: Any,
+        **kwargs: Any,
     ) -> Callable[..., Any]:
-        def on_thread() -> Any:
-            """
-            [docs]
+        def on_thread(
+            dictionary: str,
+            connection: Connection,
+            can_device: CanDevice,
+            baudrate: CAN_BAUDRATE,
+            node_id_l: int,
+            node_id_r: int,
+        ) -> Any:
+            """Connect drives to the program.
 
+            Args:
+                dictionary (str): dictionary file used for the connection
+                connection (Connection): whether to connect via ETHERcat or CANopen
+
+            Raises:
+                ILError: If the connection fails
             """
-            self.__mc.communication.connect_servo_eoe(
-                "192.168.2.22", "eve-e-xcr-c_eth_2.4.1.xdf"
+            dictionary_type = self.__check_dictionary_format(dictionary)
+            if dictionary_type != connection:
+                raise ILError("Communication type does not match the dictionary type.")
+            if connection == Connection.EtherCAT:
+                raise ILError("Not (yet) implemented.")
+            if node_id_l == node_id_r:
+                raise ILError("Node IDs cannot be the same.")
+
+            self.__mc.communication.connect_servo_canopen(
+                baudrate=baudrate,
+                can_device=stringify_can_device_enum(can_device),
+                dict_path=dictionary,
+                node_id=node_id_l,
+                alias=Drive.Left.name,
             )
-            self.__mc.motion.set_operation_mode(OperationMode.PROFILE_VELOCITY)
-            self.__mc.motion.motor_enable()
+            self.__mc.communication.connect_servo_canopen(
+                baudrate=baudrate,
+                can_device=stringify_can_device_enum(can_device),
+                dict_path=dictionary,
+                node_id=node_id_r,
+                alias=Drive.Right.name,
+            )
 
         return on_thread
 
     @run_on_thread
     def disconnect_drive(
-        self, report_callback: Callable[[thread_report], Any], *args: Any, **kwargs: Any
+        self,
+        report_callback: Callable[[thread_report], Any],
+        *args: Any,
+        **kwargs: Any,
     ) -> Callable[..., Any]:
         def on_thread() -> Any:
             """
             [docs]
 
             """
-            self.__mc.motion.motor_disable()
-            self.stop_poller_thread(DEFAULT_SERVO)
-            self.__mc.communication.disconnect()
+            self.__mc.motion.motor_disable(servo=Drive.Left.name)
+            self.stop_poller_thread(Drive.Left.name)
+            self.__mc.communication.disconnect(servo=Drive.Left.name)
+            self.__mc.motion.motor_disable(servo=Drive.Right.name)
+            self.stop_poller_thread(Drive.Right.name)
+            self.__mc.communication.disconnect(servo=Drive.Right.name)
 
         return on_thread
 
@@ -173,3 +227,47 @@ class MotionControllerService(QObject):
         """Stop poller thread."""
         if alias in self.__poller_threads and self.__poller_threads[alias].isRunning():
             self.__poller_threads[alias].stop()
+
+    def __check_dictionary_format(self, filepath: str) -> Connection:
+        """Identifies if the provided dictionary file is for CANopen or
+        ETHERcat connections.
+
+        Args:
+            filepath (str): path to the file to check
+
+        Raises:
+            ILError: If the provided file has the wrong format
+            FileNotFoundError: If the file was not found
+
+        Returns:
+            Connection: The connection type the file is meant for.
+        """
+        tree = ET.parse(filepath)
+        parsed_data = tree.getroot()
+
+        device = parsed_data.find(DEVICE_NODE)
+        if not isinstance(device, ET.Element):
+            raise ILError("Invalid file format")
+        interface = device.attrib["Interface"]
+        if interface == INTERFACE_CAN:
+            return Connection.CANopen
+        elif interface == INTERFACE_ETH:
+            return Connection.EtherCAT
+        else:
+            raise ILError("Connection type not supported.")
+
+    @run_on_thread
+    def enable_motor(
+        self,
+        report_callback: Callable[[thread_report], Any],
+        drive: Drive,
+        *args: Any,
+        **kwargs: Any,
+    ) -> Callable[..., Any]:
+        def on_thread(drive: Drive) -> Any:
+            self.__mc.motion.set_operation_mode(
+                OperationMode.PROFILE_VELOCITY, servo=drive.name
+            )
+            self.__mc.motion.motor_enable(servo=drive.name)
+
+        return on_thread

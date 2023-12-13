@@ -6,7 +6,7 @@ import qmltypes.controllers 1.0
 
 ApplicationWindow {
     id: page
-    title: qsTr("Hello World")
+    title: qsTr("Ingeniajumpstart")
     width: 640
     height: 480
     visible: true
@@ -15,10 +15,10 @@ ApplicationWindow {
 
     Connections {
         target: page.driveController
-        function onDriveConnected() {
+        function onDrive_connected_triggered() {
             stack.push(controlsPage);
         }
-        function onDriveDisconnected() {
+        function onDrive_disconnected_triggered() {
             stack.pop();
         }
     }
@@ -32,7 +32,7 @@ ApplicationWindow {
                 Layout.preferredWidth: 50
             }
             Label {
-                text: "Title"
+                text: stack.depth > 1 ? "Controls" : "Connection"
                 elide: Label.ElideRight
                 horizontalAlignment: Qt.AlignHCenter
                 verticalAlignment: Qt.AlignVCenter
