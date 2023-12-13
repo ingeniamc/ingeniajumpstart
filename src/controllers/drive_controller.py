@@ -157,6 +157,16 @@ class DriveController(QObject):
             servo=Drive(drive).name,
         )
 
+    @Slot(float, int)
+    def set_register_max_velocity(self, max_velocity: float, drive: int) -> None:
+        self.mcs.run(
+            self.log_report,
+            "communication.set_register",
+            "CL_VEL_REF_MAX",
+            max_velocity,
+            Drive(drive).name,
+        )
+
     @Slot()
     def get_velocities_r(
         self, timestamps: list[float], data: list[list[float]]
