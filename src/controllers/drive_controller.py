@@ -246,3 +246,7 @@ class DriveController(QObject):
             self.right_id = servo_ids[1]
             self.servo_ids_changed.emit(QJsonArray.fromVariantList(servo_ids))
             self.update_connect_button_state()
+
+    @Slot()
+    def emergency_stop(self) -> None:
+        self.mcs.emergency_stop(self.log_report)
