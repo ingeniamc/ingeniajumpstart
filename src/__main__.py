@@ -33,4 +33,6 @@ if __name__ == "__main__":
     if not engine.rootObjects():
         sys.exit(-1)
 
-    sys.exit(app.exec())
+    ret = app.exec()
+    drive_controller.mcs.stop_motion_controller_thread()
+    sys.exit(ret)
