@@ -164,3 +164,5 @@ qmltypes/
 
 # dictionary files
 *.xdf
+
+resources_rc.py
