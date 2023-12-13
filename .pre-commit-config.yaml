@@ -4,6 +4,7 @@ repos:
     hooks:
       - id: black
         args: [--preview]
+        exclude: resources.py
         language_version: python3.9
   - repo: https://github.com/astral-sh/ruff-pre-commit
     # Ruff version.

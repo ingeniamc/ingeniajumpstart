@@ -7,6 +7,7 @@ import "components"
 import qmltypes.controllers 1.0
 import QtCharts 2.6
 import "js/plot.js" as PlotJS
+import "js/controls.js" as ControlsJS
 
 // QEnum() does not seem to work properly with qmllint,
 // which is why we disable this warning for this file.
@@ -38,68 +39,30 @@ RowLayout {
             PlotJS.resetPlot(chartR);
         }
     }
-    Keys.onUpPressed: event => {
-        if (event.isAutoRepeat)
-            return;
-        upButton.state = "ACTIVE";
-        if (leftCheck.checked) {
-            grid.driveController.set_velocity(velocitySliderL.value, Enums.Drive.Left);
-        }
-        if (rightCheck.checked) {
-            grid.driveController.set_velocity(velocitySliderR.value, Enums.Drive.Right);
-        }
-    }
+    Keys.onUpPressed: event => ControlsJS.handleButtonPressed(upButton, 1, 1, event)
 
-    Keys.onDownPressed: event => {
-        if (event.isAutoRepeat)
-            return;
-        downButton.state = "ACTIVE";
-        if (leftCheck.checked) {
-            grid.driveController.set_velocity(velocitySliderL.value * -1, Enums.Drive.Left);
-        }
-        if (rightCheck.checked) {
-            grid.driveController.set_velocity(velocitySliderR.value * -1, Enums.Drive.Right);
-        }
-    }
+    Keys.onDownPressed: event => ControlsJS.handleButtonPressed(downButton, -1, -1, event)
 
-    Keys.onLeftPressed: event => {
-        if (event.isAutoRepeat || !rightCheck.checked || !leftCheck.checked)
-            return;
-        leftButton.state = "ACTIVE";
-        grid.driveController.set_velocity(velocitySliderL.value * -1, Enums.Drive.Left);
-        grid.driveController.set_velocity(velocitySliderR.value, Enums.Drive.Right);
-    }
+    Keys.onLeftPressed: event => ControlsJS.handleButtonPressed(leftButton, -1, 1, event)
 
-    Keys.onRightPressed: event => {
-        if (event.isAutoRepeat || !rightCheck.checked || !leftCheck.checked)
-            return;
-        rightButton.state = "ACTIVE";
-        grid.driveController.set_velocity(velocitySliderL.value, Enums.Drive.Left);
-        grid.driveController.set_velocity(velocitySliderR.value * -1, Enums.Drive.Right);
-    }
+    Keys.onRightPressed: event => ControlsJS.handleButtonPressed(rightButton, 1, -1, event)
 
     Keys.onReleased: event => {
         if (event.isAutoRepeat)
             return;
         switch (event.key) {
         case Qt.Key_Up:
-            upButton.state = "NORMAL";
+            ControlsJS.handleButtonReleased(upButton);
             break;
         case Qt.Key_Down:
-            downButton.state = "NORMAL";
+            ControlsJS.handleButtonReleased(downButton);
             break;
         case Qt.Key_Left:
-            leftButton.state = "NORMAL";
+            ControlsJS.handleButtonReleased(leftButton);
             break;
         case Qt.Key_Right:
-            rightButton.state = "NORMAL";
+            ControlsJS.handleButtonReleased(rightButton);
             break;
-        }
-        if (leftCheck.checked) {
-            grid.driveController.set_velocity(0, Enums.Drive.Left);
-        }
-        if (rightCheck.checked) {
-            grid.driveController.set_velocity(0, Enums.Drive.Right);
         }
     }
 
@@ -120,6 +83,7 @@ RowLayout {
                     } else {
                         grid.driveController.disable_motor(Enums.Drive.Left);
                     }
+                    ControlsJS.updateKeyState();
                 }
             }
             CheckBox {
@@ -133,6 +97,7 @@ RowLayout {
                     } else {
                         grid.driveController.disable_motor(Enums.Drive.Right);
                     }
+                    ControlsJS.updateKeyState();
                 }
             }
             SpacerW {
@@ -145,9 +110,11 @@ RowLayout {
                 Layout.fillWidth: true
                 Layout.fillHeight: true
                 Layout.preferredHeight: 2
+                color: "transparent"
                 ChartView {
                     id: chartL
                     anchors.fill: parent
+                    backgroundColor: "#000000"
                     axes: [
                         ValueAxis {
                             id: xAxisL
@@ -166,9 +133,11 @@ RowLayout {
                 Layout.fillWidth: true
                 Layout.fillHeight: true
                 Layout.preferredHeight: 2
+                color: "transparent"
                 ChartView {
                     id: chartR
                     anchors.fill: parent
+                    backgroundColor: "#000000"
                     axes: [
                         ValueAxis {
                             id: xAxisR
@@ -201,18 +170,21 @@ RowLayout {
                 id: upButton
                 text: "↑"
                 Layout.alignment: Qt.AlignBottom
+                leftFactor: 1
+                rightFactor: 1
             }
             SpacerW {
             }
             ColumnLayout {
                 RowLayout {
                     Text {
-                        color: "black"
+                        color: "#e0e0e0"
                         text: "Max Velocity L -"
                     }
                     Text {
                         id: velocitySliderLValue
                         text: "5.00"
+                        color: "#e0e0e0"
                     }
                 }
                 Slider {
@@ -233,26 +205,33 @@ RowLayout {
                 id: leftButton
                 text: "←"
                 Layout.alignment: Qt.AlignRight | Qt.AlignTop
+                leftFactor: -1
+                rightFactor: 1
             }
             StateButton {
                 id: downButton
                 text: "↓"
                 Layout.alignment: Qt.AlignTop
+                leftFactor: -1
+                rightFactor: -1
             }
             StateButton {
                 id: rightButton
                 text: "→"
                 Layout.alignment: Qt.AlignLeft | Qt.AlignTop
+                leftFactor: 1
+                rightFactor: -1
             }
             ColumnLayout {
                 RowLayout {
                     Text {
-                        color: "black"
+                        color: "#e0e0e0"
                         text: "Max Velocity R -"
                     }
                     Text {
                         id: velocitySliderRValue
                         text: "5.00"
+                        color: "#e0e0e0"
                     }
                 }
                 Slider {

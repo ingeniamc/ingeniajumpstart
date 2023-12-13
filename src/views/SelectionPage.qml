@@ -1,6 +1,6 @@
 pragma ComponentBehavior: Bound
 import QtQuick.Layouts
-import "components"
+import "components" as Components
 import QtQuick.Controls.Material
 import qmltypes.controllers 1.0
 import QtQuick 2.15
@@ -42,147 +42,90 @@ ColumnLayout {
         }
     }
 
-    RowLayout {
-        SpacerW {
-        }
-        Text {
-            text: "Select connection mode:"
-            font.pointSize: 12
-            Layout.fillWidth: true
-            Layout.preferredWidth: 2
-        }
-        ComboBox {
-            textRole: "text"
-            valueRole: "value"
-            model: [{
-                    value: Enums.Connection.CANopen,
-                    text: qsTr("CANopen")
-                }, {
-                    value: Enums.Connection.EtherCAT,
-                    text: qsTr("EtherCAT")
-                }]
-            Layout.fillWidth: true
-            Layout.preferredWidth: 2
-            onActivated: () => {
-                selectionPage.driveController.select_connection(currentValue);
-                selectCANdevice.visible = currentValue == Enums.Connection.CANopen;
-                selectBaudrate.visible = currentValue == Enums.Connection.CANopen;
-                selectNetworkAdapter.visible = currentValue == Enums.Connection.EtherCAT;
-            }
-        }
-        SpacerW {
+    Components.Selection {
+        text: "Select connection mode:"
+        model: [{
+                value: Enums.Connection.CANopen,
+                text: "CANopen"
+            }, {
+                value: Enums.Connection.EtherCAT,
+                text: "EtherCAT"
+            }]
+        activatedHandler: currentValue => {
+            selectionPage.driveController.select_connection(currentValue);
+            selectCANdevice.visible = currentValue == Enums.Connection.CANopen;
+            selectBaudrate.visible = currentValue == Enums.Connection.CANopen;
+            selectNetworkAdapter.visible = currentValue == Enums.Connection.EtherCAT;
         }
     }
 
-    RowLayout {
+    Components.Selection {
         id: selectNetworkAdapter
+        text: "Select network adapter:"
+        model: []
         visible: false
-        SpacerW {
+        Component.onCompleted: () => {
+            const interface_name_list = selectionPage.driveController.get_interface_name_list();
+            selectNetworkAdapter.model = interface_name_list.map((interface_name, index) => {
+                    return {
+                        value: index,
+                        text: interface_name
+                    };
+                });
         }
-        Text {
-            text: "Select network adapter:"
-            font.pointSize: 12
-            Layout.fillWidth: true
-            Layout.preferredWidth: 2
-        }
-        ComboBox {
-            id: selectNetworkAdapterBox
-            textRole: "text"
-            valueRole: "value"
-            Layout.fillWidth: true
-            Layout.preferredWidth: 2
-            Component.onCompleted: () => {
-                const interface_name_list = selectionPage.driveController.get_interface_name_list();
-                selectNetworkAdapterBox.model = interface_name_list.map((interface_name, index) => {
-                        return {
-                            value: index,
-                            text: interface_name
-                        };
-                    });
-            }
-            onActivated: () => selectionPage.driveController.select_interface(currentValue)
-        }
-        SpacerW {
-        }
+        activatedHandler: currentValue => selectionPage.driveController.select_interface(currentValue)
+    }
+
+    Components.Selection {
+        id: selectCANdevice
+        text: "Select CAN device:"
+        model: [{
+                value: Enums.CanDevice.KVASER,
+                text: "KVASER"
+            }, {
+                value: Enums.CanDevice.PCAN,
+                text: "PCAN"
+            }, {
+                value: Enums.CanDevice.IXXAT,
+                text: "IXXAT"
+            }]
+        activatedHandler: currentValue => selectionPage.driveController.select_can_device(currentValue)
+    }
+
+    Components.Selection {
+        id: selectBaudrate
+        text: "Select baudrate:"
+        model: [{
+                value: Enums.CAN_BAUDRATE.Baudrate_1M,
+                text: "1 Mbit/s"
+            }, {
+                value: Enums.CAN_BAUDRATE.Baudrate_500K,
+                text: "500 Kbit/s"
+            }, {
+                value: Enums.CAN_BAUDRATE.Baudrate_250K,
+                text: "250 Kbit/s"
+            }, {
+                value: Enums.CAN_BAUDRATE.Baudrate_125K,
+                text: "125 Kbit/s"
+            }, {
+                value: Enums.CAN_BAUDRATE.Baudrate_100K,
+                text: "100 Kbit/s"
+            }, {
+                value: Enums.CAN_BAUDRATE.Baudrate_50K,
+                text: "50 Kbit/s"
+            }]
+        activatedHandler: currentValue => selectionPage.driveController.select_can_baudrate(currentValue)
     }
 
     RowLayout {
-        id: selectCANdevice
-        SpacerW {
-        }
-        Text {
-            text: "Select CAN device:"
-            font.pointSize: 12
-            Layout.fillWidth: true
-            Layout.preferredWidth: 2
-        }
-        ComboBox {
-            textRole: "text"
-            valueRole: "value"
-            model: [{
-                    value: Enums.CanDevice.KVASER,
-                    text: qsTr("KVASER")
-                }, {
-                    value: Enums.CanDevice.PCAN,
-                    text: qsTr("PCAN")
-                }, {
-                    value: Enums.CanDevice.IXXAT,
-                    text: qsTr("IXXAT")
-                }]
-            Layout.fillWidth: true
-            Layout.preferredWidth: 2
-            onActivated: () => selectionPage.driveController.select_can_device(currentValue)
-        }
-        SpacerW {
-        }
-    }
-    RowLayout {
-        id: selectBaudrate
-        SpacerW {
-        }
-        Text {
-            text: "Select baudrate:"
-            font.pointSize: 12
-            Layout.fillWidth: true
-            Layout.preferredWidth: 2
-        }
-        ComboBox {
-            textRole: "text"
-            valueRole: "value"
-            model: [{
-                    value: Enums.CAN_BAUDRATE.Baudrate_1M,
-                    text: qsTr("1 Mbit/s")
-                }, {
-                    value: Enums.CAN_BAUDRATE.Baudrate_500K,
-                    text: qsTr("500 Kbit/s")
-                }, {
-                    value: Enums.CAN_BAUDRATE.Baudrate_250K,
-                    text: qsTr("250 Kbit/s")
-                }, {
-                    value: Enums.CAN_BAUDRATE.Baudrate_125K,
-                    text: qsTr("125 Kbit/s")
-                }, {
-                    value: Enums.CAN_BAUDRATE.Baudrate_100K,
-                    text: qsTr("100 Kbit/s")
-                }, {
-                    value: Enums.CAN_BAUDRATE.Baudrate_50K,
-                    text: qsTr("50 Kbit/s")
-                }]
-            Layout.fillWidth: true
-            Layout.preferredWidth: 2
-            onActivated: () => selectionPage.driveController.select_can_baudrate(currentValue)
-        }
-        SpacerW {
-        }
-    }
-    RowLayout {
-        SpacerW {
+        Components.SpacerW {
         }
         Text {
             text: "ID Left:"
             font.pointSize: 12
             Layout.fillWidth: true
             Layout.preferredWidth: 4
+            color: "#e0e0e0"
         }
         SpinBox {
             id: idLeft
@@ -192,13 +135,14 @@ ColumnLayout {
             editable: true
             onValueModified: () => selectionPage.driveController.select_node_id(value, Enums.Drive.Left)
         }
-        SpacerW {
+        Components.SpacerW {
         }
         Text {
             text: "ID Right:"
             font.pointSize: 12
             Layout.fillWidth: true
             Layout.preferredWidth: 4
+            color: "#e0e0e0"
         }
         SpinBox {
             id: idRight
@@ -208,34 +152,34 @@ ColumnLayout {
             editable: true
             onValueModified: () => selectionPage.driveController.select_node_id(value, Enums.Drive.Right)
         }
-        SpacerW {
+        Components.SpacerW {
         }
     }
 
     RowLayout {
-        SpacerW {
+        Components.SpacerW {
         }
         ColumnLayout {
             Layout.fillWidth: true
             Layout.preferredWidth: 2
-            Button {
-                text: qsTr("Choose dictionary file...")
+            Components.Button {
+                text: "Choose dictionary file..."
                 onClicked: fileDialog.open()
             }
             Text {
                 id: dictionaryFile
+                color: '#e0e0e0'
                 Layout.alignment: Qt.AlignHCenter
             }
         }
-
-        SpacerW {
+        Components.SpacerW {
         }
     }
 
     RowLayout {
-        SpacerW {
+        Components.SpacerW {
         }
-        Button {
+        Components.Button {
             id: scanBtn
             text: "Scan"
             Layout.fillWidth: true
@@ -244,30 +188,32 @@ ColumnLayout {
                 selectionPage.driveController.scan_servos();
             }
         }
-        SpacerW {
+        Components.SpacerW {
         }
     }
 
     RowLayout {
-        SpacerW {
+        Components.SpacerW {
         }
-        Button {
+        Components.Button {
             id: connectBtn
             text: "Connect"
-            Material.background: Material.Green
+            Material.background: '#2ffcab'
+            Material.foreground: '#1b1b1b'
+            hoverColor: '#acfedd'
             Layout.fillWidth: true
             Layout.preferredWidth: 1
-            state: Enums.ConnectButtonState.Disabled
+            state: Enums.ButtonState.Disabled
             states: [
                 State {
-                    name: Enums.ConnectButtonState.Enabled
+                    name: Enums.ButtonState.Enabled
                     PropertyChanges {
                         target: connectBtn
                         enabled: true
                     }
                 },
                 State {
-                    name: Enums.ConnectButtonState.Disabled
+                    name: Enums.ButtonState.Disabled
                     PropertyChanges {
                         target: connectBtn
                         enabled: false
@@ -275,11 +221,11 @@ ColumnLayout {
                 }
             ]
             onClicked: () => {
-                connectBtn.state = Enums.ConnectButtonState.Disabled;
+                connectBtn.state = Enums.ButtonState.Disabled;
                 selectionPage.driveController.connect();
             }
         }
-        SpacerW {
+        Components.SpacerW {
         }
     }
 }

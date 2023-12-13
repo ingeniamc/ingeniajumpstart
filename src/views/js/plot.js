@@ -13,6 +13,7 @@ function updatePlot(chart, timestamp, velocity) {
 function initSeries(chart, xAxis, yAxis, label) {
     const series = chart.createSeries(ChartView.SeriesTypeSpline, label, xAxis, yAxis);
     series.pointsVisible = true;
+    series.color = '#80ff00';
 }
 
 function resetPlot(chart) {
