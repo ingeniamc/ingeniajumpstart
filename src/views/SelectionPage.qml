@@ -19,14 +19,15 @@ ColumnLayout {
 
     Connections {
         target: selectionPage.driveController
-        function onDrive_disconnected_triggered() {
-            connectBtn.state = "NORMAL";
-        }
         function onDictionary_changed(dictionary) {
             dictionaryFile.text = dictionary;
         }
-        function onError_triggered(error_message) {
-            connectBtn.state = "NORMAL";
+        function onConnect_button_state_changed(new_state) {
+            connectBtn.state = new_state;
+        }
+        function onServo_ids_changed(servo_ids) {
+            idLeft.value = servo_ids[0];
+            idRight.value = servo_ids[1];
         }
     }
 
@@ -38,7 +39,6 @@ ColumnLayout {
         nameFilters: ["Dictionary files (*.xdf)"]
         onAccepted: {
             selectionPage.driveController.select_dictionary(selectedFile);
-            connectBtn.state = "NORMAL";
         }
     }
 
@@ -67,8 +67,40 @@ ColumnLayout {
                 selectionPage.driveController.select_connection(currentValue);
                 selectCANdevice.visible = currentValue == Enums.Connection.CANopen;
                 selectBaudrate.visible = currentValue == Enums.Connection.CANopen;
-                selectNodeIDs.visible = currentValue == Enums.Connection.CANopen;
+                selectNetworkAdapter.visible = currentValue == Enums.Connection.EtherCAT;
             }
+        }
+        SpacerW {
+        }
+    }
+
+    RowLayout {
+        id: selectNetworkAdapter
+        visible: false
+        SpacerW {
+        }
+        Text {
+            text: "Select network adapter:"
+            font.pointSize: 12
+            Layout.fillWidth: true
+            Layout.preferredWidth: 2
+        }
+        ComboBox {
+            id: selectNetworkAdapterBox
+            textRole: "text"
+            valueRole: "value"
+            Layout.fillWidth: true
+            Layout.preferredWidth: 2
+            Component.onCompleted: () => {
+                const interface_name_list = selectionPage.driveController.get_interface_name_list();
+                selectNetworkAdapterBox.model = interface_name_list.map((interface_name, index) => {
+                        return {
+                            value: index,
+                            text: interface_name
+                        };
+                    });
+            }
+            onActivated: () => selectionPage.driveController.select_interface(currentValue)
         }
         SpacerW {
         }
@@ -143,38 +175,36 @@ ColumnLayout {
         SpacerW {
         }
     }
-
     RowLayout {
-        id: selectNodeIDs
         SpacerW {
         }
         Text {
-            text: "Node ID Left:"
+            text: "ID Left:"
             font.pointSize: 12
             Layout.fillWidth: true
             Layout.preferredWidth: 4
         }
         SpinBox {
+            id: idLeft
             Layout.fillWidth: true
             Layout.preferredWidth: 4
             from: 0
-            value: 31
             editable: true
             onValueModified: () => selectionPage.driveController.select_node_id(value, Enums.Drive.Left)
         }
         SpacerW {
         }
         Text {
-            text: "Node ID Right:"
+            text: "ID Right:"
             font.pointSize: 12
             Layout.fillWidth: true
             Layout.preferredWidth: 4
         }
         SpinBox {
+            id: idRight
             Layout.fillWidth: true
             Layout.preferredWidth: 4
             from: 0
-            value: 32
             editable: true
             onValueModified: () => selectionPage.driveController.select_node_id(value, Enums.Drive.Right)
         }
@@ -206,22 +236,38 @@ ColumnLayout {
         SpacerW {
         }
         Button {
+            id: scanBtn
+            text: "Scan"
+            Layout.fillWidth: true
+            Layout.preferredWidth: 1
+            onClicked: () => {
+                selectionPage.driveController.scan_servos();
+            }
+        }
+        SpacerW {
+        }
+    }
+
+    RowLayout {
+        SpacerW {
+        }
+        Button {
             id: connectBtn
             text: "Connect"
             Material.background: Material.Green
             Layout.fillWidth: true
             Layout.preferredWidth: 1
-            state: "DISABLED"
+            state: Enums.ConnectButtonState.Disabled
             states: [
                 State {
-                    name: "NORMAL"
+                    name: Enums.ConnectButtonState.Enabled
                     PropertyChanges {
                         target: connectBtn
                         enabled: true
                     }
                 },
                 State {
-                    name: "DISABLED"
+                    name: Enums.ConnectButtonState.Disabled
                     PropertyChanges {
                         target: connectBtn
                         enabled: false
@@ -229,7 +275,7 @@ ColumnLayout {
                 }
             ]
             onClicked: () => {
-                connectBtn.state = "DISABLED";
+                connectBtn.state = Enums.ConnectButtonState.Disabled;
                 selectionPage.driveController.connect();
             }
         }

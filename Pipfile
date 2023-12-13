@@ -5,7 +5,8 @@ name = "pypi"
 
 [packages]
 pyside6 = "==6.6.0"
-ingeniamotion = "==0.6.3"
+ingenialink = {ref = "develop", git = "https://github.com/ingeniamc/ingenialink-python.git"}
+ingeniamotion = {ref = "develop", git = "https://github.com/ingeniamc/ingeniamotion.git"}
 ingenialogger = "==0.3.0"
 
 [dev-packages]
