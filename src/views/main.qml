@@ -7,7 +7,7 @@ import "components" as Components
 
 ApplicationWindow {
     id: page
-    title: qsTr("K2 Base Camp")
+    title: qsTr("Ingeniajumpstart")
     width: 800
     height: 600
     visible: true

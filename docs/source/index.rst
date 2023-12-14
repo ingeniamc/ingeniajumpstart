@@ -1,9 +1,9 @@
-.. k2-base-camp documentation master file, created by
+.. ingeniajumpstart documentation master file, created by
    sphinx-quickstart on Thu Oct 26 12:45:34 2023.
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to K2 Base Camp's documentation!
+Welcome to ingeniajumpstart's documentation!
 ============================================
 
 .. toctree::
