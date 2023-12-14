@@ -1,13 +1,14 @@
 import time
 from queue import Queue
 
-from ingenialink.exceptions import (
-    ILError,
-)
+import ingenialogger
+from ingenialink.exceptions import ILError, ILIOError
 from ingeniamotion.exceptions import IMException
 from PySide6.QtCore import QThread, Signal
 
 from .types import motion_controller_task, thread_report
+
+logger = ingenialogger.get_logger(__name__)
 
 
 class MotionControllerThread(QThread):
@@ -85,5 +86,9 @@ class MotionControllerThread(QThread):
             if raised_exception is None:
                 self.task_completed.emit(task.callback, report)
             else:
-                self.task_errored.emit(str(report.exceptions))
+                logger.error(report)
+                # We only log ILIOErrors, because they are not important enough to
+                # warrant displaying a error dialog.
+                if not isinstance(raised_exception, ILIOError):
+                    self.task_errored.emit(str(report.exceptions))
             self.queue.task_done()
