@@ -13,6 +13,9 @@ Welcome to K2 Base Camp's documentation!
    what_is_k2_base_camp
    quickstart
    modules
+   code_overview
+   development
+   examples
 
 
 Indices and tables
