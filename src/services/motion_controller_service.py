@@ -345,3 +345,4 @@ class MotionControllerService(QObject):
 
     def stop_motion_controller_thread(self) -> None:
         self.__motion_controller_thread.stop()
+        self.__motion_controller_thread.wait()

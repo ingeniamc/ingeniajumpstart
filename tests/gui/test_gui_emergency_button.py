@@ -22,7 +22,7 @@ def test_emergency_button(qtbot: QtBot, mocker: MockerFixture) -> None:
 
     drive_controller = DriveController()
 
-    spy = mocker.spy(DriveController, "log_report")
+    spy = mocker.spy(DriveController, "emergency_stop")
 
     engine.setInitialProperties({"driveController": drive_controller})
     engine.load(qml_file)
