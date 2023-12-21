@@ -16,8 +16,8 @@ def test_emergency_button(qtbot: QtBot, mocker: MockerFixture) -> None:
     emitted.
 
     Args:
-        qtbot (QtBot): see https://pytest-qt.readthedocs.io/en/latest/reference.html
-        mocker (MockerFixture): Used to spy on a signal
+        qtbot: see https://pytest-qt.readthedocs.io/en/latest/reference.html
+        mocker: Used to spy on a signal
     """
     ingenialogger.configure_logger(level=ingenialogger.LoggingLevel.DEBUG)
 

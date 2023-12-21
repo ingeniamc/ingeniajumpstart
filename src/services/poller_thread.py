@@ -26,12 +26,12 @@ class PollerThread(QThread):
         """Constructor of the PollerThread.
 
         Args:
-            mc (ingeniamotion.MotionController): MotionController instance.
-            drive (str): drive alias.
-            registers (list[dict[str, Union[int, str]]]): Register to be read.
-            sampling_time (float, optional): Sampling time. Defaults to 0.125.
-            refresh_time (float, optional): Refresh time. Defaults to 0.125.
-            buffer_size (int, optional): Buffer size. Defaults to 100.
+            mc: MotionController instance.
+            drive: drive alias.
+            registers: Register to be read.
+            sampling_time: Sampling time. Defaults to 0.125.
+            refresh_time: Refresh time. Defaults to 0.125.
+            buffer_size: Buffer size. Defaults to 100.
         """
         super().__init__()
         self.__mc = mc

@@ -37,7 +37,7 @@ def stringify_can_device_enum(device: CanDevice) -> CAN_DEVICE:
     needs.
 
     Args:
-        device (CanDevice): the int enum to convert
+        device: the int enum to convert
 
     Returns:
         CAN_DEVICE: the converted string enum

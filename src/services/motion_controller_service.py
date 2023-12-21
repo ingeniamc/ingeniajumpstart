@@ -124,9 +124,9 @@ class MotionControllerService(QObject):
         """Connect drives to the program.
 
         Args:
-            report_callback (Callable[[thread_report], Any]): callback to invoke after
+            report_callback: callback to invoke after
                 completing the operation.
-            drive_model (DriveModel): model containing the application state.
+            drive_model: model containing the application state.
 
         Raises:
             ingenialink.exceptions.ILError: If the connection fails
@@ -187,9 +187,9 @@ class MotionControllerService(QObject):
         """Scan for servos in the network.
 
         Args:
-            report_callback (Callable[[thread_report], Any]): callback to invoke after
+            report_callback: callback to invoke after
                 completing the operation.
-            drive_model (DriveModel): Contains information about the connection
+            drive_model: Contains information about the connection
 
         Raises:
             ingenialink.exceptions.ILError: If we find less than 2 servos in the network
@@ -232,7 +232,7 @@ class MotionControllerService(QObject):
         """Disconnect the drives if they are connected.
 
         Args:
-            report_callback (Callable[[thread_report], Any]): callback to invoke after
+            report_callback: callback to invoke after
                 completing the operation.
         """
 
@@ -255,7 +255,7 @@ class MotionControllerService(QObject):
         """Disable the motors of the drives that are connected.
 
         Args:
-            report_callback (Callable[[thread_report], Any]): callback to invoke after
+            report_callback: callback to invoke after
                 completing the operation.
         """
 
@@ -274,8 +274,8 @@ class MotionControllerService(QObject):
         MotionControllerThread sends the task_completed signal.
 
         Args:
-            callback (Callable[..., Any]): the callback to execute
-            thread_report (thread_report): the thread_report that serves as parameter to
+            callback: the callback to execute
+            thread_report: the thread_report that serves as parameter to
                 the callback function.
         """
         callback(thread_report)
@@ -291,11 +291,11 @@ class MotionControllerService(QObject):
         """Create an instance of the PollerThread.
 
         Args:
-            alias (str):  Drive alias.
-            registers (list[dict[str, Union[int, str]]]): Register to be read.
-            sampling_time (float, optional): Poller sampling time. Defaults to 0.125.
-            refresh_time (float, optional): Poller refresh period. Defaults to 0.125.
-            buffer_size (int, optional): Poller buffer size. Defaults to 100.
+            alias:  Drive alias.
+            registers: Register to be read.
+            sampling_time: Poller sampling time. Defaults to 0.125.
+            refresh_time: Poller refresh period. Defaults to 0.125.
+            buffer_size: Poller buffer size. Defaults to 100.
 
         Returns:
             PollerThread: the newly created PollerThread
@@ -320,7 +320,7 @@ class MotionControllerService(QObject):
         ETHERcat connections.
 
         Args:
-            filepath (str): path to the file to check
+            filepath: path to the file to check
 
         Raises:
             ingenialink.exceptions.ILError: If the provided file has the wrong format
@@ -354,9 +354,9 @@ class MotionControllerService(QObject):
         """Enables the motor of a given drive
 
         Args:
-            report_callback (Callable[[thread_report], Any]): callback to invoke after
+            report_callback: callback to invoke after
                 completing the operation.
-            drive (utils.enum.Drive): the drive to enable
+            drive: the drive to enable
         """
 
         def on_thread(drive: Drive) -> Any:

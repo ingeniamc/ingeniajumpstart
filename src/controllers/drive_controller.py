@@ -106,7 +106,7 @@ class DriveController(QObject):
         """Enable the motor of a given drive using the MotionControllerService.
 
         Args:
-            drive (int): the drive to enable
+            drive: the drive to enable
         """
         target = Drive(drive)
         if target == Drive.Left:
@@ -119,7 +119,7 @@ class DriveController(QObject):
         """Enable the motor of a given drive using the MotionControllerService.
 
         Args:
-            drive (int): the drive to disable
+            drive: the drive to disable
         """
         if drive == Drive.Left.value:
             self.mcs.run(
@@ -142,8 +142,8 @@ class DriveController(QObject):
         data prepared in a format that the UI can handle.
 
         Args:
-            timestamps (list[float]): contains the timestamp of the new data point.
-            data (list[list[float]]): contains the value of the new data point.
+            timestamps: contains the timestamp of the new data point.
+            data: contains the value of the new data point.
         """
         self.velocity_right_changed.emit(timestamps[0], data[0][0])
 
@@ -155,8 +155,8 @@ class DriveController(QObject):
         data prepared in a format that the UI can handle.
 
         Args:
-            timestamps (list[float]): contains the timestamp of the new data point.
-            data (list[list[float]]): contains the value of the new data point.
+            timestamps: contains the timestamp of the new data point.
+            data: contains the value of the new data point.
         """
         self.velocity_left_changed.emit(timestamps[0], data[0][0])
 
@@ -182,8 +182,8 @@ class DriveController(QObject):
         """Set the target velocity of a given drive using the MotionControllerService.
 
         Args:
-            velocity (float): the velocity
-            drive (int): the drive
+            velocity: the velocity
+            drive: the drive
         """
         self.mcs.run(
             self.log_report,
@@ -198,8 +198,8 @@ class DriveController(QObject):
         velocity - of a given drive using the MotionControllerService.
 
         Args:
-            max_velocity (float): the value to set the register to
-            drive (int): the drive
+            max_velocity: the value to set the register to
+            drive: the drive
         """
         self.mcs.run(
             self.log_report,
@@ -217,7 +217,7 @@ class DriveController(QObject):
         corresponding property in the DriveModel.
 
         Args:
-            dictionary (str): the url of the dictionary file
+            dictionary: the url of the dictionary file
         """
         self.drive_model.dictionary = dictionary.removeprefix("file:///")
         self.drive_model.dictionary_type = self.mcs.check_dictionary_format(
@@ -232,7 +232,7 @@ class DriveController(QObject):
         selected in the UI.
 
         Args:
-            connection (int): the selected connection
+            connection: the selected connection
         """
         self.drive_model.connection = ConnectionProtocol(connection)
         self.update_connect_button_state()
@@ -243,7 +243,7 @@ class DriveController(QObject):
         selected in the UI.
 
         Args:
-            interface (int): the selected interface
+            interface: the selected interface
         """
         self.drive_model.interface_index = interface
         self.update_connect_button_state()
@@ -254,7 +254,7 @@ class DriveController(QObject):
         selected in the UI.
 
         Args:
-            can_device (int): the selected can device
+            can_device: the selected can device
         """
         self.drive_model.can_device = CanDevice(can_device)
         self.update_connect_button_state()
@@ -265,7 +265,7 @@ class DriveController(QObject):
         was selected in the UI.
 
         Args:
-            can_baudrate (int): the selected can baudrate
+            can_baudrate: the selected can baudrate
         """
         self.drive_model.can_baudrate = CAN_BAUDRATE(baudrate)
         self.update_connect_button_state()
@@ -276,8 +276,8 @@ class DriveController(QObject):
         that was selected in the UI (which property is set depends on the drive).
 
         Args:
-            node_id (int): the selected node / slave ID
-            drive (int): the drive the ID belongs to
+            node_id: the selected node / slave ID
+            drive: the drive the ID belongs to
         """
         if drive == Drive.Left.value:
             self.drive_model.left_id = node_id
@@ -294,7 +294,7 @@ class DriveController(QObject):
         """Callback after the drives where connected. Emits a signal to the UI.
 
         Args:
-            thread_report (thread_report): the result of the operation that triggered
+            thread_report: the result of the operation that triggered
                 the callback
         """
         self.drive_connected_triggered.emit()
@@ -303,7 +303,7 @@ class DriveController(QObject):
         """Callback after the drives where disconnected. Emits a signal to the UI.
 
         Args:
-            thread_report (thread_report): the result of the operation that triggered
+            thread_report: the result of the operation that triggered
                 the callback
         """
 
@@ -318,7 +318,7 @@ class DriveController(QObject):
         function that handles the communication with the UI.
 
         Args:
-            thread_report (thread_report): the result of the operation that triggered
+            thread_report: the result of the operation that triggered
                 the callback
         """
         poller_thread = self.mcs.create_poller_thread(
@@ -336,7 +336,7 @@ class DriveController(QObject):
         Emits a signal to the UI.
 
         Args:
-            thread_report (thread_report): the result of the operation that triggered
+            thread_report: the result of the operation that triggered
                 the callback
         """
         poller_thread = self.mcs.create_poller_thread(
@@ -352,7 +352,7 @@ class DriveController(QObject):
         Stops the corresponding poller thread.
 
         Args:
-            thread_report (thread_report): the result of the operation that triggered
+            thread_report: the result of the operation that triggered
                 the callback
         """
         self.mcs.stop_poller_thread(Drive.Left.name)
@@ -362,7 +362,7 @@ class DriveController(QObject):
         Stops the corresponding poller thread.
 
         Args:
-            thread_report (thread_report): the result of the operation that triggered
+            thread_report: the result of the operation that triggered
                 the callback
         """
         self.mcs.stop_poller_thread(Drive.Right.name)
@@ -372,7 +372,7 @@ class DriveController(QObject):
         updates the DriveModel state and emits a signal to the UI.
 
         Args:
-            thread_report (thread_report): the result of the operation that triggered
+            thread_report: the result of the operation that triggered
                 the callback
         """
         if thread_report.output is not None:
@@ -387,7 +387,7 @@ class DriveController(QObject):
         Emits a signal to the UI that contains the error message.
 
         Args:
-            error_message (str): _description_
+            error_message: _description_
         """
         self.error_triggered.emit(error_message)
         self.update_connect_button_state()
@@ -396,7 +396,7 @@ class DriveController(QObject):
         """Generic callback that simply logs the result of the operation.
 
         Args:
-            report (thread_report): the result of the operation that triggered
+            report: the result of the operation that triggered
                 the callback
         """
         logger.debug(report)

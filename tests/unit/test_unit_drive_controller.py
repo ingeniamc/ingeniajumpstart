@@ -11,7 +11,7 @@ def test_select(drive_controller: DriveController) -> None:
     making all the selections.
 
     Args:
-        drive_controller (DriveController): the DriveController
+        drive_controller: the DriveController
     """
     connect_button_spy = QSignalSpy(drive_controller.connect_button_state_changed)
     connection = ConnectionProtocol.CANopen
