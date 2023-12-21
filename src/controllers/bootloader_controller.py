@@ -97,8 +97,8 @@ class BootloaderController(QObject):
         file that was uploaded in the UI.
 
         Args:
-            firmware (str): the url of the firmware file.
-            drive (int): the drive the file belongs to.
+            firmware: the url of the firmware file.
+            drive: the drive the file belongs to.
         """
         firmware_path = firmware.removeprefix("file:///")
         if drive == Drive.Left.value:
@@ -115,7 +115,7 @@ class BootloaderController(QObject):
         drive.
 
         Args:
-            drive (int): the drive.
+            drive: the drive.
         """
         if drive == Drive.Left.value:
             self.drive_model.left_firmware = None
@@ -144,7 +144,7 @@ class BootloaderController(QObject):
         be consumed in the UI.
 
         Args:
-            progress (int): the progress of the installation, as a percentage.
+            progress: the progress of the installation, as a percentage.
         """
         self.firmware_installation_progress_changed.emit(progress)
 
@@ -154,7 +154,7 @@ class BootloaderController(QObject):
         selected in the UI.
 
         Args:
-            connection (int): the selected connection.
+            connection: the selected connection.
         """
         self.drive_model.connection = ConnectionProtocol(connection)
         self.update_install_button_state()
@@ -165,7 +165,7 @@ class BootloaderController(QObject):
         selected in the UI.
 
         Args:
-            interface (int): the selected interface.
+            interface: the selected interface.
         """
         self.drive_model.interface_index = interface
         self.update_install_button_state()
@@ -176,7 +176,7 @@ class BootloaderController(QObject):
         selected in the UI.
 
         Args:
-            can_device (int): the selected can device.
+            can_device: the selected can device.
         """
         self.drive_model.can_device = CanDevice(can_device)
         self.update_install_button_state()
@@ -187,7 +187,7 @@ class BootloaderController(QObject):
         was selected in the UI.
 
         Args:
-            can_baudrate (int): the selected can baudrate.
+            can_baudrate: the selected can baudrate.
         """
         self.drive_model.can_baudrate = CAN_BAUDRATE(baudrate)
         self.update_install_button_state()
@@ -198,8 +198,8 @@ class BootloaderController(QObject):
         that was selected in the UI (which property is set depends on the drive).
 
         Args:
-            node_id (int): the selected node / slave ID.
-            drive (int): the drive the ID belongs to.
+            node_id: the selected node / slave ID.
+            drive: the drive the ID belongs to.
         """
         if drive == Drive.Left.value:
             self.drive_model.left_id = node_id
@@ -212,7 +212,7 @@ class BootloaderController(QObject):
         updates the DriveModel state and emits a signal to the UI.
 
         Args:
-            thread_report (thread_report): the result of the operation that triggered
+            thread_report: the result of the operation that triggered
                 the callback.
         """
         if thread_report.output is not None:
@@ -228,7 +228,7 @@ class BootloaderController(QObject):
         Emits a signal to the UI that contains the error message.
 
         Args:
-            error_message (str): the error message.
+            error_message: the error message.
         """
         self.error_triggered.emit(error_message)
 
@@ -236,7 +236,7 @@ class BootloaderController(QObject):
         """Callback when firmware was installed successfully to one or more drives.
 
         Args:
-            thread_report (thread_report): the result of the operation that triggered
+            thread_report: the result of the operation that triggered
                 the callback.
         """
         self.firmware_installation_complete_triggered.emit()
