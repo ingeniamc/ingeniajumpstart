@@ -428,7 +428,6 @@ class MotionControllerService(QObject):
                     )
                     self.__mc.communication.disconnect(servo=drive)
                 elif drive_model.connection == ConnectionProtocol.EtherCAT:
-                    print(firmware)
                     self.__mc.communication.load_firmware_ecat_interface_index(
                         fw_file=firmware,
                         if_index=drive_model.interface_index,

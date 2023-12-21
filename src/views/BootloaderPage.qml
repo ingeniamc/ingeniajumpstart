@@ -23,9 +23,11 @@ ColumnLayout {
             if (drive === Enums.Drive.Left) {
                 firmwareFileLeft.text = firmware;
                 resetFirmwareLeft.visible = true;
+                firmwareButtonLeft.enabled = false;
             } else {
                 firmwareFileRight.text = firmware;
                 resetFirmwareRight.visible = true;
+                firmwareButtonRight.enabled = false;
             }
         }
         function onInstall_button_state_changed(new_state) {
@@ -171,6 +173,12 @@ ColumnLayout {
             idRightAutomatic.model = [];
             idLeftAutomatic.enabled = false;
             idRightAutomatic.enabled = false;
+            bootloaderPage.bootloaderController.reset_firmware(Enums.Drive.Left);
+            resetFirmwareLeft.visible = false;
+            firmwareButtonLeft.enabled = true;
+            bootloaderPage.bootloaderController.reset_firmware(Enums.Drive.Right);
+            resetFirmwareRight.visible = false;
+            firmwareButtonRight.enabled = true;
         }
     }
 
@@ -380,6 +388,7 @@ ColumnLayout {
             Layout.fillWidth: true
             Layout.preferredWidth: 2
             Components.Button {
+                id: firmwareButtonLeft
                 text: "Choose firmware left..."
                 onClicked: firmwarefileLeftDialog.open()
             }
@@ -396,6 +405,7 @@ ColumnLayout {
                     onClicked: () => {
                         bootloaderPage.bootloaderController.reset_firmware(Enums.Drive.Left);
                         resetFirmwareLeft.visible = false;
+                        firmwareButtonLeft.enabled = true;
                     }
                 }
             }
@@ -406,6 +416,7 @@ ColumnLayout {
             Layout.fillWidth: true
             Layout.preferredWidth: 2
             Components.Button {
+                id: firmwareButtonRight
                 text: "Choose firmware right..."
                 onClicked: firmwarefileRightDialog.open()
             }
@@ -422,6 +433,7 @@ ColumnLayout {
                     onClicked: () => {
                         bootloaderPage.bootloaderController.reset_firmware(Enums.Drive.Right);
                         resetFirmwareRight.visible = false;
+                        firmwareButtonRight.enabled = true;
                     }
                 }
             }
