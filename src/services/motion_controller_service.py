@@ -5,11 +5,11 @@ from typing import Any, Callable, Union
 from ingenialink.exceptions import ILError
 from ingeniamotion import MotionController
 from ingeniamotion.enums import OperationMode
-from PySide6.QtCore import QObject, Signal, Slot
-
 from models.drive_model import DriveModel
+from PySide6.QtCore import QObject, Signal, Slot
 from utils.enums import ConnectionProtocol, Drive, stringify_can_device_enum
 from utils.types import motion_controller_task, thread_report
+
 from services.motion_controller_thread import MotionControllerThread
 from services.poller_thread import PollerThread
 
