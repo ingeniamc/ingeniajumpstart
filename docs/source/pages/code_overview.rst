@@ -17,7 +17,7 @@ Here's a list of the most important libraries and frameworks we are using:
 * `PySide6 <https://doc.qt.io/qtforpython-6/>`_ - main graphics framework
 * `QML <https://doc.qt.io/qt-6/qmlapplications.html>`_ - declarative language for creating interfaces
 * `javascript <https://en.wikipedia.org/wiki/JavaScript>`_ - small parts of the logic in the QML code is written in this language
-* `ingenialink <https://distext.ingeniamc.com/doc/ingenialink-python/latest/>`_ - communication library for Ingenia servo drives 
+* `ingeniamotion <https://distext.ingeniamc.com/doc/ingeniamotion/0.7.0/>`_ - communication library for Ingenia servo drives 
 * `pytest <https://docs.pytest.org/en/7.4.x/>`_ - testing library 
 * `sphinx <https://www.sphinx-doc.org/en/master/>`_ - facilitates creating documentation 
 * `mypy <https://mypy.readthedocs.io/en/stable/index.html>`_ (typing), `black <https://black.readthedocs.io/en/stable/>`_ (formatting), `ruff <https://docs.astral.sh/ruff/>`_ (linting) - improve code quality
@@ -27,7 +27,6 @@ Project folder structure
 ========================
 
 | root
-| ├── .vscode *(editor-specific configuration)*
 | ├── assets *(static files such as images)*
 | ├── docs *(this documentation)*
 | ├── src

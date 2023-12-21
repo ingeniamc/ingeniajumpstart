@@ -9,7 +9,7 @@ Installing for the development environment is much like outlined in :ref:`quicks
 
 The only difference is that we need to include the ``-d`` flag when installing the dependencies::
 
-    pipenv install --ignore-pipfile
+    pipenv install -d --ignore-pipfile
 
 .. WARNING::
     Unless otherwise specified, all commands should be run inside the virtual environment. If you get errors about missing packages, it's likely you forgot to do so or are using the wrong environment.
