@@ -1,5 +1,6 @@
 import time
 from queue import Queue
+from typing import Union
 
 import ingenialogger
 from ingenialink.exceptions import ILError, ILIOError
@@ -32,7 +33,7 @@ class MotionControllerThread(QThread):
     """Signal emitted when a task is completed.
     A report [thread_report] is returned by the thread"""
 
-    queue: Queue[motion_controller_task]
+    queue: Queue[Union[motion_controller_task, None]]
     """Task queue - the thread will work until the queue is empty and then
     wait for new tasks.
     """
@@ -60,6 +61,8 @@ class MotionControllerThread(QThread):
         self.__running = True
         while self.__running:
             task = self.queue.get()
+            if task is None:
+                break
             timestamp = time.time()
             raised_exception = None
             output = None
@@ -91,3 +94,7 @@ class MotionControllerThread(QThread):
                 if not isinstance(raised_exception, ILIOError):
                     self.task_errored.emit(str(report.exceptions))
             self.queue.task_done()
+
+    def stop(self) -> None:
+        self.__running = False
+        self.queue.put(item=None)

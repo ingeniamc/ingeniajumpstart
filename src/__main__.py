@@ -19,9 +19,13 @@ if __name__ == "__main__":
 
     # Create the application.
     app = QApplication(sys.argv)
-
-    # Set the favicon.
-    app.setWindowIcon(QIcon("assets/novantaMotionFavicon.png"))
+    app.setWindowIcon(
+        QIcon(
+            os.fspath(
+                Path(__file__).resolve().parent / "assets/novantaMotionFavicon.png"
+            )
+        )
+    )
 
     # Insert QML Quick view into the application.
     view = QQuickView()
@@ -37,4 +41,6 @@ if __name__ == "__main__":
         sys.exit(-1)
 
     # Start the application.
-    sys.exit(app.exec())
+    ret = app.exec()
+    drive_controller.mcs.stop_motion_controller_thread()
+    sys.exit(ret)
