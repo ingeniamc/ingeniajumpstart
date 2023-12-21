@@ -12,16 +12,13 @@ ApplicationWindow {
     height: 600
     visible: true
     required property DriveController driveController
+    required property BootloaderController bootloaderController
 
     Connections {
         // Receive signals coming from the controllers.
         target: page.driveController
         function onDrive_connected_triggered() {
-            if (stack.depth <= 1)
-                stack.push(controlsPage);
-        }
-        function onDrive_disconnected_triggered() {
-            stack.pop();
+            stack.push(controlsPage);
         }
         function onError_triggered(error_message) {
             errorMessageDialogLabel.text = error_message;
@@ -57,9 +54,29 @@ ApplicationWindow {
         RowLayout {
             anchors.fill: parent
             ToolButton {
+                id: disconnectButton
+                text: qsTr("< Disconnect")
+                visible: stack.depth == 3
+                contentItem: Text {
+                    text: disconnectButton.text
+                    font: disconnectButton.font
+                    opacity: enabled ? 1.0 : 0.3
+                    color: disconnectButton.down ? "#009688" : "#e0e0e0"
+                    horizontalAlignment: Text.AlignHCenter
+                    verticalAlignment: Text.AlignVCenter
+                    elide: Text.ElideRight
+                }
+                onClicked: () => {
+                    page.driveController.disconnect()
+                    stack.pop()
+                }
+                Layout.preferredWidth: 3
+                Layout.fillWidth: true
+            }
+            ToolButton {
                 id: backButton
-                enabled: stack.depth > 1
-                text: qsTr("‹")
+                text: qsTr("< Bootloader")
+                visible: stack.depth == 2
                 contentItem: Text {
                     text: backButton.text
                     font: backButton.font
@@ -69,17 +86,59 @@ ApplicationWindow {
                     verticalAlignment: Text.AlignVCenter
                     elide: Text.ElideRight
                 }
-                onClicked: () => page.driveController.disconnect()
-                Layout.preferredWidth: 1
+                onClicked: () => {
+                    stack.pop()
+                }
+                Layout.preferredWidth: 3
+                Layout.fillWidth: true
+            }
+            ToolButton {
+                id: forwardButton
+                text: qsTr("Connect >")
+                visible: stack.depth == 1
+                contentItem: Text {
+                    text: forwardButton.text
+                    font: forwardButton.font
+                    opacity: enabled ? 1.0 : 0.3
+                    color: forwardButton.down ? "#009688" : "#e0e0e0"
+                    horizontalAlignment: Text.AlignHCenter
+                    verticalAlignment: Text.AlignVCenter
+                    elide: Text.ElideRight
+                }
+                onClicked: () => {
+                    stack.push(selectionPage)
+                }
+                Layout.preferredWidth: 3
                 Layout.fillWidth: true
             }
             Item {
                 Layout.fillWidth: true
-                Layout.preferredWidth: 8
+                Layout.preferredWidth: 6
             }
 
             Label {
-                text: stack.depth > 1 ? "Controls" : "Connection"
+                text: "Bootloader"
+                visible: stack.depth == 1
+                elide: Label.ElideRight
+                horizontalAlignment: Qt.AlignHCenter
+                verticalAlignment: Qt.AlignVCenter
+                Layout.fillWidth: true
+                Layout.preferredWidth: 4
+                color: "#e0e0e0"
+            }
+            Label {
+                text: "Connection"
+                visible: stack.depth == 2
+                elide: Label.ElideRight
+                horizontalAlignment: Qt.AlignHCenter
+                verticalAlignment: Qt.AlignVCenter
+                Layout.fillWidth: true
+                Layout.preferredWidth: 4
+                color: "#e0e0e0"
+            }
+            Label {
+                text: "Controls"
+                visible: stack.depth == 3
                 elide: Label.ElideRight
                 horizontalAlignment: Qt.AlignHCenter
                 verticalAlignment: Qt.AlignVCenter
@@ -109,20 +168,31 @@ ApplicationWindow {
     StackView {
         // Handles multiple pages layout.
         id: stack
-        initialItem: selectionPage
         anchors.fill: parent
         focus: true
+        Component.onCompleted: {
+            stack.push(bootloaderPage)
+            stack.push(selectionPage)
+        }
     }
 
+    BootloaderPage {
+        // The first page is an interface to install firware files to the drives.
+        id: bootloaderPage
+        visible: false
+        bootloaderController: page.bootloaderController
+    }
+
+
     SelectionPage {
-        // The first page is an interface to establish the connection with the drive.
+        // The main page is an interface to establish the connection with the drives.
         id: selectionPage
         visible: false
         driveController: page.driveController
     }
 
     ControlsPage {
-        // The second page is an interface that allows manipulating the velocity of the connected motors.
+        // The last page is an interface that allows manipulating the velocity of the connected motors.
         id: controlsPage
         visible: false
         driveController: page.driveController

@@ -2,6 +2,7 @@ from typing import Generator
 
 import pytest
 from controllers.drive_controller import DriveController
+from services.motion_controller_service import MotionControllerService
 
 
 @pytest.fixture
@@ -11,6 +12,7 @@ def drive_controller() -> Generator[DriveController, None, None]:
     Returns:
         DriveController: the DriveController
     """
-    drive_controller = DriveController()
+    mcs = MotionControllerService()
+    drive_controller = DriveController(mcs)
     yield drive_controller
     drive_controller.mcs.stop_motion_controller_thread()

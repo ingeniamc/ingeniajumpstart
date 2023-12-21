@@ -14,16 +14,22 @@ import QtQuick.Dialogs
 // qmllint disable missing-property
 
 ColumnLayout {
-    id: selectionPage
-    required property DriveController driveController
+    id: bootloaderPage
+    required property BootloaderController bootloaderController
 
     Connections {
-        target: selectionPage.driveController
-        function onDictionary_changed(dictionary) {
-            dictionaryFile.text = dictionary;
+        target: bootloaderPage.bootloaderController
+        function onFirmware_changed(firmware, drive) {
+            if (drive === Enums.Drive.Left) {
+                firmwareFileLeft.text = firmware;
+                resetFirmwareLeft.visible = true;
+            } else {
+                firmwareFileRight.text = firmware;
+                resetFirmwareRight.visible = true;
+            }
         }
-        function onConnect_button_state_changed(new_state) {
-            connectBtn.state = new_state;
+        function onInstall_button_state_changed(new_state) {
+            installBtn.state = new_state;
         }
         function onServo_ids_changed(servo_ids) {
             const servo_ids_model = servo_ids.map((servo_id) => { return {
@@ -31,23 +37,119 @@ ColumnLayout {
                 text: servo_id
             }});
             idLeftAutomatic.model = servo_ids_model;
-            idRightAutomatic.model = servo_ids_model;
-            idRightAutomatic.incrementCurrentIndex();
             idLeftAutomatic.enabled = true;
-            idRightAutomatic.enabled = true;
+            // Handle if the scan returned only one servo
+            if (servo_ids_model.length > 1) {
+                idRightAutomatic.model = servo_ids_model;
+                idRightAutomatic.incrementCurrentIndex();
+                idRightAutomatic.enabled = true;
+            } else {
+                idRightAutomatic.enabled = false;
+            }
             idsAutomatic.visible = true;
+        }
+        function onFirmware_installation_progress_changed(progress) {
+            progressDialogBar.value = progress;
+            progressDialogBar.indeterminate = progress < 100 ? false : true;
+        }
+        function onFirmware_installation_complete_triggered() {
+            progressDialogBar.indeterminate = true;
+            progressDialogButtons.visible = true
+            progressDialogBar.visible = false
+            isInProgress.visible = false
+            progressDialog.close();
+        }
+        function onError_triggered(error_message) {
+            progressDialogBar.indeterminate = true;
+            progressDialogButtons.visible = true
+            progressDialogBar.visible = false
+            isInProgress.visible = false
+            progressDialog.close();
+        }
+    }
+
+    Dialog {
+        // Dialog to confirm the installation of firmware. 
+        // Will block the application during installation and show a progress bar.
+        // Closes and resets on error or completion.
+        id: progressDialog
+        modal: true
+        closePolicy: Popup.NoAutoClose
+        title: qsTr("Installing firmware..")
+        x: (parent.width - width) / 2
+        y: (parent.height - height) / 2
+        
+        ColumnLayout {
+            anchors.fill: parent
+            Label {
+                text: "Installation can take several minutes."
+                Layout.fillHeight: true
+            }
+            Label {
+                text: "Please do not disconnect the drive while the process is in progress!"
+                Layout.fillHeight: true
+            }
+            Label {
+                id: isInProgress
+                visible: false
+                text: "Installation in progress.."
+                Layout.fillHeight: true
+            }
+            Components.SpacerH {}
+            ProgressBar {
+                id: progressDialogBar
+                visible: false
+                from: 0
+                to: 100
+                value: 0
+                indeterminate: true
+                Layout.fillHeight: true
+                Layout.fillWidth: true
+            }
+        }
+
+        footer: DialogButtonBox {
+            id: progressDialogButtons
+            Button {
+                text: qsTr("Cancel")
+                DialogButtonBox.buttonRole: DialogButtonBox.RejectRole
+            }
+            Button {
+                text: qsTr("Install")
+                DialogButtonBox.buttonRole: DialogButtonBox.ApplyRole
+            }
+            
+            onApplied: () => {
+                bootloaderPage.bootloaderController.install_firmware();
+                progressDialogButtons.visible = false
+                progressDialogBar.visible = true
+                isInProgress.visible = true
+            }
+        }
+    }
+
+
+    FileDialog {
+        // Input for firmware file (left drive).
+        id: firmwarefileLeftDialog
+        title: "Please choose a file"
+        defaultSuffix: "lfu"
+        fileMode: FileDialog.OpenFile
+        nameFilters: ["LFU Files (*.lfu)", "SFU Files (*.sfu)"]
+        onAccepted: {
+            bootloaderPage.bootloaderController.select_firmware(selectedFile, Enums.Drive.Left);
         }
     }
 
     FileDialog {
-        // Input for dictionary file.
-        id: fileDialog
+        // Input for firmware file (right drive).
+        id: firmwarefileRightDialog
         title: "Please choose a file"
-        defaultSuffix: "xdf"
+        defaultSuffix: "lfu"
         fileMode: FileDialog.OpenFile
-        nameFilters: ["Dictionary files (*.xdf)"]
+        nameFilters: ["LFU Files (*.lfu)", "SFU Files (*.sfu)"]
         onAccepted: {
-            selectionPage.driveController.select_dictionary(selectedFile);
+            bootloaderPage.bootloaderController.select_firmware(selectedFile, Enums.Drive.Right);
         }
     }
 
@@ -61,7 +163,7 @@ ColumnLayout {
                 text: "EtherCAT"
             }]
         activatedHandler: currentValue => {
-            selectionPage.driveController.select_connection(currentValue);
+            bootloaderPage.bootloaderController.select_connection(currentValue);
             selectCANdevice.visible = currentValue == Enums.ConnectionProtocol.CANopen;
             selectBaudrate.visible = currentValue == Enums.ConnectionProtocol.CANopen;
             selectNetworkAdapter.visible = currentValue == Enums.ConnectionProtocol.EtherCAT;
@@ -78,7 +180,7 @@ ColumnLayout {
         model: []
         visible: false
         Component.onCompleted: () => {
-            const interface_name_list = selectionPage.driveController.get_interface_name_list();
+            const interface_name_list = bootloaderPage.bootloaderController.get_interface_name_list();
             selectNetworkAdapter.model = interface_name_list.map((interface_name, index) => {
                     return {
                         value: index,
@@ -86,7 +188,7 @@ ColumnLayout {
                     };
                 });
         }
-        activatedHandler: currentValue => selectionPage.driveController.select_interface(currentValue)
+        activatedHandler: currentValue => bootloaderPage.bootloaderController.select_interface(currentValue)
     }
 
     Components.Selection {
@@ -102,7 +204,7 @@ ColumnLayout {
                 value: Enums.CanDevice.IXXAT,
                 text: "IXXAT"
             }]
-        activatedHandler: currentValue => selectionPage.driveController.select_can_device(currentValue)
+        activatedHandler: currentValue => bootloaderPage.bootloaderController.select_can_device(currentValue)
     }
 
     Components.Selection {
@@ -127,7 +229,7 @@ ColumnLayout {
                 value: Enums.CAN_BAUDRATE.Baudrate_50K,
                 text: "50 Kbit/s"
             }]
-        activatedHandler: currentValue => selectionPage.driveController.select_can_baudrate(currentValue)
+        activatedHandler: currentValue => bootloaderPage.bootloaderController.select_can_baudrate(currentValue)
     }
 
     RowLayout {
@@ -172,7 +274,7 @@ ColumnLayout {
             Material.foreground: '#FFFFFF'
             hoverColor: '#85ceff'
             onClicked: () => {
-                selectionPage.driveController.scan_servos();
+                bootloaderPage.bootloaderController.scan_servos();
             }
         }
         Components.SpacerW {
@@ -198,7 +300,7 @@ ColumnLayout {
             Layout.preferredWidth: 4
             from: 0
             editable: true
-            onValueModified: () => selectionPage.driveController.select_node_id(value, Enums.Drive.Left)
+            onValueModified: () => bootloaderPage.bootloaderController.select_node_id(value, Enums.Drive.Left)
         }
         Components.SpacerW {
         }
@@ -215,7 +317,7 @@ ColumnLayout {
             Layout.preferredWidth: 4
             from: 0
             editable: true
-            onValueModified: () => selectionPage.driveController.select_node_id(value, Enums.Drive.Right)
+            onValueModified: () => bootloaderPage.bootloaderController.select_node_id(value, Enums.Drive.Right)
         }
         Components.SpacerW {
         }
@@ -243,7 +345,7 @@ ColumnLayout {
             Layout.fillWidth: true
             Layout.preferredWidth: 2
             Material.foreground: Material.foreground
-            onActivated: () => selectionPage.driveController.select_node_id(currentValue, Enums.Drive.Left)
+            onActivated: () => bootloaderPage.bootloaderController.select_node_id(currentValue, Enums.Drive.Left)
         }
         Components.SpacerW {
         }
@@ -263,27 +365,65 @@ ColumnLayout {
             Layout.fillWidth: true
             Layout.preferredWidth: 2
             Material.foreground: Material.foreground
-            onActivated: () => selectionPage.driveController.select_node_id(currentValue, Enums.Drive.Right)
+            onActivated: () => bootloaderPage.bootloaderController.select_node_id(currentValue, Enums.Drive.Right)
         }
         Components.SpacerW {
         }
     }
 
     RowLayout {
-        // Button for dictionary file upload & display of currently selected file.
+        // Button for firmware file upload & display of currently selected file,
+        // as well as a button to clear the firmware file.
         Components.SpacerW {
         }
         ColumnLayout {
             Layout.fillWidth: true
             Layout.preferredWidth: 2
             Components.Button {
-                text: "Choose dictionary file..."
-                onClicked: fileDialog.open()
+                text: "Choose firmware left..."
+                onClicked: firmwarefileLeftDialog.open()
             }
-            Text {
-                id: dictionaryFile
-                color: '#e0e0e0'
+            RowLayout {
                 Layout.alignment: Qt.AlignHCenter
+                Text {
+                    id: firmwareFileLeft
+                    color: '#e0e0e0'
+                }
+                RoundButton {
+                    id: resetFirmwareLeft
+                    text: "X"
+                    visible: false
+                    onClicked: () => {
+                        bootloaderPage.bootloaderController.reset_firmware(Enums.Drive.Left);
+                        resetFirmwareLeft.visible = false;
+                    }
+                }
+            }
+        }
+        Components.SpacerW {
+        }
+        ColumnLayout {
+            Layout.fillWidth: true
+            Layout.preferredWidth: 2
+            Components.Button {
+                text: "Choose firmware right..."
+                onClicked: firmwarefileRightDialog.open()
+            }
+            RowLayout {
+                Layout.alignment: Qt.AlignHCenter
+                Text {
+                    id: firmwareFileRight
+                    color: '#e0e0e0'
+                }
+                RoundButton {
+                    id: resetFirmwareRight
+                    text: "X"
+                    visible: false
+                    onClicked: () => {
+                        bootloaderPage.bootloaderController.reset_firmware(Enums.Drive.Right);
+                        resetFirmwareRight.visible = false;
+                    }
+                }
             }
         }
         Components.SpacerW {
@@ -292,11 +432,15 @@ ColumnLayout {
 
 
     RowLayout {
+        // Button to open the installation dialog. 
+        // Only active (clickable) when the pre-requisites for installation are met 
+        // (at least a firmware file was uploaded, configuration for the ConnectionProtocol,
+        // a node was selected for the drive we want to change).
         Components.SpacerW {
         }
         Components.Button {
-            id: connectBtn
-            text: "Connect"
+            id: installBtn
+            text: "Install firmware"
             Material.background: '#2ffcab'
             Material.foreground: '#1b1b1b'
             hoverColor: '#acfedd'
@@ -307,21 +451,20 @@ ColumnLayout {
                 State {
                     name: Enums.ButtonState.Enabled
                     PropertyChanges {
-                        target: connectBtn
+                        target: installBtn
                         enabled: true
                     }
                 },
                 State {
                     name: Enums.ButtonState.Disabled
                     PropertyChanges {
-                        target: connectBtn
+                        target: installBtn
                         enabled: false
                     }
                 }
             ]
             onClicked: () => {
-                connectBtn.state = Enums.ButtonState.Disabled;
-                selectionPage.driveController.connect();
+                progressDialog.open()
             }
         }
         Components.SpacerW {

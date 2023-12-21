@@ -3,12 +3,14 @@ import sys
 from pathlib import Path
 
 import ingenialogger
+from controllers.bootloader_controller import BootloaderController
 from controllers.drive_controller import DriveController
 from PySide6.QtCore import QPointF, Qt
 from PySide6.QtQml import QQmlApplicationEngine
 from PySide6.QtQuick import QQuickItem
 from pytest_mock import MockerFixture
 from pytestqt.qtbot import QtBot
+from services.motion_controller_service import MotionControllerService
 
 
 def test_emergency_button(qtbot: QtBot, mocker: MockerFixture) -> None:
@@ -26,11 +28,18 @@ def test_emergency_button(qtbot: QtBot, mocker: MockerFixture) -> None:
         Path(__file__).resolve().parent.parent.parent / "src/views/main.qml"
     )
 
-    drive_controller = DriveController()
+    mcs = MotionControllerService()
+    drive_controller = DriveController(mcs)
+    bootloaderController = BootloaderController(mcs)
 
     spy = mocker.spy(DriveController, "emergency_stop")
 
-    engine.setInitialProperties({"driveController": drive_controller})
+    engine.setInitialProperties(
+        {
+            "driveController": drive_controller,
+            "bootloaderController": bootloaderController,
+        }
+    )
     engine.load(qml_file)
     if not engine.rootObjects():
         sys.exit(-1)

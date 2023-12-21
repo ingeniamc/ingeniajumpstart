@@ -2,6 +2,7 @@
     "files": [
         "src/__main__.py",
         "src/controllers/drive_controller.py",
+        "src/controllers/bootloader_controller.py",
         "src/models/drive_model.py",
         "src/services/motion_controller_service.py",
         "src/services/motion_controller_thread.py",
@@ -11,6 +12,7 @@
         "src/views/main.qml",
         "src/views/ControlsPage.qml",
         "src/views/SelectionPage.qml",
+        "src/views/BootloaderPage.qml",
         "src/views/components/Button.qml",
         "src/views/components/Selection.qml",
         "src/views/components/SpacerH.qml",

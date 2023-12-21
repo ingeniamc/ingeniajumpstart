@@ -18,7 +18,12 @@ if not qml_files:
     print(f"No .qml files found in {directory}")
     sys.exit(1)
 
+# import QtQuick.Dialogs is cursed, the only way to fix it is disabling this warning
+qml_files.append("--import")
+qml_files.append("disable")
 command += qml_files
+
+print(command)
 
 print(f"Linting {len(qml_files)} QML files in {directory}")
 
