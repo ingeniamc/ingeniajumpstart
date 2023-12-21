@@ -8,9 +8,10 @@ application state and confirm that it has been changed as expected.
 Also confirm that the connect button state has the right state before and after
 making all the selections.
 """
-  
+
+
 def test_select_connection(drive_controller: DriveController) -> None:
-    connection = Connection.CANopen
+    connection = ConnectionProtocol.CANopen
     drive_controller.select_connection(connection.value)
     assert drive_controller.drive_model.connection == connection
 
@@ -65,7 +66,7 @@ def test_select_dictionary(drive_controller: DriveController) -> None:
 
 def test_connect_button(drive_controller: DriveController) -> None:
     connect_button_spy = QSignalSpy(drive_controller.connect_button_state_changed)
-    drive_controller.select_connection(Connection.CANopen.value)
+    drive_controller.select_connection(ConnectionProtocol.CANopen.value)
     drive_controller.select_interface(2)
     drive_controller.select_can_device(CanDevice.KVASER.value)
     drive_controller.select_can_baudrate(CAN_BAUDRATE.Baudrate_1M.value)
