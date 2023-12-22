@@ -1,4 +1,4 @@
-# ingeniajumpstart
+# K2 Base Camp
 Simple open source app to plug &amp; play with your servo drive.
 
 Getting started
@@ -12,7 +12,7 @@ The project requires [python 3.9](https://www.python.org/downloads/release/pytho
 
 1. Clone the repository
 
-    `git clone https://github.com/ingeniamc/ingeniajumpstart.git`
+    `git clone https://github.com/ingeniamc/k2-base-camp.git`
 
 2. Install dependencies
 
