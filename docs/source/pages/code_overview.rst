@@ -72,31 +72,54 @@ To illustrate the flow of the application while it is running, consider the foll
 
 * Selecting a *connection protocol*:
 
-    #. We choose a different *connection protocol* using the dropdown in the GUI.
+    #. We choose a different *connection protocol* using the dropdown in the GUI:
+    
+        .. image:: ../_static/select_connection.png
+            :width: 400
+            :alt: The interface with the dropdown for connections expanded
+
     #. A javascript function handles the event and calls a function in the ``controller`` (this only works if the function is declared as a ``Slot``).
     #. The ``controller`` receives the new value and sets the corresponding property of its ``model``.
 
 * Connecting the drives:
 
-    #. We configured the connection parameters correctly and hit the *Connect* - button.
+    #. We configured the connection parameters correctly and hit the *Connect* - button:
+
+        .. image:: ../_static/connect.png
+            :width: 400
+            :alt: The interface with an active connect button
+        
     #. A javascript function handles the event and calls a function in the ``controller``.
     #. The ``controller`` passes a function it wants executed to the ``service``, along with a callback function.
     #. The ``service`` puts the function and its parameters in the ``queue`` of its drive communication ``thread``.
     #. The thread notices the incoming task, completes it, and sends a success ``signal``.
     #. The ``signal`` is received by the ``service`` which then executes the callback function it received from the ``controller`` earlier (the callback function is defined in the ``controller``).
     #. The callback function is used to emit a signal that the connection has been completed successfully.
-    #. The frontend receives the signal and exectues a javascript function that opens a new page in the interface.
+    #. The frontend receives the signal and exectues a javascript function that opens a new page in the interface:
+
+        .. image:: ../_static/control.png
+            :width: 400
+            :alt: The control interface
 
 ``Services`` can also start additional ``threads`` when necessary, for example it is sometimes necessary to continuosly receive data from a drive.
 
 * One such example is the data that we use to plot the changes in velocity:
 
     #. We press one of the checkboxes that enable a motor in the GUI.
+
+        .. image:: ../_static/motor_button.png
+            :width: 400
+            :alt: The control interface with one motor enable button highlighted
+
     #. As in the example before, the ``controller`` and ``service`` enable the motor of the drive (GUI -> ``controller`` -> ``service`` -> ``thread`` -> ``service`` -> ``controller``).
     #. The callback function in the ``controller`` uses the ``service`` to start a new ``thread``.
     #. The ``controller`` connects the ``signal`` the ``thread`` emits when it reads new data to one of its functions.
     #. The connected function in turn emits a ``signal`` that is received by the GUI.
-    #. The GUI updates the graph when it receives new data through the ``signal``.
+    #. The GUI updates the graph when it receives new data through the ``signal``:
+
+        .. image:: ../_static/graph.png
+            :width: 400
+            :alt: The control interface with a velocity graph
 
 .. NOTE::
 
