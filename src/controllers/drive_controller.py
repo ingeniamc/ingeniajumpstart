@@ -58,6 +58,14 @@ class DriveController(QObject):
         dictionary (str): the path of the selected file.
     """
 
+    config_changed = Signal(str, int, arguments=["config", "drive"])
+    """Triggers when a config file was selected.
+
+    Args:
+        config (str): the path of the selected file.
+        drive (int): the drive the file is for.
+    """
+
     error_triggered = Signal(str, arguments=["error_message"])
     """Triggers when an error occurs while communicating with the drive.
 
@@ -225,6 +233,43 @@ class DriveController(QObject):
         )
         self.dictionary_changed.emit(os.path.basename(self.drive_model.dictionary))
         self.update_connect_button_state()
+
+    @Slot()
+    def reset_dictionary(self) -> None:
+        """Resets the dictionary file in the DriveModel."""
+        self.drive_model.dictionary = None
+        self.drive_model.dictionary_type = None
+        self.dictionary_changed.emit("")
+        self.update_connect_button_state()
+
+    @Slot(str, int)
+    def select_config(self, config: str, drive: int) -> None:
+        """Update the DriveModel, setting the config property for a drive to the url of
+        the file that was uploaded in the UI.
+
+        Args:
+            config: the url of the config file.
+            drive: the drive
+        """
+        config = config.removeprefix("file:///")
+        if drive == Drive.Left.value:
+            self.drive_model.left_config = config
+        else:
+            self.drive_model.right_config = config
+        self.config_changed.emit(os.path.basename(config), drive)
+
+    @Slot(int)
+    def reset_config(self, drive: int) -> None:
+        """Resets the config file in the DriveModel for a given drive.
+
+        Args:
+            drive: the drive.
+        """
+        if drive == Drive.Left.value:
+            self.drive_model.left_config = None
+        else:
+            self.drive_model.right_config = None
+        self.config_changed.emit("", drive)
 
     @Slot(int)
     def select_connection(self, connection: int) -> None:
