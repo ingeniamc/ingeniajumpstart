@@ -244,6 +244,7 @@ class MotionControllerService(QObject):
             for servo in self.__mc.servos:
                 if self.__mc.is_alive(servo):
                     self.__mc.motion.motor_disable(servo=servo)
+                    self.stop_poller_thread(servo)
 
         return on_thread
 

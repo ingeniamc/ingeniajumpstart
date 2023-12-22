@@ -47,6 +47,9 @@ class DriveController(QObject):
     servo_ids_changed = Signal(QJsonArray, arguments=["servo_ids"])
     """Triggers when the scan returned new values for the servo connections"""
 
+    emergency_stop_triggered = Signal()
+    """Triggers when the emergency stop button was pressed"""
+
     def __init__(self) -> None:
         super().__init__()
         self.mcs = MotionControllerService()
@@ -245,6 +248,9 @@ class DriveController(QObject):
             self.servo_ids_changed.emit(QJsonArray.fromVariantList(servo_ids))
             self.update_connect_button_state()
 
+    def emergency_stop_callback(self, thread_report: thread_report) -> None:
+        self.emergency_stop_triggered.emit()
+
     @Slot()
     def emergency_stop(self) -> None:
-        self.mcs.emergency_stop(self.log_report)
+        self.mcs.emergency_stop(self.emergency_stop_callback)
