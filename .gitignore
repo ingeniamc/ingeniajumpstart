@@ -167,3 +167,5 @@ resources_rc.py
 docs/PySide6-fixed.txt
 docs/PySide6-original.txt
 docs/PySide6-original.inv
+
+.vscode/
