@@ -80,6 +80,9 @@ class DriveController(QObject):
             scan.
     """
 
+    emergency_stop_triggered = Signal()
+    """Triggers when the emergency stop button was pressed"""
+
     def __init__(self) -> None:
         super().__init__()
         self.mcs = MotionControllerService()
@@ -284,11 +287,11 @@ class DriveController(QObject):
         else:
             self.drive_model.right_id = node_id
         self.update_connect_button_state()
-
+       
     @Slot()
     def emergency_stop(self) -> None:
         """Immediately disables the motors of all connected drives."""
-        self.mcs.emergency_stop(self.log_report)
+        self.mcs.emergency_stop(self.emergency_stop_callback)
 
     def connect_callback(self, thread_report: thread_report) -> None:
         """Callback after the drives where connected. Emits a signal to the UI.
@@ -381,6 +384,9 @@ class DriveController(QObject):
             self.drive_model.right_id = servo_ids[1]
             self.servo_ids_changed.emit(QJsonArray.fromVariantList(servo_ids))
             self.update_connect_button_state()
+
+     def emergency_stop_callback(self, thread_report: thread_report) -> None:
+        self.emergency_stop_triggered.emit()
 
     def error_message_callback(self, error_message: str) -> None:
         """Callback when an error occured in a MotionControllerThread.
