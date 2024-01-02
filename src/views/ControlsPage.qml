@@ -43,6 +43,9 @@ RowLayout {
             rightCheck.checked = false;
         }
     }
+
+    // Bind velocity controls to the arrow keys on the keyboard.
+
     Keys.onUpPressed: event => ControlsJS.handleButtonPressed(upButton, -1, 1, event)
 
     Keys.onDownPressed: event => ControlsJS.handleButtonPressed(downButton, 1, -1, event)
@@ -72,6 +75,7 @@ RowLayout {
 
     ColumnLayout {
         RowLayout {
+            // Checkboxes to enable / disable motors.
             Layout.fillHeight: true
 
             SpacerW {
@@ -108,6 +112,7 @@ RowLayout {
             }
         }
         RowLayout {
+            // Graphs to display motor velocities over time. 
             Layout.fillHeight: true
 
             Rectangle {
@@ -159,6 +164,11 @@ RowLayout {
         }
 
         GridLayout {
+            /** Buttons to control velocities. 
+             * The arrow key buttons are bound to click events.
+             * Sliders to control the target velocities.
+             * Inputs to control the maximum velocities.
+             */
             Layout.fillHeight: true
             Layout.preferredHeight: 1
             rows: 4

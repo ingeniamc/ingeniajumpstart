@@ -1,3 +1,4 @@
+# Config for ruff (python linter)
 select = [
     "E",
     "F",

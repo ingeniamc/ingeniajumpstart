@@ -3,16 +3,22 @@ import sys
 from pathlib import Path
 
 import ingenialogger
+from controllers.drive_controller import DriveController
 from PySide6.QtCore import QPointF, Qt
 from PySide6.QtQml import QQmlApplicationEngine
 from PySide6.QtQuick import QQuickItem
 from pytest_mock import MockerFixture
 from pytestqt.qtbot import QtBot
 
-from src.controllers.drive_controller import DriveController
-
 
 def test_emergency_button(qtbot: QtBot, mocker: MockerFixture) -> None:
+    """Start the UI and press the emergency button. Confirm that the expected signal is
+    emitted.
+
+    Args:
+        qtbot: see https://pytest-qt.readthedocs.io/en/latest/reference.html
+        mocker: Used to spy on a signal
+    """
     ingenialogger.configure_logger(level=ingenialogger.LoggingLevel.DEBUG)
 
     engine = QQmlApplicationEngine()

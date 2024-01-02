@@ -16,7 +16,7 @@ class Drive(Enum):
     Right = auto()
 
 
-class Connection(Enum):
+class ConnectionProtocol(Enum):
     EtherCAT = auto()
     CANopen = auto()
 
@@ -37,7 +37,7 @@ def stringify_can_device_enum(device: CanDevice) -> CAN_DEVICE:
     needs.
 
     Args:
-        device (CanDevice): the int enum to convert
+        device: the int enum to convert
 
     Returns:
         CAN_DEVICE: the converted string enum
@@ -61,7 +61,7 @@ class Enums(QObject):
     """Register enums for use in QML."""
 
     QEnum(Drive)
-    QEnum(Connection)
+    QEnum(ConnectionProtocol)
     QEnum(CanDevice)
     QEnum(CAN_BAUDRATE)
     QEnum(ButtonState)

@@ -5,6 +5,8 @@ import QtQuick 2.15
 import QtQuick.Controls 2.15
 import QtQuick.Window
 
+// Helper component to abstract some of the dropdown component logic.
+
 RowLayout {
     id: selection
     required property string text

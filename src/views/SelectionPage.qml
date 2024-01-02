@@ -40,6 +40,7 @@ ColumnLayout {
     }
 
     FileDialog {
+        // Input for dictionairy file.
         id: fileDialog
         title: "Please choose a file"
         defaultSuffix: "xdf"
@@ -53,17 +54,17 @@ ColumnLayout {
     Components.Selection {
         text: "Select connection mode:"
         model: [{
-                value: Enums.Connection.CANopen,
+                value: Enums.ConnectionProtocol.CANopen,
                 text: "CANopen"
             }, {
-                value: Enums.Connection.EtherCAT,
+                value: Enums.ConnectionProtocol.EtherCAT,
                 text: "EtherCAT"
             }]
         activatedHandler: currentValue => {
             selectionPage.driveController.select_connection(currentValue);
-            selectCANdevice.visible = currentValue == Enums.Connection.CANopen;
-            selectBaudrate.visible = currentValue == Enums.Connection.CANopen;
-            selectNetworkAdapter.visible = currentValue == Enums.Connection.EtherCAT;
+            selectCANdevice.visible = currentValue == Enums.ConnectionProtocol.CANopen;
+            selectBaudrate.visible = currentValue == Enums.ConnectionProtocol.CANopen;
+            selectNetworkAdapter.visible = currentValue == Enums.ConnectionProtocol.EtherCAT;
             idLeftAutomatic.model = [];
             idRightAutomatic.model = [];
             idLeftAutomatic.enabled = false;
@@ -179,6 +180,7 @@ ColumnLayout {
     }
 
     RowLayout {
+        // Manual input for slave / node IDs.
         id: idsManual
         visible: false
         Components.SpacerW {
@@ -220,6 +222,7 @@ ColumnLayout {
     }
 
     RowLayout {
+        // Slave / node IDs returned from a scan.
         id: idsAutomatic
         visible: false
         Components.SpacerW {
@@ -267,6 +270,7 @@ ColumnLayout {
     }
 
     RowLayout {
+        // Button for dictionairy file upload & display of currently selected file.
         Components.SpacerW {
         }
         ColumnLayout {

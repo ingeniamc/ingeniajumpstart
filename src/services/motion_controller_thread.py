@@ -6,8 +6,7 @@ import ingenialogger
 from ingenialink.exceptions import ILError, ILIOError
 from ingeniamotion.exceptions import IMException
 from PySide6.QtCore import QThread, Signal
-
-from .types import motion_controller_task, thread_report
+from utils.types import motion_controller_task, thread_report
 
 logger = ingenialogger.get_logger(__name__)
 
@@ -50,7 +49,7 @@ class MotionControllerThread(QThread):
     def run(self) -> None:
         """Run function.
         Emit a signal when it starts (started). Emits a report of
-        :class:`~motionlab3.dataclasses.thread_report` type using the task_completed
+        :class:`~utils.types.thread_report` type using the task_completed
         signal. This report includes the method name, the output of the callback
         function, a timestamp, the duration and the exception raised during the
         callback, if any.

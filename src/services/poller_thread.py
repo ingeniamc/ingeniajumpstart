@@ -26,11 +26,12 @@ class PollerThread(QThread):
         """Constructor of the PollerThread.
 
         Args:
-            mc: MotionController instance
+            mc: MotionController instance.
             drive: drive alias.
             registers: Register to be read.
-            sampling_time: Sampling time.
-            buffer_size: Buffer size.
+            sampling_time: Sampling time. Defaults to 0.125.
+            refresh_time: Refresh time. Defaults to 0.125.
+            buffer_size: Buffer size. Defaults to 100.
         """
         super().__init__()
         self.__mc = mc

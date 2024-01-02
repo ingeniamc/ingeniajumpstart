@@ -1,42 +1,47 @@
+from controllers.drive_controller import DriveController
 from ingenialink import CAN_BAUDRATE
 from PySide6.QtTest import QSignalSpy
+from utils.enums import ButtonState, CanDevice, ConnectionProtocol, Drive
 
-from src.controllers.drive_controller import DriveController
-from src.enums import ButtonState, CanDevice, Connection, Drive
+"""Use the various slots (functions) in the DriveController to change the
+application state and confirm that it has been changed as expected.
+Also confirm that the connect button state has the right state before and after
+making all the selections.
+"""
 
 
 def test_select_connection(drive_controller: DriveController) -> None:
-    connection = Connection.CANopen
+    connection = ConnectionProtocol.CANopen
     drive_controller.select_connection(connection.value)
-    assert drive_controller.connection == connection
+    assert drive_controller.drive_model.connection == connection
 
 
 def test_select_interface(drive_controller: DriveController) -> None:
     interface = 2
     drive_controller.select_interface(interface)
-    assert drive_controller.interface_index == interface
+    assert drive_controller.drive_model.interface_index == interface
 
 
 def test_select_can_device(drive_controller: DriveController) -> None:
     can_device = CanDevice.KVASER
     drive_controller.select_can_device(can_device.value)
-    assert drive_controller.can_device == can_device
+    assert drive_controller.drive_model.can_device == can_device
 
 
 def test_select_can_baudrate(drive_controller: DriveController) -> None:
     can_baudrate = CAN_BAUDRATE.Baudrate_1M
     drive_controller.select_can_baudrate(can_baudrate.value)
-    assert drive_controller.baudrate == can_baudrate
+    assert drive_controller.drive_model.can_baudrate == can_baudrate
 
 
 def test_select_ids(drive_controller: DriveController) -> None:
     left_id = 31
     drive_controller.select_node_id(left_id, Drive.Left.value)
-    assert drive_controller.left_id == left_id
+    assert drive_controller.drive_model.left_id == left_id
 
     right_id = 32
     drive_controller.select_node_id(right_id, Drive.Right.value)
-    assert drive_controller.right_id == right_id
+    assert drive_controller.drive_model.right_id == right_id
 
 
 def test_select_dictionary(drive_controller: DriveController) -> None:
@@ -44,16 +49,16 @@ def test_select_dictionary(drive_controller: DriveController) -> None:
 
     ethercat_dict = "tests/assets/cap-net-e_eoe_2.4.1.xdf"
     drive_controller.select_dictionary(ethercat_dict)
-    assert drive_controller.dictionary == ethercat_dict
-    assert drive_controller.dictionary_type == Connection.EtherCAT
+    assert drive_controller.drive_model.dictionary == ethercat_dict
+    assert drive_controller.drive_model.dictionary_type == ConnectionProtocol.EtherCAT
     assert dict_signal_spy.at(dict_signal_spy.size() - 1)[
         0
     ] == ethercat_dict.removeprefix("tests/assets/")
 
     canopen_dict = "tests/assets/eve-xcr-c_can_2.4.1.xdf"
     drive_controller.select_dictionary(canopen_dict)
-    assert drive_controller.dictionary == canopen_dict
-    assert drive_controller.dictionary_type == Connection.CANopen  # type: ignore
+    assert drive_controller.drive_model.dictionary == canopen_dict
+    assert drive_controller.drive_model.dictionary_type == ConnectionProtocol.CANopen  # type: ignore
     assert dict_signal_spy.at(dict_signal_spy.size() - 1)[
         0
     ] == canopen_dict.removeprefix("tests/assets/")
@@ -61,7 +66,7 @@ def test_select_dictionary(drive_controller: DriveController) -> None:
 
 def test_connect_button(drive_controller: DriveController) -> None:
     connect_button_spy = QSignalSpy(drive_controller.connect_button_state_changed)
-    drive_controller.select_connection(Connection.CANopen.value)
+    drive_controller.select_connection(ConnectionProtocol.CANopen.value)
     drive_controller.select_interface(2)
     drive_controller.select_can_device(CanDevice.KVASER.value)
     drive_controller.select_can_baudrate(CAN_BAUDRATE.Baudrate_1M.value)

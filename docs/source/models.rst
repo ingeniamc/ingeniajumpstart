@@ -1,29 +1,10 @@
-models package
-==============
+Models
+======
 
-Submodules
-----------
+Drive Model
+-----------
 
-models.console module
----------------------
-
-.. automodule:: models.console
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-models.rotate module
---------------------
-
-.. automodule:: models.rotate
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-Module contents
----------------
-
-.. automodule:: models
+.. automodule:: models.drive_model
    :members:
    :undoc-members:
    :show-inheritance:

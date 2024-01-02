@@ -1,3 +1,4 @@
+"""Script to find all .qml files in the project and lint them with pyside6-qmllint."""
 import os
 import subprocess
 import sys

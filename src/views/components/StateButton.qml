@@ -11,6 +11,8 @@ import "../js/controls.js" as ControlsJS
 // no longer used, the warning can be re-enabled.
 // qmllint disable missing-property
 
+// Helper component to abstract some of the arrow key button logic.
+
 Button {
     id: stateButton
     state: Enums.ButtonState.Disabled
@@ -43,10 +45,6 @@ Button {
             }
         }
     ]
-    Action {
-        shortcut: Qt.Key_Up
-        onTriggered: () => console.log("and action")
-    }
     onPressed: () => ControlsJS.handleButtonPressed(stateButton, leftFactor, rightFactor)
     onReleased: () => ControlsJS.handleButtonReleased(stateButton)
 }

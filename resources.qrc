@@ -1,3 +1,5 @@
+<!-- Compiled with pyside6-rcc to create a module that defines global styles 
+for the application that can be imported in __main__.py -->
 <!DOCTYPE RCC><RCC version="1.0">
 <qresource prefix="/">
     <file>qtquickcontrols2.conf</file>
