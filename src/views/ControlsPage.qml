@@ -38,6 +38,10 @@ RowLayout {
             PlotJS.resetPlot(chartL);
             PlotJS.resetPlot(chartR);
         }
+        function onEmergency_stop_triggered() {
+            leftCheck.checked = false;
+            rightCheck.checked = false;
+        }
     }
 
     // Bind velocity controls to the arrow keys on the keyboard.
