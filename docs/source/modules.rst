@@ -4,7 +4,7 @@ K2 Base Camp
 .. toctree::
    :maxdepth: 4
 
-   controllers
-   models
-   services
-   utils
+   api/controllers
+   api/models
+   api/services
+   api/utils

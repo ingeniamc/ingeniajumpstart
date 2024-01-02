@@ -51,6 +51,7 @@ class PollerThread(QThread):
         )
 
     def run(self) -> None:
+        """Start the thread. Periodically retrieve data from the drive."""
         self.__poller.start()
         self.__running = True
         while self.__running:
@@ -62,5 +63,6 @@ class PollerThread(QThread):
             time.sleep(self.__refresh_time)
 
     def stop(self) -> None:
+        """Stop the thread"""
         self.__poller.stop()
         self.__running = False

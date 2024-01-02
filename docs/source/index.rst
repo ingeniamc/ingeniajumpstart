@@ -10,9 +10,12 @@ Welcome to K2 Base Camp's documentation!
    :maxdepth: 2
    :caption: Contents:
 
-   what_is_k2_base_camp
-   quickstart
+   pages/what_is_k2_base_camp
+   pages/quickstart
    modules
+   pages/code_overview
+   pages/development
+   pages/examples
 
 
 Indices and tables
