@@ -40,7 +40,7 @@ ColumnLayout {
     }
 
     FileDialog {
-        // Input for dictionairy file.
+        // Input for dictionary file.
         id: fileDialog
         title: "Please choose a file"
         defaultSuffix: "xdf"
@@ -270,7 +270,7 @@ ColumnLayout {
     }
 
     RowLayout {
-        // Button for dictionairy file upload & display of currently selected file.
+        // Button for dictionary file upload & display of currently selected file.
         Components.SpacerW {
         }
         ColumnLayout {

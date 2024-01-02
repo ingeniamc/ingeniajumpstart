@@ -19,12 +19,12 @@ logger = ingenialogger.get_logger(__name__)
 
 @QmlElement
 class DriveController(QObject):
-    """The connection between the buisiness logic (BL) and the user interface (UI).
+    """A connection between the buisiness logic (BL) and the user interface (UI).
     Emits signals that the UI can respond to (BL -> UI).
     Defines slots that can then be accessed directly in the UI (UI -> BL).
-    Creates and updates an instance of DriveModel to store the application state.
-    Creates an instance of MotionControllerService that is used to connect to and
-    communicate with the drives.
+    Creates and updates an instance of DriveModel to store application state.
+    Uses an instance of MotionControllerService to connect to and communicate with the
+    drives.
     Defines callback functions that are invoked after a task delegated to the
     MotionControllerService was completed.
     """
@@ -83,9 +83,9 @@ class DriveController(QObject):
     emergency_stop_triggered = Signal()
     """Triggers when the emergency stop button was pressed"""
 
-    def __init__(self) -> None:
+   def __init__(self, mcs: MotionControllerService) -> None:
         super().__init__()
-        self.mcs = MotionControllerService()
+        self.mcs = mcs
         self.mcs.error_triggered.connect(self.error_message_callback)
         self.drive_model = DriveModel()
 
@@ -214,7 +214,7 @@ class DriveController(QObject):
 
     @Slot(str)
     def select_dictionary(self, dictionary: str) -> None:
-        """Update the DriveModel, setting the dictionnary property to the url of the
+        """Update the DriveModel, setting the dictionary property to the url of the
         file that was uploaded in the UI.
         Also identifies which connection protocol the dictionary belongs to and sets the
         corresponding property in the DriveModel.
@@ -393,7 +393,7 @@ class DriveController(QObject):
         Emits a signal to the UI that contains the error message.
 
         Args:
-            error_message: _description_
+            error_message: the error message.
         """
         self.error_triggered.emit(error_message)
         self.update_connect_button_state()

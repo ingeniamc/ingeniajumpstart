@@ -5,7 +5,7 @@ name = "pypi"
 
 [packages]
 pyside6 = "==6.6.0"
-ingenialink = {ref = "develop", git = "https://github.com/ingeniamc/ingenialink-python.git"}
+ingenialink = "==7.1.0"
 ingeniamotion = "==0.7.0"
 ingenialogger = "==0.3.0"
 k2-base-camp = {file = ".", editable = true}

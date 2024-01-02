@@ -20,6 +20,8 @@ class DriveModel(QObject):
         right_id: Union[int, None] = None,
         dictionary: Union[str, None] = None,
         dictionary_type: Union[ConnectionProtocol, None] = None,
+        left_firmware: Union[str, None] = None,
+        right_firmware: Union[str, None] = None,
     ) -> None:
         super().__init__()
         self.connection = connection
@@ -30,13 +32,15 @@ class DriveModel(QObject):
         self.right_id = right_id
         self.dictionary = dictionary
         self.dictionary_type = dictionary_type
+        self.left_firmware = left_firmware
+        self.right_firmware = right_firmware
 
     def connect_button_state(self) -> ButtonState:
         """Calculate the state the "Connect"-button should be in based on the
         application state.
 
         Returns:
-            utils.enums.ButtonState: the new button state
+            utils.enums.ButtonState: the button state.
         """
         if (
             self.dictionary is None
@@ -56,3 +60,40 @@ class DriveModel(QObject):
         ):
             return ButtonState.Disabled
         return ButtonState.Enabled
+
+    def install_prerequisites_met(self) -> bool:
+        """Calculate if the application is in the right state to perform the
+        "install firmware" - operation.
+
+        Returns:
+            bool: true if it is, false if not.
+        """
+        return (
+            (
+                (self.left_id is not None and self.left_firmware is not None)
+                or (self.right_id is not None and self.right_firmware is not None)
+            )
+            and self.left_id != self.right_id
+            and (
+                (
+                    self.connection == ConnectionProtocol.CANopen
+                    and self.can_baudrate is not None
+                    and self.can_device is not None
+                )
+                or (
+                    self.connection == ConnectionProtocol.EtherCAT
+                    and self.interface_index is not None
+                )
+            )
+        )
+
+    def install_button_state(self) -> ButtonState:
+        """The "install" - button should only be active if the application is in the
+        right state to perform the operation.
+
+        Returns:
+            utils.enums.ButtonState: the button state.
+        """
+        if self.install_prerequisites_met():
+            return ButtonState.Enabled
+        return ButtonState.Disabled

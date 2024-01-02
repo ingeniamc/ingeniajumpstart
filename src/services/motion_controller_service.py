@@ -16,6 +16,7 @@ from services.poller_thread import PollerThread
 DEVICE_NODE = "Body//Device"
 INTERFACE_CAN = "CAN"
 INTERFACE_ETH = "ETH"
+DEFAULT_DICTIONARY_PATH = "assets/eve-net-c_can_2.4.1.xdf"
 
 
 class MotionControllerService(QObject):
@@ -181,6 +182,7 @@ class MotionControllerService(QObject):
         self,
         report_callback: Callable[[thread_report], Any],
         drive_model: DriveModel,
+        minimum_nodes: int = 2,
         *args: Any,
         **kwargs: Any,
     ) -> Callable[..., list[int]]:
@@ -190,18 +192,19 @@ class MotionControllerService(QObject):
             report_callback: callback to invoke after
                 completing the operation.
             drive_model: Contains information about the connection
+            minimum_nodes: the minimum number of nodes we expect to find (e.g.
+                installing firmware only requires one, while connect to drives needs
+                two).
 
         Raises:
-            ingenialink.exceptions.ILError: If we find less than 2 servos in the network
-                or the connection protocol is not implemented.
+            ingenialink.exceptions.ILError: If we find less than the expected number of
+                servos in the network or the connection protocol is not implemented.
 
         Returns:
             list[int]: All slave / node IDs that are found.
         """
 
-        def on_thread(
-            drive_model: DriveModel,
-        ) -> list[int]:
+        def on_thread(drive_model: DriveModel, minimum_nodes: int = 2) -> list[int]:
             if drive_model.connection == ConnectionProtocol.CANopen:
                 result = self.__mc.communication.scan_servos_canopen(
                     can_device=stringify_can_device_enum(drive_model.can_device),
@@ -213,10 +216,11 @@ class MotionControllerService(QObject):
                 )
             else:
                 raise ILError("Connection type not implemented.")
-            if len(result) < 2:
+            if len(result) < minimum_nodes:
                 nodes_found = result if len(result) > 0 else "(none)"
                 raise ILError(
-                    f"Scan expected to find at least 2 nodes. Nodes found:{nodes_found}"
+                    f"Scan expected to find at least {minimum_nodes} nodes. "
+                    + f"Nodes found: {nodes_found}"
                 )
             return result
 
@@ -369,5 +373,66 @@ class MotionControllerService(QObject):
         return on_thread
 
     def stop_motion_controller_thread(self) -> None:
+        """Stops the MotionControllerThread that was created upon initialization."""
         self.__motion_controller_thread.stop()
         self.__motion_controller_thread.wait()
+
+    @run_on_thread
+    def install_firmware(
+        self,
+        report_callback: Callable[[thread_report], Any],
+        progress_callback: Callable[[int], None],
+        drive_model: DriveModel,
+        *args: Any,
+        **kwargs: Any,
+    ) -> Callable[..., Any]:
+        """Install the firmware files given by the user to the corresponding drives.
+        Depending on the selected ConnectionProtocol, a different function is called to
+        achieve this. If a protocol expects the drives to be connected, a default
+        dictionary is used to establish this connection (and the drives are
+        disconnected after completing the installation).
+
+        Args:
+            report_callback (Callable[[thread_report], Any]): callback to invoke after
+                completing the operation.
+            progress_callback (Callable[[int], None]): callback the installation
+                function can invoke to continuosly inform about the progress of the
+                operation.
+        """
+
+        def on_thread(
+            progress_callback: Callable[[int], None], drive_model: DriveModel
+        ) -> Any:
+            if not drive_model.install_prerequisites_met():
+                raise ILError(
+                    "Incorrect or insufficient configuration. Make sure to provide the "
+                    + "right parameters for the selected connection protocol."
+                )
+            for drive, firmware, id in [
+                (Drive.Left.name, drive_model.left_firmware, drive_model.left_id),
+                (Drive.Right.name, drive_model.right_firmware, drive_model.right_id),
+            ]:
+                if firmware is None or id is None:
+                    continue
+                if drive_model.connection == ConnectionProtocol.CANopen:
+                    self.__mc.communication.connect_servo_canopen(
+                        baudrate=drive_model.can_baudrate,
+                        can_device=stringify_can_device_enum(drive_model.can_device),
+                        dict_path=DEFAULT_DICTIONARY_PATH,
+                        node_id=id,
+                        alias=drive,
+                    )
+                    self.__mc.communication.load_firmware_canopen(
+                        servo=drive,
+                        fw_file=firmware,
+                        progress_callback=progress_callback,
+                    )
+                    self.__mc.communication.disconnect(servo=drive)
+                elif drive_model.connection == ConnectionProtocol.EtherCAT:
+                    self.__mc.communication.load_firmware_ecat_interface_index(
+                        fw_file=firmware,
+                        if_index=drive_model.interface_index,
+                        slave=id,
+                    )
+
+        return on_thread
