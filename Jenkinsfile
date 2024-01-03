@@ -28,7 +28,7 @@ pipeline {
                         stage('Mypy') {
                             steps {
                                 bat """
-                                    py -3.9 -m pipenv run mypy ./src --config-file mypy.ini --junit-xml=mypy_junit.xml
+                                    py -3.9 -m pipenv run mypy ./k2basecamp --config-file mypy.ini --junit-xml=mypy_junit.xml
                                 """
                             }
                             post {
@@ -40,14 +40,14 @@ pipeline {
                         stage("Formatting") {
                             steps {
                                 bat """
-                                    py -3.9 -m pipenv run black ./src --check
+                                    py -3.9 -m pipenv run black ./k2basecamp --check
                                 """
                             }
                         }
                         stage("Linting") {
                             steps {
                                 bat """
-                                    py -3.9 -m pipenv run ruff ./src --output-format=junit --output-file=ruff_junit.xml
+                                    py -3.9 -m pipenv run ruff ./k2basecamp --output-format=junit --output-file=ruff_junit.xml
                                 """
                             }
                             post {
