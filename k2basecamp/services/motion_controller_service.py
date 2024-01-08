@@ -121,7 +121,7 @@ class MotionControllerService(QObject):
     def connect_drives(
         self,
         report_callback: Callable[[thread_report], Any],
-        drive_model: ConnectionModel,
+        connection_model: ConnectionModel,
         *args: Any,
         **kwargs: Any,
     ) -> Callable[..., Any]:
@@ -130,40 +130,50 @@ class MotionControllerService(QObject):
         Args:
             report_callback: callback to invoke after
                 completing the operation.
-            drive_model: model containing the application state.
+            connection_model: model containing the application state.
 
         Raises:
             ingenialink.exceptions.ILError: If the connection fails
         """
 
         def on_thread(
-            drive_model: ConnectionModel,
+            connection_model: ConnectionModel,
         ) -> Any:
-            if not drive_model.dictionary:
+            if not connection_model.dictionary:
                 raise ILError("No dictionary selected.")
-            dictionary_type = self.check_dictionary_format(drive_model.dictionary)
-            if dictionary_type != drive_model.connection:
+            dictionary_type = self.check_dictionary_format(connection_model.dictionary)
+            if dictionary_type != connection_model.connection:
                 raise ILError("Communication type does not match the dictionary type.")
-            if drive_model.left_id == drive_model.right_id:
+            if connection_model.left_id == connection_model.right_id:
                 raise ILError("Node IDs cannot be the same.")
             for drive, id, config in [
-                (Drive.Left.name, drive_model.left_id, drive_model.left_config),
-                (Drive.Right.name, drive_model.right_id, drive_model.right_config),
+                (
+                    Drive.Left.name,
+                    connection_model.left_id,
+                    connection_model.left_config,
+                ),
+                (
+                    Drive.Right.name,
+                    connection_model.right_id,
+                    connection_model.right_config,
+                ),
             ]:
                 if id is None:
                     continue
-                if drive_model.connection == ConnectionProtocol.EtherCAT:
+                if connection_model.connection == ConnectionProtocol.EtherCAT:
                     self.__mc.communication.connect_servo_ethercat_interface_index(
-                        if_index=drive_model.interface_index,
+                        if_index=connection_model.interface_index,
                         slave_id=id,
-                        dict_path=drive_model.dictionary,
+                        dict_path=connection_model.dictionary,
                         alias=drive,
                     )
-                elif drive_model.connection == ConnectionProtocol.CANopen:
+                elif connection_model.connection == ConnectionProtocol.CANopen:
                     self.__mc.communication.connect_servo_canopen(
-                        baudrate=drive_model.can_baudrate,
-                        can_device=stringify_can_device_enum(drive_model.can_device),
-                        dict_path=drive_model.dictionary,
+                        baudrate=connection_model.can_baudrate,
+                        can_device=stringify_can_device_enum(
+                            connection_model.can_device
+                        ),
+                        dict_path=connection_model.dictionary,
                         node_id=id,
                         alias=drive,
                     )
@@ -188,7 +198,7 @@ class MotionControllerService(QObject):
     def scan_servos(
         self,
         report_callback: Callable[[thread_report], Any],
-        drive_model: BaseModel,
+        base_model: BaseModel,
         minimum_nodes: int = 2,
         *args: Any,
         **kwargs: Any,
@@ -198,7 +208,7 @@ class MotionControllerService(QObject):
         Args:
             report_callback: callback to invoke after
                 completing the operation.
-            drive_model: Contains information about the connection
+            base_model: Contains information about the connection
             minimum_nodes: the minimum number of nodes we expect to find (e.g.
                 installing firmware only requires one, while connect to drives needs
                 two).
@@ -211,15 +221,15 @@ class MotionControllerService(QObject):
             list[int]: All slave / node IDs that are found.
         """
 
-        def on_thread(drive_model: BaseModel, minimum_nodes: int = 2) -> list[int]:
-            if drive_model.connection == ConnectionProtocol.CANopen:
+        def on_thread(base_model: BaseModel, minimum_nodes: int = 2) -> list[int]:
+            if base_model.connection == ConnectionProtocol.CANopen:
                 result = self.__mc.communication.scan_servos_canopen(
-                    can_device=stringify_can_device_enum(drive_model.can_device),
-                    baudrate=drive_model.can_baudrate,
+                    can_device=stringify_can_device_enum(base_model.can_device),
+                    baudrate=base_model.can_baudrate,
                 )
-            elif drive_model.connection == ConnectionProtocol.EtherCAT:
+            elif base_model.connection == ConnectionProtocol.EtherCAT:
                 result = self.__mc.communication.scan_servos_ethercat_interface_index(
-                    drive_model.interface_index
+                    base_model.interface_index
                 )
             else:
                 raise ILError("Connection type not implemented.")
