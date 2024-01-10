@@ -332,6 +332,12 @@ class BootloaderController(QObject):
         """
         self.drives_in_progress.pop()
         if len(self.drives_in_progress) == 0:
+            if hasattr(self, "bootloader_thread_left"):
+                self.disconnect(self.bootloader_thread_left)
+                self.bootloader_thread_left.quit()
+            if hasattr(self, "bootloader_thread_right"):
+                self.disconnect(self.bootloader_thread_right)
+                self.bootloader_thread_right.quit()
             self.firmware_installation_complete_triggered.emit()
             if len(self.errors) > 0:
                 self.error_triggered.emit("\n".join(self.errors))

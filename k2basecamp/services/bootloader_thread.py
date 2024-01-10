@@ -49,7 +49,6 @@ class BootloaderThread(QThread):
 
     def run(self) -> None:
         """Start the thread."""
-
         try:
             install_firmware(
                 bootloader_model=self.__bootloader_model,
@@ -62,8 +61,6 @@ class BootloaderThread(QThread):
             self.firmware_installation_complete_triggered.emit()
         except Exception as e:
             logger.error(e)
-            # We only log ILIOErrors, because they are not important enough to
-            # warrant displaying a error dialog.
             self.error_triggered.emit(str(e))
 
     def progress_callback(self, progress: int) -> None:

@@ -334,7 +334,9 @@ class MotionControllerService(QObject):
     def stop_poller_thread(self, alias: str) -> None:
         """Stop the poller thread for the given drive."""
         if alias in self.__poller_threads and self.__poller_threads[alias].isRunning():
+            self.disconnect(self.__poller_threads[alias])
             self.__poller_threads[alias].stop()
+            self.__poller_threads[alias].quit()
 
     def check_dictionary_format(self, filepath: str) -> ConnectionProtocol:
         """Identifies if the provided dictionary file is for CANopen or
@@ -390,7 +392,9 @@ class MotionControllerService(QObject):
 
     def stop_motion_controller_thread(self) -> None:
         """Stops the MotionControllerThread that was created upon initialization."""
+        self.disconnect(self.__motion_controller_thread)
         self.__motion_controller_thread.stop()
+        self.__motion_controller_thread.quit()
         self.__motion_controller_thread.wait()
 
     def create_bootloader_thread(
