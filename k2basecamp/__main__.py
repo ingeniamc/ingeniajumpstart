@@ -10,10 +10,10 @@ from PySide6.QtWidgets import QApplication
 
 # Needed for styling.
 # Created with pyside6-rcc using resources.qrc and qtquickcontrols.conf.
-import resources  # noqa: F401
-from controllers.bootloader_controller import BootloaderController
-from controllers.drive_controller import DriveController
-from services.motion_controller_service import MotionControllerService
+import k2basecamp.resources  # noqa: F401
+from k2basecamp.controllers.bootloader_controller import BootloaderController
+from k2basecamp.controllers.drive_controller import DriveController
+from k2basecamp.services.motion_controller_service import MotionControllerService
 
 if __name__ == "__main__":
     # Init the logger util.
