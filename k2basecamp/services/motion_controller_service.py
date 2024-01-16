@@ -473,12 +473,12 @@ class MotionControllerService(QObject):
         """Install firmware to a drive using the MotionController.
 
         Args:
-            firmware: the file containing the firmware.
-            id: the node id of the drive.
-            bootloader_model: the model with the application state.
-            mc: the MotionController to communicate with the drive.
             drive: the drive to install the firmware to.
             progress_callback: callback for when the installation progress updates.
+            bootloader_model: the model with the application state.
+            firmware: the file containing the firmware.
+            id: the node id of the drive.
+            mc: the MotionController to communicate with the drive.
         """
         if not bootloader_model.install_prerequisites_met():
             self.error_triggered.emit(
