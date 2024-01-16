@@ -1,10 +1,11 @@
+from typing import Any, Callable
+
 import ingenialogger
 from ingeniamotion import MotionController
 from PySide6.QtCore import QThread, Signal
 
 from k2basecamp.models.bootloader_model import BootloaderModel
 from k2basecamp.utils.enums import Drive
-from k2basecamp.utils.functions import install_firmware
 
 logger = ingenialogger.get_logger(__name__)
 
@@ -31,32 +32,34 @@ class BootloaderThread(QThread):
 
     def __init__(
         self,
+        install_firmware: Callable[
+            [Drive, Callable[[int], Any], BootloaderModel, str, int, MotionController],
+            None,
+        ],
         drive: Drive,
         bootloader_model: BootloaderModel,
         firmware: str,
         id: int,
+        mc: MotionController,
     ) -> None:
         super().__init__()
-        if not bootloader_model.install_prerequisites_met():
-            self.error_triggered.emit(
-                "Incorrect or insufficient configuration. Make sure to provide the "
-                + "right parameters for the selected connection protocol."
-            )
+        self.__install_firmware = install_firmware
         self.__drive = drive
         self.__bootloader_model = bootloader_model
         self.__firmware = firmware
         self.__id = id
+        self.__mc = mc
 
     def run(self) -> None:
         """Start the thread."""
         try:
-            install_firmware(
-                bootloader_model=self.__bootloader_model,
-                mc=MotionController(),
-                drive=self.__drive,
-                firmware=self.__firmware,
-                id=self.__id,
-                progress_callback=self.progress_callback,
+            self.__install_firmware(
+                self.__drive,
+                self.progress_callback,
+                self.__bootloader_model,
+                self.__firmware,
+                self.__id,
+                self.__mc,
             )
             self.firmware_installation_complete_triggered.emit()
         except Exception as e:

@@ -14,12 +14,12 @@ from k2basecamp.services.bootloader_thread import BootloaderThread
 from k2basecamp.services.motion_controller_thread import MotionControllerThread
 from k2basecamp.services.poller_thread import PollerThread
 from k2basecamp.utils.enums import ConnectionProtocol, Drive, stringify_can_device_enum
-from k2basecamp.utils.functions import install_firmware
 from k2basecamp.utils.types import motion_controller_task, thread_report
 
 DEVICE_NODE = "Body//Device"
 INTERFACE_CAN = "CAN"
 INTERFACE_ETH = "ETH"
+DEFAULT_DICTIONARY_PATH = "k2basecamp/assets/eve-net-c_can_2.4.1.xdf"
 
 
 class MotionControllerService(QObject):
@@ -412,10 +412,12 @@ class MotionControllerService(QObject):
             BootloaderThread: the thread.
         """
         return BootloaderThread(
-            bootloader_model=bootloader_model,
-            id=id,
             drive=drive,
+            install_firmware=self.install_firmware,
+            bootloader_model=bootloader_model,
             firmware=firmware,
+            id=id,
+            mc=MotionController(),
         )
 
     @run_on_thread
@@ -448,13 +450,60 @@ class MotionControllerService(QObject):
             firmware: str,
             id: int,
         ) -> Any:
-            install_firmware(
-                bootloader_model=bootloader_model,
+            self.install_firmware(
                 drive=drive,
+                progress_callback=progress_callback,
+                bootloader_model=bootloader_model,
                 firmware=firmware,
                 id=id,
                 mc=self.__mc,
-                progress_callback=progress_callback,
             )
 
         return on_thread
+
+    def install_firmware(
+        self,
+        drive: Drive,
+        progress_callback: Callable[[int], Any],
+        bootloader_model: BootloaderModel,
+        firmware: str,
+        id: int,
+        mc: MotionController,
+    ) -> None:
+        """Install firmware to a drive using the MotionController.
+
+        Args:
+            firmware: the file containing the firmware.
+            id: the node id of the drive.
+            bootloader_model: the model with the application state.
+            mc: the MotionController to communicate with the drive.
+            drive: the drive to install the firmware to.
+            progress_callback: callback for when the installation progress updates.
+        """
+        if not bootloader_model.install_prerequisites_met():
+            self.error_triggered.emit(
+                "Incorrect or insufficient configuration. Make sure to provide the "
+                + "right parameters for the selected connection protocol."
+            )
+            return
+
+        if bootloader_model.connection == ConnectionProtocol.CANopen:
+            mc.communication.connect_servo_canopen(
+                baudrate=bootloader_model.can_baudrate,
+                can_device=stringify_can_device_enum(bootloader_model.can_device),
+                dict_path=DEFAULT_DICTIONARY_PATH,
+                node_id=id,
+                alias=drive.name,
+            )
+            mc.communication.load_firmware_canopen(
+                servo=drive.name,
+                fw_file=firmware,
+                progress_callback=progress_callback,
+            )
+            mc.communication.disconnect(servo=drive.name)
+        elif bootloader_model.connection == ConnectionProtocol.EtherCAT:
+            mc.communication.load_firmware_ecat_interface_index(
+                fw_file=firmware,
+                if_index=bootloader_model.interface_index,
+                slave=id,
+            )
