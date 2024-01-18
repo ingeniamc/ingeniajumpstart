@@ -19,9 +19,6 @@ class MotionControllerThread(QThread):
 
     """
 
-    thread_started: Signal = Signal()
-    """Signal emitted when the thread starts"""
-
     task_errored: Signal = Signal(str, arguments=["error_message"])
     """Signal emitted when a task fails.
     The error message is returned by the thread"""
@@ -58,7 +55,6 @@ class MotionControllerThread(QThread):
         instead.
 
         """
-        self.thread_started.emit()
         self.__running = True
         while self.__running:
             task = self.queue.get()

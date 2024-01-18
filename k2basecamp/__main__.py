@@ -14,6 +14,7 @@ import k2basecamp.resources  # noqa: F401
 from k2basecamp.controllers.bootloader_controller import BootloaderController
 from k2basecamp.controllers.connection_controller import ConnectionController
 from k2basecamp.services.motion_controller_service import MotionControllerService
+from k2basecamp.utils.enums import Drive
 
 if __name__ == "__main__":
     # Init the logger util.
@@ -51,5 +52,7 @@ if __name__ == "__main__":
 
     # Start the application.
     ret = app.exec()
-    connection_controller.mcs.stop_motion_controller_thread()
+    mcs.stop_motion_controller_thread()
+    mcs.stop_poller_thread(Drive.Left.name)
+    mcs.stop_poller_thread(Drive.Right.name)
     sys.exit(ret)
