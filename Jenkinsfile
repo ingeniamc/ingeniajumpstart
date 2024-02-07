@@ -98,6 +98,23 @@ pipeline {
 
                     }
                 }
+                stage("Generate documentation") {
+                    steps {
+                        bat """
+                            py -3.9 -m pipenv run python -m sphinx -b html docs/source _docs
+                        """
+                    }
+                }
+                stage('Archive') {
+                    steps {
+                        bat """
+                            "C:\\Program Files\\7-Zip\\7z.exe" a -r docs.zip -w _docs -mem=AES256
+                            XCOPY dist ${env.WORKSPACE}\\dist /i
+                            XCOPY docs.zip ${env.WORKSPACE}
+                        """
+                        archiveArtifacts artifacts: "dist\\*, docs.zip"
+                    }
+                }
             }
         }
     }
