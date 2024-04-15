@@ -119,9 +119,9 @@ ColumnLayout {
         visible: false
         Component.onCompleted: () => {
             const interface_name_list = selectionPage.connectionController.get_interface_name_list();
-            selectNetworkAdapter.model = interface_name_list.map((interface_name, index) => {
+            selectNetworkAdapter.model = interface_name_list.map((interface_name) => {
                     return {
-                        value: index,
+                        value: interface_name,
                         text: interface_name
                     };
                 });

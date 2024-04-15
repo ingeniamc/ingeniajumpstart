@@ -1,4 +1,4 @@
-from typing import Union
+from typing import Optional
 
 from ingenialink import CAN_BAUDRATE
 from PySide6.QtCore import QObject
@@ -16,14 +16,14 @@ class BaseModel(QObject):
         connection: ConnectionProtocol = ConnectionProtocol.CANopen,
         can_device: CanDevice = CanDevice.KVASER,
         can_baudrate: CAN_BAUDRATE = CAN_BAUDRATE.Baudrate_1M,
-        interface_index: int = 0,
-        left_id: Union[int, None] = None,
-        right_id: Union[int, None] = None,
+        interface: Optional[str] = None,
+        left_id: Optional[int] = None,
+        right_id: Optional[int] = None,
     ) -> None:
         super().__init__()
         self.connection = connection
         self.can_device = can_device
         self.can_baudrate = can_baudrate
-        self.interface_index = interface_index
+        self.interface = interface
         self.left_id = left_id
         self.right_id = right_id

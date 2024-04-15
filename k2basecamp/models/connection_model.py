@@ -42,7 +42,7 @@ class ConnectionModel(BaseModel):
             )
             or (
                 self.connection == ConnectionProtocol.EtherCAT
-                and (self.interface_index is None)
+                and (self.interface is None)
             )
         ):
             return ButtonState.Disabled
