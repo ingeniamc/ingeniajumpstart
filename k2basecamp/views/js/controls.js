@@ -6,10 +6,16 @@
  * @param {int} rightFactor 
  * @param {KeyEvent} event 
  */
-function handleButtonPressed(button, leftFactor, rightFactor, event) {
-    // KeyEvents will fire repeatedly if held down (autoRepeat).
-    if (event?.isAutoRepeat || button.state == Enums.ButtonState.Disabled)
+function handleButtonPressed(button, leftFactor, rightFactor) {
+    if (button.state != Enums.ButtonState.Enabled)
         return;
+
+    // Reset all other buttons
+    for (const otherButton of [upButton, downButton, leftButton, rightButton]) {
+        if (button == otherButton || otherButton.state != Enums.ButtonState.Active) continue;
+        otherButton.state = Enums.ButtonState.Enabled;
+    }
+
     button.state = Enums.ButtonState.Active;
     if (leftCheck.checked) {
         grid.connectionController.set_velocity(velocitySliderL.value * leftFactor, Enums.Drive.Left);
@@ -25,7 +31,7 @@ function handleButtonPressed(button, leftFactor, rightFactor, event) {
  * @param {Button} button 
  */
 function handleButtonReleased(button) {
-    if (button.state == Enums.ButtonState.Disabled)
+    if (button.state != Enums.ButtonState.Active)
         return;
     button.state = Enums.ButtonState.Enabled;
     if (leftCheck.checked) {
