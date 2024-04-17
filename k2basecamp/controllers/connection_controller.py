@@ -1,7 +1,7 @@
 import os
 
 import ingenialogger
-from ingenialink import CAN_BAUDRATE
+from ingenialink import CAN_BAUDRATE, SERVO_STATE
 from PySide6.QtCore import QJsonArray, QObject, Signal, Slot
 from PySide6.QtQml import QmlElement
 
@@ -92,10 +92,13 @@ class ConnectionController(QObject):
     emergency_stop_triggered = Signal()
     """Triggers when the emergency stop button was pressed"""
 
+    servo_state_changed = Signal(int, int, arguments=["servo_state", "drive"])
+
     def __init__(self, mcs: MotionControllerService) -> None:
         super().__init__()
         self.mcs = mcs
         self.mcs.error_triggered.connect(self.error_message_callback)
+        self.mcs.servo_state_update_triggered.connect(self.update_servo_state)
         self.connection_model = ConnectionModel()
 
     @Slot()
@@ -443,6 +446,24 @@ class ConnectionController(QObject):
         """
         self.error_triggered.emit(error_message)
         self.update_connect_button_state()
+
+    @Slot(str, int, SERVO_STATE)
+    def update_servo_state(self, drive: str, state: SERVO_STATE) -> None:
+        """Send a signal to the GUI to update the servo state image of the affected
+        drive.
+
+        Args:
+            drive: affected drive
+            state: the new state
+        """
+        if drive == Drive.Left.name:
+            drive_value = Drive.Left.value
+        elif drive == Drive.Right.name:
+            drive_value = Drive.Right.value
+        else:
+            logger.error(f"Invalid drive name: {drive}")
+            return
+        self.servo_state_changed.emit(state.value, drive_value)
 
     def log_report(self, report: thread_report) -> None:
         """Generic callback that simply logs the result of the operation.
