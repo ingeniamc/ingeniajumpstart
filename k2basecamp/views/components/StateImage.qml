@@ -16,7 +16,7 @@ Image {
     sourceSize.width: 20
     sourceSize.height: 20
     source: "images/circle-available.svg"
-    state: Enums.SERVO_STATE.RDY
+    state: Enums.SERVO_STATE.DISABLED
     states: [
         State {
             name: Enums.SERVO_STATE.RDY

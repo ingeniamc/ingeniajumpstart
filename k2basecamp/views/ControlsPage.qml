@@ -33,14 +33,12 @@ RowLayout {
             PlotJS.initSeries(chartR, xAxisR, yAxisR, "Right");
         }
         function onDrive_disconnected_triggered() {
-            leftCheck.checked = false;
-            rightCheck.checked = false;
+            ControlsJS.resetControls()
             PlotJS.resetPlot(chartL);
             PlotJS.resetPlot(chartR);
         }
         function onEmergency_stop_triggered() {
-            leftCheck.checked = false;
-            rightCheck.checked = false;
+            ControlsJS.resetControls()
         }
         function onServo_state_changed(servoState, drive) {
             switch (drive) {

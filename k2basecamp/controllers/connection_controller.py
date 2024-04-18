@@ -90,9 +90,10 @@ class ConnectionController(QObject):
     """
 
     emergency_stop_triggered = Signal()
-    """Triggers when the emergency stop button was pressed"""
+    """Triggers when the emergency stop button was pressed."""
 
     servo_state_changed = Signal(int, int, arguments=["servo_state", "drive"])
+    """Triggers when the state of a servo changes."""
 
     def __init__(self, mcs: MotionControllerService) -> None:
         super().__init__()
@@ -359,6 +360,8 @@ class ConnectionController(QObject):
                 the callback
         """
 
+        self.update_servo_state(Drive.Right.name, SERVO_STATE.DISABLED)
+        self.update_servo_state(Drive.Left.name, SERVO_STATE.DISABLED)
         self.drive_disconnected_triggered.emit()
         self.update_connect_button_state()
 
