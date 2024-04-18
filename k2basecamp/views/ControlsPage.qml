@@ -41,6 +41,9 @@ RowLayout {
         function onEmergency_stop_triggered() {
             leftCheck.checked = false;
             rightCheck.checked = false;
+            for (const button of [upButton, downButton, leftButton, rightButton]) {
+                button.state = Enums.ButtonState.Disabled;
+            }
         }
     }
 
@@ -112,7 +115,7 @@ RowLayout {
             }
         }
         RowLayout {
-            // Graphs to display motor velocities over time. 
+            // Graphs to display motor velocities over time.
             Layout.fillHeight: true
 
             Rectangle {
@@ -164,7 +167,7 @@ RowLayout {
         }
 
         GridLayout {
-            /** Buttons to control velocities. 
+            /** Buttons to control velocities.
              * The arrow key buttons are bound to click events.
              * Sliders to control the target velocities.
              * Inputs to control the maximum velocities.
