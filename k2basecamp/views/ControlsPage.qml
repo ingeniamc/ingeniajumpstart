@@ -41,6 +41,9 @@ RowLayout {
         function onEmergency_stop_triggered() {
             leftCheck.checked = false;
             rightCheck.checked = false;
+            for (const button of [upButton, downButton, leftButton, rightButton]) {
+                button.state = Enums.ButtonState.Disabled;
+            }
         }
     }
 
