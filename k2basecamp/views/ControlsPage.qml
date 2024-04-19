@@ -46,13 +46,13 @@ RowLayout {
 
     // Bind velocity controls to the arrow keys on the keyboard.
 
-    Keys.onUpPressed: event => ControlsJS.handleButtonPressed(upButton, -1, 1, event)
+    Keys.onUpPressed: event => ControlsJS.handleButtonPressed(upButton, -1, 1)
 
-    Keys.onDownPressed: event => ControlsJS.handleButtonPressed(downButton, 1, -1, event)
+    Keys.onDownPressed: event => ControlsJS.handleButtonPressed(downButton, 1, -1)
 
-    Keys.onLeftPressed: event => ControlsJS.handleButtonPressed(leftButton, 1, 1, event)
+    Keys.onLeftPressed: event => ControlsJS.handleButtonPressed(leftButton, 1, 1)
 
-    Keys.onRightPressed: event => ControlsJS.handleButtonPressed(rightButton, -1, -1, event)
+    Keys.onRightPressed: event => ControlsJS.handleButtonPressed(rightButton, -1, -1)
 
     Keys.onReleased: event => {
         if (event.isAutoRepeat)
@@ -112,7 +112,7 @@ RowLayout {
             }
         }
         RowLayout {
-            // Graphs to display motor velocities over time. 
+            // Graphs to display motor velocities over time.
             Layout.fillHeight: true
 
             Rectangle {
@@ -164,7 +164,7 @@ RowLayout {
         }
 
         GridLayout {
-            /** Buttons to control velocities. 
+            /** Buttons to control velocities.
              * The arrow key buttons are bound to click events.
              * Sliders to control the target velocities.
              * Inputs to control the maximum velocities.
