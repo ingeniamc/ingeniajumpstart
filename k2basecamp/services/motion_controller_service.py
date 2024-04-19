@@ -185,14 +185,15 @@ class MotionControllerService(QObject):
                     )
                 else:
                     raise ILError("Connection type not implemented.")
-                if config is not None:
-                    self.__mc.configuration.load_configuration(
-                        config_path=config, servo=drive
-                    )
 
                 self.__mc.communication.subscribe_servo_status(
                     partial(self.servo_status_callback, drive), drive
                 )
+
+                if config is not None:
+                    self.__mc.configuration.load_configuration(
+                        config_path=config, servo=drive
+                    )
 
         return on_thread
 
