@@ -39,7 +39,7 @@ class BootloaderModel(BaseModel):
                 )
                 or (
                     self.connection == ConnectionProtocol.EtherCAT
-                    and self.interface_index is not None
+                    and self.interface is not None
                 )
             )
         )

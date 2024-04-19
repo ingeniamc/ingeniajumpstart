@@ -18,9 +18,9 @@ def test_select_connection(connection_controller: ConnectionController) -> None:
 
 
 def test_select_interface(connection_controller: ConnectionController) -> None:
-    interface = 2
+    interface = "interface_name"
     connection_controller.select_interface(interface)
-    assert connection_controller.connection_model.interface_index == interface
+    assert connection_controller.connection_model.interface == interface
 
 
 def test_select_can_device(connection_controller: ConnectionController) -> None:
