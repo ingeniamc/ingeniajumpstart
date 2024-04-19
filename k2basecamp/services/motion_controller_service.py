@@ -1,6 +1,6 @@
 import xml.etree.ElementTree as ET
 from functools import partial, wraps
-from typing import Any, Callable, Union
+from typing import Any, Callable, Optional, Union
 
 from ingenialink import SERVO_STATE
 from ingenialink.exceptions import ILError
@@ -166,7 +166,9 @@ class MotionControllerService(QObject):
                     continue
                 if connection_model.connection == ConnectionProtocol.EtherCAT:
                     self.__mc.communication.connect_servo_ethercat_interface_index(
-                        if_index=connection_model.interface_index,
+                        if_index=self.get_current_interface_index(
+                            connection_model.interface
+                        ),
                         slave_id=id,
                         dict_path=connection_model.dictionary,
                         alias=drive,
@@ -218,6 +220,12 @@ class MotionControllerService(QObject):
         """
         return self.__mc.communication.get_interface_name_list()
 
+    def get_current_interface_index(self, interface: Optional[str]) -> int:
+        if interface is None:
+            raise ILError("Interface is not set.")
+        available_interfaces = self.__mc.communication.get_interface_name_list()
+        return available_interfaces.index(interface)
+
     @run_on_thread
     def scan_servos(
         self,
@@ -253,7 +261,7 @@ class MotionControllerService(QObject):
                 )
             elif base_model.connection == ConnectionProtocol.EtherCAT:
                 result = self.__mc.communication.scan_servos_ethercat_interface_index(
-                    base_model.interface_index
+                    self.get_current_interface_index(base_model.interface)
                 )
             else:
                 raise ILError("Connection type not implemented.")
@@ -529,6 +537,6 @@ class MotionControllerService(QObject):
         elif bootloader_model.connection == ConnectionProtocol.EtherCAT:
             mc.communication.load_firmware_ecat_interface_index(
                 fw_file=firmware,
-                if_index=bootloader_model.interface_index,
+                if_index=self.get_current_interface_index(bootloader_model.interface),
                 slave=id,
             )

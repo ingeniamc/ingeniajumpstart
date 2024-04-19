@@ -100,7 +100,10 @@ class BootloaderController(QObject):
         Returns:
             QJsonArray: the available interfaces in JSON format.
         """
-        return QJsonArray.fromStringList(self.mcs.get_interface_name_list())
+        interface_name_list = self.mcs.get_interface_name_list()
+        if len(interface_name_list) > 0:
+            self.bootloader_model.interface = interface_name_list[0]
+        return QJsonArray.fromStringList(interface_name_list)
 
     @Slot()
     def scan_servos(self) -> None:
@@ -236,15 +239,15 @@ class BootloaderController(QObject):
         self.bootloader_model.connection = ConnectionProtocol(connection)
         self.update_install_button_state()
 
-    @Slot(int)
-    def select_interface(self, interface: int) -> None:
+    @Slot(str)
+    def select_interface(self, interface: str) -> None:
         """Update the DriveModel, setting the interface property to the value that was
         selected in the UI.
 
         Args:
             interface: the selected interface.
         """
-        self.bootloader_model.interface_index = interface
+        self.bootloader_model.interface = interface
         self.update_install_button_state()
 
     @Slot(int)
