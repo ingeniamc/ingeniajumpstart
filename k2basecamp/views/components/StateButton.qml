@@ -45,6 +45,6 @@ Button {
             }
         }
     ]
-    onPressed: () => ControlsJS.handleButtonPressed(stateButton, leftFactor, rightFactor)
+    onPressAndHold: () => ControlsJS.handleButtonPressed(stateButton, leftFactor, rightFactor)
     onReleased: () => ControlsJS.handleButtonReleased(stateButton)
 }
