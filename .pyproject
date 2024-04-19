@@ -19,6 +19,7 @@
         "k2basecamp/views/components/Selection.qml",
         "k2basecamp/views/components/SpacerH.qml",
         "k2basecamp/views/components/SpacerW.qml",
-        "k2basecamp/views/components/StateButton.qml"
+        "k2basecamp/views/components/StateButton.qml",
+        "k2basecamp/views/components/StateImage.qml"
     ]
 }

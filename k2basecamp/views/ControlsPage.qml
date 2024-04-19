@@ -33,14 +33,24 @@ RowLayout {
             PlotJS.initSeries(chartR, xAxisR, yAxisR, "Right");
         }
         function onDrive_disconnected_triggered() {
-            leftCheck.checked = false;
-            rightCheck.checked = false;
+            ControlsJS.resetControls()
             PlotJS.resetPlot(chartL);
             PlotJS.resetPlot(chartR);
         }
         function onEmergency_stop_triggered() {
-            leftCheck.checked = false;
-            rightCheck.checked = false;
+            ControlsJS.resetControls()
+        }
+        function onServo_state_changed(servoState, drive) {
+            switch (drive) {
+                case Enums.Drive.Left:
+                    leftState.state = servoState;
+                    break;
+                case Enums.Drive.Right:
+                    rightState.state = servoState;
+                    break;
+                default:
+                    console.log("Drive not found:", drive);
+            }
         }
     }
 
@@ -77,7 +87,6 @@ RowLayout {
         RowLayout {
             // Checkboxes to enable / disable motors.
             Layout.fillHeight: true
-
             SpacerW {
             }
             CheckBox {
@@ -94,6 +103,12 @@ RowLayout {
                     ControlsJS.updateKeyState();
                 }
             }
+            StateImage {
+                id: leftState
+            }
+            SpacerW {
+                Layout.preferredWidth: 2
+            }
             CheckBox {
                 id: rightCheck
                 text: qsTr("Right")
@@ -108,11 +123,14 @@ RowLayout {
                     ControlsJS.updateKeyState();
                 }
             }
+            StateImage {
+                id: rightState
+            }
             SpacerW {
             }
         }
         RowLayout {
-            // Graphs to display motor velocities over time. 
+            // Graphs to display motor velocities over time.
             Layout.fillHeight: true
 
             Rectangle {
@@ -164,7 +182,7 @@ RowLayout {
         }
 
         GridLayout {
-            /** Buttons to control velocities. 
+            /** Buttons to control velocities.
              * The arrow key buttons are bound to click events.
              * Sliders to control the target velocities.
              * Inputs to control the maximum velocities.

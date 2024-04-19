@@ -1,6 +1,6 @@
 from enum import Enum, auto
 
-from ingenialink import CAN_BAUDRATE, CAN_DEVICE
+from ingenialink import CAN_BAUDRATE, CAN_DEVICE, SERVO_STATE
 from PySide6.QtCore import QEnum, QObject
 from PySide6.QtQml import QmlElement
 
@@ -64,4 +64,5 @@ class Enums(QObject):
     QEnum(ConnectionProtocol)
     QEnum(CanDevice)
     QEnum(CAN_BAUDRATE)
+    QEnum(SERVO_STATE)
     QEnum(ButtonState)
