@@ -1,7 +1,7 @@
 import os
 
 import ingenialogger
-from ingenialink import CAN_BAUDRATE, SERVO_STATE
+from ingenialink import CAN_BAUDRATE, NET_DEV_EVT, SERVO_STATE
 from PySide6.QtCore import QJsonArray, QObject, Signal, Slot
 from PySide6.QtQml import QmlElement
 
@@ -95,11 +95,15 @@ class ConnectionController(QObject):
     servo_state_changed = Signal(int, int, arguments=["servo_state", "drive"])
     """Triggers when the state of a servo changes."""
 
+    net_state_changed = Signal(int, arguments=["net_state"])
+    """Triggers when the state of the network changes."""
+
     def __init__(self, mcs: MotionControllerService) -> None:
         super().__init__()
         self.mcs = mcs
         self.mcs.error_triggered.connect(self.error_message_callback)
         self.mcs.servo_state_update_triggered.connect(self.update_servo_state)
+        self.mcs.net_state_update_triggered.connect(self.update_net_state)
         self.connection_model = ConnectionModel()
 
     @Slot()
@@ -363,8 +367,8 @@ class ConnectionController(QObject):
                 the callback
         """
 
-        self.update_servo_state(Drive.Right.name, SERVO_STATE.DISABLED)
-        self.update_servo_state(Drive.Left.name, SERVO_STATE.DISABLED)
+        self.update_servo_state(Drive.Right, SERVO_STATE.DISABLED)
+        self.update_servo_state(Drive.Left, SERVO_STATE.DISABLED)
         self.drive_disconnected_triggered.emit()
         self.update_connect_button_state()
 
@@ -454,23 +458,31 @@ class ConnectionController(QObject):
         self.error_triggered.emit(error_message)
         self.update_connect_button_state()
 
-    @Slot(str, int, SERVO_STATE)
-    def update_servo_state(self, drive: str, state: SERVO_STATE) -> None:
+    @Slot(Drive, SERVO_STATE)
+    def update_servo_state(self, drive: Drive, state: SERVO_STATE) -> None:
         """Send a signal to the GUI to update the servo state image of the affected
         drive.
 
         Args:
-            drive: affected drive
+            drive: the affected drive
             state: the new state
         """
-        if drive == Drive.Left.name:
-            drive_value = Drive.Left.value
-        elif drive == Drive.Right.name:
-            drive_value = Drive.Right.value
-        else:
-            logger.error(f"Invalid drive name: {drive}")
-            return
-        self.servo_state_changed.emit(state.value, drive_value)
+        self.servo_state_changed.emit(state.value, drive.value)
+
+    @Slot(Drive, NET_DEV_EVT)
+    def update_net_state(self, drive: Drive, state: NET_DEV_EVT) -> None:
+        """Send a signal to the GUI to update the interface when the network state
+        changes.
+        Also stops related poller threads if the drive was disconnected.
+
+        Args:
+            drive: the affected drive
+            state: the new state
+        """
+        if state == NET_DEV_EVT.REMOVED:
+            self.mcs.stop_poller_thread(drive.name)
+            self.error_triggered.emit("Network connection lost.")
+        self.net_state_changed.emit(state.value)
 
     def log_report(self, report: thread_report) -> None:
         """Generic callback that simply logs the result of the operation.
