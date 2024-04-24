@@ -16,4 +16,6 @@ At its core, it is a minimal interface that lets you connect to both drives of t
 
 You can then enable / disable the servo motors and get them moving using the arrow keys (or pressing the corresponding buttons).
 
+The interface includes a LED for each motor that displays its current status.
+
 The graphs will display the velocity of the motors over time, and the input box and sliders can be used to set additional parameters related to the velocity of the motors.

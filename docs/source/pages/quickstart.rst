@@ -18,11 +18,11 @@ If you have python 3.9 and pipenv installed on your system, running K2 Base Camp
 #. Cloning the repository from `github <https://github.com/ingeniamc/k2-base-camp.git>`_
 #. Installing the dependencies::
 
-    pipenv install --ignore-pipfile
+    pipenv sync
 
 #. Running the program::
 
-    pipenv run python src/__main__.py
+    pipenv run python -m k2basecamp
 
 Installing python
 =================
@@ -40,5 +40,5 @@ You might have to explicitly specify the python location when creating the virtu
 
 Subsequently, the quickstart commands would be adapted to::
 
-    py -3.9 -m pipenv install --ignore-pipfile
-    py -3.9 -m pipenv run python src/__main__.py
+    py -3.9 -m pipenv sync
+    py -3.9 -m pipenv run python -m k2basecamp

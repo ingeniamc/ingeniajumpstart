@@ -29,7 +29,8 @@ Project folder structure
 | root
 | ├── assets *(static files such as images)*
 | ├── docs *(this documentation)*
-| ├── src
+| ├── k2basecamp
+| │   ├── assets
 | │   ├── controllers
 | │   ├── models
 | │   ├── services
@@ -43,7 +44,7 @@ Project folder structure
 Architecture
 ============
 
-The ``src`` directory contains the application code and is composed of several important parts.
+The ``k2basecamp`` directory contains the application code and is composed of several important parts.
 
 Everything that is visible to the user is contained in the ``views`` folder and written in QML (all QML and javascript code is contained in the ``views`` folder). 
 The user interface and all it's components are defined here. 
@@ -120,6 +121,28 @@ To illustrate the flow of the application while it is running, consider the foll
         .. image:: ../_static/graph.png
             :width: 400
             :alt: The control interface with a velocity graph
+
+* The library that we use to communicate with the drive (ingeniamotion) also allows us to get periodic updates about certain states. For example, we can display LEDs that inform the user about the state of the motor.
+    
+    #. The subscription to the motor state is done in the ``service`` when we connect to the drives.
+    #. When making the subscription, we also define a callback function in the ``service`` that handles the information we will now periodically receive from the drives.
+    #. In the callback, a signal is sent to the ``controller``, containing the current motor state.
+    #. In this case, the ``controller`` simply emits a ``signal`` to the GUI where the corresponding LED is updated.
+
+        .. image:: ../_static/leds.png
+            :width: 400
+            :alt: 
+            
+* Another subscription that we make is to the network state. This allows us to update the interface when the drives are suddenly disconnected (e.g. when the cable gets pulled) or when the connection becomes available again.
+
+    #. Just as in the previous example, the subscription is made in the ``service`` when connecting to the drives.
+    #. The callback in the ``service`` passes the information to the ``controller``.
+    #. Here we might run additional code depending on the state (e.g. stopping running poller threads when the connection was lost).
+    #. Lastly, we inform the GUI about the occurence via ``signals``. This could mean displaying an error message or changing button states (disabled / re-enabled).
+
+        .. image:: ../_static/connection_lost.png
+            :width: 400
+            :alt: 
 
 .. NOTE::
 
