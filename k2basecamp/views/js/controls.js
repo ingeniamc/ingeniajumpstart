@@ -64,3 +64,14 @@ function updateKeyState() {
         rightButton.state = Enums.ButtonState.Disabled;
     }
 }
+
+/**
+ * Reset all the control elements of the interface to their initial state
+ */
+function resetControls() {
+    leftCheck.checked = false;
+    rightCheck.checked = false;
+    for (const button of [upButton, downButton, leftButton, rightButton]) {
+        button.state = Enums.ButtonState.Disabled
+    }
+}

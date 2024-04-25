@@ -1,7 +1,8 @@
 import xml.etree.ElementTree as ET
-from functools import wraps
+from functools import partial, wraps
 from typing import Any, Callable, Optional, Union
 
+from ingenialink import SERVO_STATE
 from ingenialink.exceptions import ILError
 from ingeniamotion import MotionController
 from ingeniamotion.enums import OperationMode
@@ -31,6 +32,9 @@ class MotionControllerService(QObject):
 
     error_triggered = Signal(str, arguments=["error_message"])
     """Triggers when an error occurs while communicating with the drive"""
+
+    servo_state_update_triggered: Signal = Signal(str, SERVO_STATE)
+    """Triggers when the servo state is updated."""
 
     def __init__(self) -> None:
         """The constructor for MotionControllerService class"""
@@ -168,6 +172,7 @@ class MotionControllerService(QObject):
                         slave_id=id,
                         dict_path=connection_model.dictionary,
                         alias=drive,
+                        servo_status_listener=True,
                     )
                 elif connection_model.connection == ConnectionProtocol.CANopen:
                     self.__mc.communication.connect_servo_canopen(
@@ -178,15 +183,34 @@ class MotionControllerService(QObject):
                         dict_path=connection_model.dictionary,
                         node_id=id,
                         alias=drive,
+                        servo_status_listener=True,
                     )
                 else:
                     raise ILError("Connection type not implemented.")
+
+                self.__mc.communication.subscribe_servo_status(
+                    partial(self.servo_status_callback, drive), drive
+                )
+
                 if config is not None:
                     self.__mc.configuration.load_configuration(
                         config_path=config, servo=drive
                     )
 
         return on_thread
+
+    def servo_status_callback(
+        self, drive: str, state: SERVO_STATE, _: None, subnode: int
+    ) -> None:
+        """Callback when the state of the drive changes
+
+        Args:
+            drive: the affected drive
+            state: the new state
+            _ (None): (unused)
+            subnode: subnode, unused
+        """
+        self.servo_state_update_triggered.emit(drive, state)
 
     def get_interface_name_list(self) -> list[str]:
         """Get a list of available interface names from the MotionController.
