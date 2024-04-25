@@ -67,11 +67,18 @@ function updateKeyState() {
 
 /**
  * Reset all the control elements of the interface to their initial state
+ * @param {boolean} drivesConnected
  */
-function resetControls() {
-    leftCheck.checked = false;
-    rightCheck.checked = false;
+function resetControls(drivesConnected = true) {
+    for (const checkbox of [leftCheck, rightCheck]) {
+        checkbox.checked = false;
+        checkbox.enabled = drivesConnected;
+        checkbox.tooltipText = drivesConnected ? null : "Drive not connected."
+    }
     for (const button of [upButton, downButton, leftButton, rightButton]) {
         button.state = Enums.ButtonState.Disabled
+    }
+    for (const stateLED of [leftState, rightState]) {
+        stateLED.state = Enums.SERVO_STATE.DISABLED
     }
 }

@@ -52,6 +52,9 @@ RowLayout {
                     console.log("Drive not found:", drive);
             }
         }
+        function onNet_state_changed(netState) {
+            ControlsJS.resetControls(netState != Enums.NET_DEV_EVT.REMOVED)
+        }
     }
 
     // Bind velocity controls to the arrow keys on the keyboard.
@@ -92,6 +95,9 @@ RowLayout {
             CheckBox {
                 id: leftCheck
                 text: qsTr("Left")
+                property string tooltipText
+                ToolTip.visible: tooltipText ? hovered : false
+                ToolTip.text: tooltipText
                 onToggled: () => {
                     PlotJS.resetPlot(chartL);
                     PlotJS.initSeries(chartL, xAxisL, yAxisL, "Left");
@@ -112,6 +118,9 @@ RowLayout {
             CheckBox {
                 id: rightCheck
                 text: qsTr("Right")
+                property string tooltipText
+                ToolTip.visible: tooltipText ? hovered : false
+                ToolTip.text: tooltipText
                 onToggled: () => {
                     PlotJS.resetPlot(chartR);
                     PlotJS.initSeries(chartR, xAxisR, yAxisR, "Right");

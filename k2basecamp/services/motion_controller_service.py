@@ -2,7 +2,7 @@ import xml.etree.ElementTree as ET
 from functools import partial, wraps
 from typing import Any, Callable, Optional, Union
 
-from ingenialink import SERVO_STATE
+from ingenialink import NET_DEV_EVT, SERVO_STATE
 from ingenialink.exceptions import ILError
 from ingeniamotion import MotionController
 from ingeniamotion.enums import OperationMode
@@ -33,8 +33,11 @@ class MotionControllerService(QObject):
     error_triggered = Signal(str, arguments=["error_message"])
     """Triggers when an error occurs while communicating with the drive"""
 
-    servo_state_update_triggered: Signal = Signal(str, SERVO_STATE)
+    servo_state_update_triggered: Signal = Signal(Drive, SERVO_STATE)
     """Triggers when the servo state is updated."""
+
+    net_state_update_triggered: Signal = Signal(Drive, NET_DEV_EVT)
+    """Triggers when the network state is updated."""
 
     def __init__(self) -> None:
         """The constructor for MotionControllerService class"""
@@ -152,12 +155,12 @@ class MotionControllerService(QObject):
                 raise ILError("Node IDs cannot be the same.")
             for drive, id, config in [
                 (
-                    Drive.Left.name,
+                    Drive.Left,
                     connection_model.left_id,
                     connection_model.left_config,
                 ),
                 (
-                    Drive.Right.name,
+                    Drive.Right,
                     connection_model.right_id,
                     connection_model.right_config,
                 ),
@@ -171,8 +174,9 @@ class MotionControllerService(QObject):
                         ),
                         slave_id=id,
                         dict_path=connection_model.dictionary,
-                        alias=drive,
+                        alias=drive.name,
                         servo_status_listener=True,
+                        net_status_listener=True,
                     )
                 elif connection_model.connection == ConnectionProtocol.CANopen:
                     self.__mc.communication.connect_servo_canopen(
@@ -182,25 +186,28 @@ class MotionControllerService(QObject):
                         ),
                         dict_path=connection_model.dictionary,
                         node_id=id,
-                        alias=drive,
+                        alias=drive.name,
                         servo_status_listener=True,
+                        net_status_listener=True,
                     )
                 else:
                     raise ILError("Connection type not implemented.")
 
                 self.__mc.communication.subscribe_servo_status(
-                    partial(self.servo_status_callback, drive), drive
+                    partial(self.servo_status_callback, drive), drive.name
                 )
-
+                self.__mc.communication.subscribe_net_status(
+                    partial(self.net_status_callback, drive), drive.name
+                )
                 if config is not None:
                     self.__mc.configuration.load_configuration(
-                        config_path=config, servo=drive
+                        config_path=config, servo=drive.name
                     )
 
         return on_thread
 
     def servo_status_callback(
-        self, drive: str, state: SERVO_STATE, _: None, subnode: int
+        self, drive: Drive, state: SERVO_STATE, _: None, subnode: int
     ) -> None:
         """Callback when the state of the drive changes
 
@@ -211,6 +218,15 @@ class MotionControllerService(QObject):
             subnode: subnode, unused
         """
         self.servo_state_update_triggered.emit(drive, state)
+
+    def net_status_callback(self, drive: Drive, state: NET_DEV_EVT) -> None:
+        """Callback when the state of the network changes
+
+        Args:
+            drive: the affected drive
+            state: the new state
+        """
+        self.net_state_update_triggered.emit(drive, state)
 
     def get_interface_name_list(self) -> list[str]:
         """Get a list of available interface names from the MotionController.
