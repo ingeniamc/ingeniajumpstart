@@ -122,7 +122,7 @@ To illustrate the flow of the application while it is running, consider the foll
             :width: 400
             :alt: The control interface with a velocity graph
 
-* The library that we use to communicate with the drive (ingeniamotion) also allows us to get periodic updates about certain states. For example, we can display LEDs that inform the user about the state of the motor.
+* The library that we use to communicate with the drive (ingeniamotion) also allows us to get periodic updates about certain states. For example, we can display LEDs that inform the user about the state of the motor (RED = Disabled, YELLOW = Ready, GREEN = Enabled).
     
     #. The subscription to the motor state is done in the ``service`` when we connect to the drives.
     #. When making the subscription, we also define a callback function in the ``service`` that handles the information we will now periodically receive from the drives.
