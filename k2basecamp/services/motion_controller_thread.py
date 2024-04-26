@@ -1,4 +1,5 @@
 import time
+from functools import partial
 from queue import Queue
 from typing import Union
 
@@ -75,8 +76,12 @@ class MotionControllerThread(QThread):
             ) as e:
                 raised_exception = e
             duration = time.time() - timestamp
+            if isinstance(task.callback, partial):
+                func_name = task.callback.func.__qualname__
+            else:
+                func_name = task.callback.__qualname__
             report = thread_report(
-                task.callback.__qualname__,
+                func_name,
                 output,
                 timestamp,
                 duration,
