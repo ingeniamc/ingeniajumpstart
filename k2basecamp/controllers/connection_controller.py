@@ -15,7 +15,7 @@ from k2basecamp.utils.types import thread_report
 # (QML_IMPORT_MINOR_VERSION is optional)
 QML_IMPORT_NAME = "qmltypes.controllers"
 QML_IMPORT_MAJOR_VERSION = 1
-MAX_VALOCITY_REGISTER = "CL_VEL_REF_MAX"
+MAX_VELOCITY_REGISTER = "CL_VEL_REF_MAX"
 
 logger = ingenialogger.get_logger(__name__)
 
@@ -232,7 +232,7 @@ class ConnectionController(QObject):
         self.mcs.run(
             self.log_report,
             "communication.set_register",
-            MAX_VALOCITY_REGISTER,
+            MAX_VELOCITY_REGISTER,
             max_velocity,
             Drive(drive).name,
         )
@@ -368,7 +368,7 @@ class ConnectionController(QObject):
             self.mcs.run(
                 partial(self.get_max_velocity_value_callback, drive),
                 "communication.get_register",
-                MAX_VALOCITY_REGISTER,
+                MAX_VELOCITY_REGISTER,
                 drive.name,
             )
 
@@ -384,7 +384,10 @@ class ConnectionController(QObject):
         if t_report.exceptions is None:
             new_value = t_report.output
             if not isinstance(new_value, float):
-                logger.debug("Register is not an integer, float or string.")
+                logger.debug(
+                    "Invalid max velocity value type. Expected type float, got type "
+                    + f"{type(new_value)}"
+                )
                 return
             self.max_velocity_value_received.emit(new_value, drive.value)
         else:
