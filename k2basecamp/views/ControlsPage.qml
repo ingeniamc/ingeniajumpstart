@@ -59,9 +59,11 @@ RowLayout {
             switch (drive) {
                 case Enums.Drive.Left:
                     maxVelocityLeft.value = newValue;
+                    velocitySliderL.to = newValue;
                     break;
                 case Enums.Drive.Right:
                     maxVelocityRight.value = newValue;
+                    velocitySliderR.to = newValue;
                     break;
                 default:
                     console.log("Drive not found:", drive);
@@ -241,6 +243,7 @@ RowLayout {
                     to: 1000
                     editable: true
                     onValueModified: () => {
+                        velocitySliderL.to = value;
                         grid.connectionController.set_register_max_velocity(value, Enums.Drive.Left);
                     }
                 }
@@ -303,6 +306,7 @@ RowLayout {
                     to: 1000
                     editable: true
                     onValueModified: () => {
+                        velocitySliderR.to = value;
                         grid.connectionController.set_register_max_velocity(value, Enums.Drive.Right);
                     }
                 }
