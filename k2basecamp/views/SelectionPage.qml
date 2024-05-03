@@ -340,7 +340,7 @@ ColumnLayout {
 
     RowLayout {
         // Buttons for config file upload & display of currently selected files,
-        // as well as a button to clear the config files. Seperate buttons for each drive.
+        // as well as a button to clear the config files. Separate buttons for each drive.
         id: separateConfigUpload
         visible: false
         Components.SpacerW {
@@ -393,7 +393,7 @@ ColumnLayout {
 
     RowLayout {
         // Buttons for dictionary file upload & display of currently selected files,
-        // as well as a button to clear the dictionary files. Seperate buttons for each drive.
+        // as well as a button to clear the dictionary files. Separate buttons for each drive.
         id: separateDictionaryUpload
         visible: false
         Components.SpacerW {

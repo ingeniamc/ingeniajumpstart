@@ -1,18 +1,18 @@
 /**
- * Reset the upload button components used for file uploads and display seperate or combined buttons as
+ * Reset the upload button components used for file uploads and display separate or combined buttons as
  * desired by the user.
- * @param {boolean} selectSeperately 
+ * @param {boolean} selectSeparately 
  * @param {Components.UploadButton.FileType} fileType 
  */
-function resetUploads(selectSeperately, fileType) {
+function resetUploads(selectSeparately, fileType) {
     switch (fileType) {
         case Components.UploadButton.FileType.Config:
-            setSelectSeperately(combinedConfigUpload, separateConfigUpload, selectSeperately);
+            setSelectSeparately(combinedConfigUpload, separateConfigUpload, selectSeparately);
             selectionPage.connectionController.reset_config(Enums.Drive.Both);
             resetUploadButtons([combinedConfigUploadBtn, leftConfigUploadBtn, rightConfigUploadBtn]);
             break;
         case Components.UploadButton.FileType.Dictionary:
-            setSelectSeperately(combinedDictionaryUpload, separateDictionaryUpload, selectSeperately);
+            setSelectSeparately(combinedDictionaryUpload, separateDictionaryUpload, selectSeparately);
             selectionPage.connectionController.reset_dictionary(Enums.Drive.Both);
             resetUploadButtons([combinedDictionaryUploadBtn, leftDictionaryUploadBtn, rightDictionaryUploadBtn]);
             break;
@@ -20,14 +20,14 @@ function resetUploads(selectSeperately, fileType) {
 }
 
 /**
- * Sets the interface to display either seperate or combined upload buttons.
+ * Sets the interface to display either separate or combined upload buttons.
  * @param {RowLayout} combinedUploadComponent 
- * @param {RowLayout} seperateUploadComponent 
- * @param {boolean} selectSeperately 
+ * @param {RowLayout} separateUploadComponent 
+ * @param {boolean} selectSeparately 
  */
-function setSelectSeperately(combinedUploadComponent, seperateUploadComponent, selectSeperately) {
-    combinedUploadComponent.visible = !selectSeperately;
-    seperateUploadComponent.visible = selectSeperately;
+function setSelectSeparately(combinedUploadComponent, separateUploadComponent, selectSeparately) {
+    combinedUploadComponent.visible = !selectSeparately;
+    separateUploadComponent.visible = selectSeparately;
 }
 
 /**
