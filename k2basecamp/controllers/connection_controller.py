@@ -52,7 +52,7 @@ class ConnectionController(QObject):
         velocity (float): velocity of the new data point.
     """
 
-    dictionary_changed = Signal(str, arguments=["dictionary"])
+    dictionary_changed = Signal(str, int, arguments=["dictionary", "drive"])
     """Triggers when the dictionary file was selected.
 
     Args:
@@ -232,8 +232,8 @@ class ConnectionController(QObject):
             Drive(drive).name,
         )
 
-    @Slot(str)
-    def select_dictionary(self, dictionary: str) -> None:
+    @Slot(str, int)
+    def select_dictionary(self, dictionary: str, drive: int) -> None:
         """Update the DriveModel, setting the dictionary property to the url of the
         file that was uploaded in the UI.
         Also identifies which connection protocol the dictionary belongs to and sets the
@@ -241,20 +241,39 @@ class ConnectionController(QObject):
 
         Args:
             dictionary: the url of the dictionary file
+            drive: the drive the dictionary is for
         """
-        self.connection_model.dictionary = dictionary.removeprefix("file:///")
-        self.connection_model.dictionary_type = self.mcs.check_dictionary_format(
-            self.connection_model.dictionary
-        )
-        self.dictionary_changed.emit(os.path.basename(self.connection_model.dictionary))
+        dictionary = dictionary.removeprefix("file:///")
+        dictionary_type = self.mcs.check_dictionary_format(dictionary)
+        if drive == Drive.Left.value:
+            self.connection_model.left_dictionary = dictionary
+            self.connection_model.left_dictionary_type = dictionary_type
+        elif drive == Drive.Right.value:
+            self.connection_model.right_dictionary = dictionary
+            self.connection_model.right_dictionary_type = dictionary_type
+        elif drive == Drive.Both.value:
+            self.connection_model.left_dictionary = dictionary
+            self.connection_model.left_dictionary_type = dictionary_type
+            self.connection_model.right_dictionary = dictionary
+            self.connection_model.right_dictionary_type = dictionary_type
+        self.dictionary_changed.emit(os.path.basename(dictionary), drive)
         self.update_connect_button_state()
 
-    @Slot()
-    def reset_dictionary(self) -> None:
+    @Slot(int)
+    def reset_dictionary(self, drive: int) -> None:
         """Resets the dictionary file in the DriveModel."""
-        self.connection_model.dictionary = None
-        self.connection_model.dictionary_type = None
-        self.dictionary_changed.emit("")
+        if drive == Drive.Left.value:
+            self.connection_model.left_dictionary = None
+            self.connection_model.left_dictionary_type = None
+        elif drive == Drive.Right.value:
+            self.connection_model.right_dictionary = None
+            self.connection_model.right_dictionary_type = None
+        elif drive == Drive.Both.value:
+            self.connection_model.left_dictionary = None
+            self.connection_model.left_dictionary_type = None
+            self.connection_model.right_dictionary = None
+            self.connection_model.right_dictionary_type = None
+        self.dictionary_changed.emit("", drive)
         self.update_connect_button_state()
 
     @Slot(str, int)
@@ -269,7 +288,10 @@ class ConnectionController(QObject):
         config = config.removeprefix("file:///")
         if drive == Drive.Left.value:
             self.connection_model.left_config = config
-        else:
+        elif drive == Drive.Right.value:
+            self.connection_model.right_config = config
+        elif drive == Drive.Both.value:
+            self.connection_model.left_config = config
             self.connection_model.right_config = config
         self.config_changed.emit(os.path.basename(config), drive)
 
@@ -282,7 +304,10 @@ class ConnectionController(QObject):
         """
         if drive == Drive.Left.value:
             self.connection_model.left_config = None
-        else:
+        elif drive == Drive.Right.value:
+            self.connection_model.right_config = None
+        elif drive == Drive.Both.value:
+            self.connection_model.left_config = None
             self.connection_model.right_config = None
         self.config_changed.emit("", drive)
 

@@ -283,7 +283,7 @@ ColumnLayout {
         }
         Components.SpacerW {
         }
-        Components.Button {
+        Components.StyledButton {
             id: scanButton
             text: "Scan"
             Layout.fillWidth: true
@@ -397,7 +397,7 @@ ColumnLayout {
         ColumnLayout {
             Layout.fillWidth: true
             Layout.preferredWidth: 2
-            Components.Button {
+            Components.StyledButton {
                 id: firmwareButtonLeft
                 text: "Choose firmware left..."
                 onClicked: firmwarefileLeftDialog.open()
@@ -425,7 +425,7 @@ ColumnLayout {
         ColumnLayout {
             Layout.fillWidth: true
             Layout.preferredWidth: 2
-            Components.Button {
+            Components.StyledButton {
                 id: firmwareButtonRight
                 text: "Choose firmware right..."
                 onClicked: firmwarefileRightDialog.open()
@@ -460,7 +460,7 @@ ColumnLayout {
         // a node was selected for the drive we want to change).
         Components.SpacerW {
         }
-        Components.Button {
+        Components.StyledButton {
             id: installBtn
             text: "Install firmware"
             Material.background: '#2ffcab'

@@ -49,10 +49,10 @@ def test_select_dictionary(connection_controller: ConnectionController) -> None:
     dict_signal_spy = QSignalSpy(connection_controller.dictionary_changed)
 
     ethercat_dict = "tests/assets/cap-net-e_eoe_2.4.1.xdf"
-    connection_controller.select_dictionary(ethercat_dict)
-    assert connection_controller.connection_model.dictionary == ethercat_dict
+    connection_controller.select_dictionary(ethercat_dict, Drive.Right.value)
+    assert connection_controller.connection_model.right_dictionary == ethercat_dict
     assert (
-        connection_controller.connection_model.dictionary_type
+        connection_controller.connection_model.right_dictionary_type
         == ConnectionProtocol.EtherCAT
     )
     assert dict_signal_spy.at(dict_signal_spy.size() - 1)[
@@ -60,10 +60,10 @@ def test_select_dictionary(connection_controller: ConnectionController) -> None:
     ] == ethercat_dict.removeprefix("tests/assets/")
 
     canopen_dict = "tests/assets/eve-xcr-c_can_2.4.1.xdf"
-    connection_controller.select_dictionary(canopen_dict)
-    assert connection_controller.connection_model.dictionary == canopen_dict
+    connection_controller.select_dictionary(canopen_dict, Drive.Right.value)
+    assert connection_controller.connection_model.right_dictionary == canopen_dict
     assert (
-        connection_controller.connection_model.dictionary_type
+        connection_controller.connection_model.right_dictionary_type
         == ConnectionProtocol.CANopen  # type: ignore
     )
     assert dict_signal_spy.at(dict_signal_spy.size() - 1)[

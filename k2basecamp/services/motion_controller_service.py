@@ -146,23 +146,30 @@ class MotionControllerService(QObject):
         def on_thread(
             connection_model: ConnectionModel,
         ) -> Any:
-            if not connection_model.dictionary:
-                raise ILError("No dictionary selected.")
-            dictionary_type = self.check_dictionary_format(connection_model.dictionary)
-            if dictionary_type != connection_model.connection:
+            if (
+                not connection_model.left_dictionary
+                or not connection_model.right_dictionary
+            ):
+                raise ILError("You need to select a dictionary for each drive.")
+            if (
+                connection_model.left_dictionary_type != connection_model.connection
+                or connection_model.right_dictionary_type != connection_model.connection
+            ):
                 raise ILError("Communication type does not match the dictionary type.")
             if connection_model.left_id == connection_model.right_id:
                 raise ILError("Node IDs cannot be the same.")
-            for drive, id, config in [
+            for drive, id, config, dictionary in [
                 (
                     Drive.Left,
                     connection_model.left_id,
                     connection_model.left_config,
+                    connection_model.left_dictionary,
                 ),
                 (
                     Drive.Right,
                     connection_model.right_id,
                     connection_model.right_config,
+                    connection_model.right_dictionary,
                 ),
             ]:
                 if id is None:
@@ -173,7 +180,7 @@ class MotionControllerService(QObject):
                             connection_model.interface
                         ),
                         slave_id=id,
-                        dict_path=connection_model.dictionary,
+                        dict_path=dictionary,
                         alias=drive.name,
                         servo_status_listener=True,
                         net_status_listener=True,
@@ -184,7 +191,7 @@ class MotionControllerService(QObject):
                         can_device=stringify_can_device_enum(
                             connection_model.can_device
                         ),
-                        dict_path=connection_model.dictionary,
+                        dict_path=dictionary,
                         node_id=id,
                         alias=drive.name,
                         servo_status_listener=True,
