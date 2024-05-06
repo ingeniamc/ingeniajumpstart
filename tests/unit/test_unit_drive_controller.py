@@ -85,7 +85,7 @@ def test_connect_button(connection_controller: ConnectionController) -> None:
         == ButtonState.Disabled.value
     )
     canopen_dict = "tests/assets/eve-xcr-c_can_2.4.1.xdf"
-    connection_controller.select_dictionary(canopen_dict)
+    connection_controller.select_dictionary(canopen_dict, Drive.Both.value)
     # Now that everything is selected, the button should be enabled.
     assert (
         connect_button_spy.at(connect_button_spy.size() - 1)[0]
