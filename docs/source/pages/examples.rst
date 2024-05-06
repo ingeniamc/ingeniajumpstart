@@ -72,7 +72,7 @@ The objective of this example is changing the value of a register of the drive u
     Note the ``@Slot`` decorator - it is necessary for the function to be callable from the GUI and defines the types of the parameters it expects.
     We are making use of the ``MotionControllerService`` here, calling its "run" function with several parameters. 
     This is the most basic way to communicate with the drive and allows us to directly invoke a single `ingenialink <https://distext.ingeniamc.com/doc/ingenialink-python/latest/>`_ function.
-    That function (in this case ``communication.set_register``) will be executed **in a seperate thread** with all parameters that come after it (``max_velocity``, ``Drive(drive).name``).
+    That function (in this case ``communication.set_register``) will be executed **in a separate thread** with all parameters that come after it (``max_velocity``, ``Drive(drive).name``).
     Upon conclusion, the callback function (``self.log_report``) will be invoked.
     The ``thread`` we use to communicate with the drive is an instance of ``MotionControllerThread``, which was created when ``MotionControllerService`` was instantiated.
 

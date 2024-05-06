@@ -8,8 +8,8 @@ import "components" as Components
 ApplicationWindow {
     id: page
     title: qsTr("K2 Base Camp")
-    width: 800
-    height: 600
+    width: 1024
+    height: 768
     visible: true
     required property ConnectionController connectionController
     required property BootloaderController bootloaderController
@@ -159,7 +159,7 @@ ApplicationWindow {
                 Layout.preferredWidth: 6
             }
 
-            Components.Button {
+            Components.StyledButton {
                 objectName: "emergencyStopBtn"
                 text: "Stop (F12)"
                 Layout.preferredWidth: 3

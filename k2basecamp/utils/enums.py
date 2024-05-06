@@ -14,6 +14,7 @@ class ButtonState(Enum):
 class Drive(Enum):
     Left = auto()
     Right = auto()
+    Both = auto()
 
 
 class ConnectionProtocol(Enum):
