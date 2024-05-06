@@ -55,6 +55,20 @@ RowLayout {
         function onNet_state_changed(netState) {
             ControlsJS.resetControls(netState != Enums.NET_DEV_EVT.REMOVED)
         }
+        function onMax_velocity_value_received(newValue, drive) {
+            switch (drive) {
+                case Enums.Drive.Left:
+                    maxVelocityLeft.value = newValue;
+                    velocitySliderL.to = newValue;
+                    break;
+                case Enums.Drive.Right:
+                    maxVelocityRight.value = newValue;
+                    velocitySliderR.to = newValue;
+                    break;
+                default:
+                    console.log("Drive not found:", drive);
+            }
+        }
     }
 
     // Bind velocity controls to the arrow keys on the keyboard.
@@ -224,10 +238,12 @@ RowLayout {
                     }
                 }
                 SpinBox {
+                    id: maxVelocityLeft
                     from: 0
-                    value: 10
+                    to: 1000
                     editable: true
                     onValueModified: () => {
+                        velocitySliderL.to = value;
                         grid.connectionController.set_register_max_velocity(value, Enums.Drive.Left);
                     }
                 }
@@ -285,10 +301,12 @@ RowLayout {
                     }
                 }
                 SpinBox {
+                    id: maxVelocityRight
                     from: 0
-                    value: 10
+                    to: 1000
                     editable: true
                     onValueModified: () => {
+                        velocitySliderR.to = value;
                         grid.connectionController.set_register_max_velocity(value, Enums.Drive.Right);
                     }
                 }

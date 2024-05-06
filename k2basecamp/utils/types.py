@@ -1,5 +1,6 @@
 from dataclasses import dataclass
-from typing import Any, Callable, Optional
+from functools import partial
+from typing import Any, Callable, Optional, Union
 
 
 @dataclass
@@ -22,6 +23,6 @@ class motion_controller_task:
     """
 
     action: Callable[..., Any]
-    callback: Callable[..., Any]
+    callback: Union[Callable[..., Any], partial[Callable[..., Any]]]
     args: Any
     kwargs: Any

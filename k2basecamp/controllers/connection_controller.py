@@ -1,4 +1,5 @@
 import os
+from functools import partial
 
 import ingenialogger
 from ingenialink import CAN_BAUDRATE, NET_DEV_EVT, SERVO_STATE
@@ -14,6 +15,7 @@ from k2basecamp.utils.types import thread_report
 # (QML_IMPORT_MINOR_VERSION is optional)
 QML_IMPORT_NAME = "qmltypes.controllers"
 QML_IMPORT_MAJOR_VERSION = 1
+MAX_VELOCITY_REGISTER = "CL_VEL_REF_MAX"
 
 logger = ingenialogger.get_logger(__name__)
 
@@ -97,6 +99,9 @@ class ConnectionController(QObject):
 
     net_state_changed = Signal(int, arguments=["net_state"])
     """Triggers when the state of the network changes."""
+
+    max_velocity_value_received = Signal(float, int, arguments=["new_value", "drive"])
+    """Triggers when we received the current value for CL_VEL_REF_MAX in the drive."""
 
     def __init__(self, mcs: MotionControllerService) -> None:
         super().__init__()
@@ -227,7 +232,7 @@ class ConnectionController(QObject):
         self.mcs.run(
             self.log_report,
             "communication.set_register",
-            "CL_VEL_REF_MAX",
+            MAX_VELOCITY_REGISTER,
             max_velocity,
             Drive(drive).name,
         )
@@ -358,6 +363,35 @@ class ConnectionController(QObject):
                 the callback
         """
         self.drive_connected_triggered.emit()
+        # Get the current value of the CL_VEL_REF_MAX register
+        for drive in [Drive.Left, Drive.Right]:
+            self.mcs.run(
+                partial(self.get_max_velocity_value_callback, drive),
+                "communication.get_register",
+                MAX_VELOCITY_REGISTER,
+                drive.name,
+            )
+
+    def get_max_velocity_value_callback(
+        self, drive: Drive, t_report: thread_report
+    ) -> None:
+        """Callback after we received the value for a certain register from the drive.
+
+        Args:
+            drive: The drive in question.
+            t_report: Thread report.
+        """
+        if t_report.exceptions is None:
+            new_value = t_report.output
+            if not isinstance(new_value, float):
+                logger.debug(
+                    "Invalid max velocity value type. Expected type float, got type "
+                    + f"{type(new_value)}"
+                )
+                return
+            self.max_velocity_value_received.emit(new_value, drive.value)
+        else:
+            logger.warning(f"Could not read register. Exception: {t_report.exceptions}")
 
     def disconnect_callback(self, thread_report: thread_report) -> None:
         """Callback after the drives where disconnected. Emits a signal to the UI.

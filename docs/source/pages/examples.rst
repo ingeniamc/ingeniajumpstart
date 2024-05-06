@@ -64,7 +64,7 @@ The objective of this example is changing the value of a register of the drive u
             self.mcs.run(
                 self.log_report,
                 "communication.set_register",
-                "CL_VEL_REF_MAX",
+                MAX_VALOCITY_REGISTER,
                 max_velocity,
                 Drive(drive).name,
             )
