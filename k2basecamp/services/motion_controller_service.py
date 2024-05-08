@@ -11,7 +11,6 @@ from PySide6.QtCore import QObject, Signal, Slot
 from k2basecamp.models.base_model import BaseModel
 from k2basecamp.models.bootloader_model import BootloaderModel
 from k2basecamp.models.connection_model import ConnectionModel
-from k2basecamp.services.bootloader_thread import BootloaderThread
 from k2basecamp.services.motion_controller_thread import MotionControllerThread
 from k2basecamp.services.poller_thread import PollerThread
 from k2basecamp.utils.enums import ConnectionProtocol, Drive, stringify_can_device_enum
@@ -21,6 +20,7 @@ DEVICE_NODE = "Body//Device"
 INTERFACE_CAN = "CAN"
 INTERFACE_ETH = "ETH"
 DEFAULT_DICTIONARY_PATH = "k2basecamp/assets/eve-net-c_can_2.4.1.xdf"
+EXPECTED_NODE_NR_SCAN = 2
 
 
 class MotionControllerService(QObject):
@@ -254,7 +254,6 @@ class MotionControllerService(QObject):
         self,
         report_callback: Callable[[thread_report], Any],
         base_model: BaseModel,
-        minimum_nodes: int = 2,
         *args: Any,
         **kwargs: Any,
     ) -> Callable[..., list[int]]:
@@ -276,7 +275,7 @@ class MotionControllerService(QObject):
             list[int]: All slave / node IDs that are found.
         """
 
-        def on_thread(base_model: BaseModel, minimum_nodes: int = 2) -> list[int]:
+        def on_thread(base_model: BaseModel) -> list[int]:
             if base_model.connection == ConnectionProtocol.CANopen:
                 result = self.__mc.communication.scan_servos_canopen(
                     can_device=stringify_can_device_enum(base_model.can_device),
@@ -288,10 +287,10 @@ class MotionControllerService(QObject):
                 )
             else:
                 raise ILError("Connection type not implemented.")
-            if len(result) < minimum_nodes:
+            if len(result) < EXPECTED_NODE_NR_SCAN:
                 nodes_found = result if len(result) > 0 else "(none)"
                 raise ILError(
-                    f"Scan expected to find at least {minimum_nodes} nodes. "
+                    f"Scan expected to find at least {EXPECTED_NODE_NR_SCAN} nodes. "
                     + f"Nodes found: {nodes_found}"
                 )
             return result
@@ -453,38 +452,15 @@ class MotionControllerService(QObject):
         self.__motion_controller_thread.quit()
         self.__motion_controller_thread.wait()
 
-    def create_bootloader_thread(
-        self, bootloader_model: BootloaderModel, drive: Drive, firmware: str, id: int
-    ) -> BootloaderThread:
-        """Create a thread for installing firmware in parallel.
-
-        Args:
-            bootloader_model: model containing the application state.
-            drive: the drive the firmware will be installed to.
-            firmware: the file containing the firmware.
-            id: the node id of the drive.
-
-        Returns:
-            BootloaderThread: the thread.
-        """
-        return BootloaderThread(
-            drive=drive,
-            install_firmware=self.install_firmware,
-            bootloader_model=bootloader_model,
-            firmware=firmware,
-            id=id,
-            mc=MotionController(),
-        )
-
     @run_on_thread
-    def install_firmware_sequential(
+    def install_firmware(
         self,
         report_callback: Callable[[thread_report], Any],
         progress_callback: Callable[[int], Any],
-        drive: Drive,
         bootloader_model: BootloaderModel,
         firmware: str,
-        id: int,
+        left_id: int,
+        right_id: int,
         *args: Any,
         **kwargs: Any,
     ) -> Callable[..., Any]:
@@ -493,73 +469,58 @@ class MotionControllerService(QObject):
         Args:
             report_callback: callback to invoke after completing the operation.
             progress_callback: callback for when the installation progress updates.
-            drive: the drive to install the firmware to.
             bootloader_model: the model with the application state.
             firmware: the file containing the firmware.
-            id: the node id of the drive.
+            left_id: the node id of the left drive.
+            right_id: the node id of the right drive.
         """
 
         def on_thread(
             progress_callback: Callable[[int], Any],
-            drive: Drive,
             bootloader_model: BootloaderModel,
             firmware: str,
-            id: int,
+            left_id: int,
+            right_id: int,
         ) -> Any:
-            self.install_firmware(
-                drive=drive,
-                progress_callback=progress_callback,
-                bootloader_model=bootloader_model,
-                firmware=firmware,
-                id=id,
-                mc=self.__mc,
-            )
+            if not bootloader_model.install_prerequisites_met():
+                self.error_triggered.emit(
+                    "Incorrect or insufficient configuration. Make sure to provide the "
+                    + "right parameters for the selected connection protocol."
+                )
+                return
+
+            if bootloader_model.connection == ConnectionProtocol.CANopen:
+                self.__mc.communication.connect_servo_canopen(
+                    baudrate=bootloader_model.can_baudrate,
+                    can_device=stringify_can_device_enum(bootloader_model.can_device),
+                    dict_path=DEFAULT_DICTIONARY_PATH,
+                    node_id=left_id,
+                    alias=Drive.Left.name,
+                )
+                self.__mc.communication.connect_servo_canopen(
+                    baudrate=bootloader_model.can_baudrate,
+                    can_device=stringify_can_device_enum(bootloader_model.can_device),
+                    dict_path=DEFAULT_DICTIONARY_PATH,
+                    node_id=right_id,
+                    alias=Drive.Right.name,
+                )
+                # We pass one of the two drive aliases to the function. It should
+                # automatically detect that we have a two drive setup based on the
+                # firmware file type and update both drives.
+                self.__mc.communication.load_firmware_canopen(
+                    servo=Drive.Left.name,
+                    fw_file=firmware,
+                    progress_callback=progress_callback,
+                )
+                self.__mc.communication.disconnect(servo=Drive.Left.name)
+                self.__mc.communication.disconnect(servo=Drive.Right.name)
+            elif bootloader_model.connection == ConnectionProtocol.EtherCAT:
+                self.__mc.communication.load_firmware_ecat_interface_index(
+                    fw_file=firmware,
+                    if_index=self.get_current_interface_index(
+                        bootloader_model.interface
+                    ),
+                    slave=left_id,
+                )
 
         return on_thread
-
-    def install_firmware(
-        self,
-        drive: Drive,
-        progress_callback: Callable[[int], Any],
-        bootloader_model: BootloaderModel,
-        firmware: str,
-        id: int,
-        mc: MotionController,
-    ) -> None:
-        """Install firmware to a drive using the MotionController.
-
-        Args:
-            drive: the drive to install the firmware to.
-            progress_callback: callback for when the installation progress updates.
-            bootloader_model: the model with the application state.
-            firmware: the file containing the firmware.
-            id: the node id of the drive.
-            mc: the MotionController to communicate with the drive.
-        """
-        if not bootloader_model.install_prerequisites_met():
-            self.error_triggered.emit(
-                "Incorrect or insufficient configuration. Make sure to provide the "
-                + "right parameters for the selected connection protocol."
-            )
-            return
-
-        if bootloader_model.connection == ConnectionProtocol.CANopen:
-            mc.communication.connect_servo_canopen(
-                baudrate=bootloader_model.can_baudrate,
-                can_device=stringify_can_device_enum(bootloader_model.can_device),
-                dict_path=DEFAULT_DICTIONARY_PATH,
-                node_id=id,
-                alias=drive.name,
-            )
-            mc.communication.load_firmware_canopen(
-                servo=drive.name,
-                fw_file=firmware,
-                progress_callback=progress_callback,
-            )
-            mc.communication.disconnect(servo=drive.name)
-        elif bootloader_model.connection == ConnectionProtocol.EtherCAT:
-            mc.communication.load_firmware_ecat_interface_index(
-                fw_file=firmware,
-                if_index=self.get_current_interface_index(bootloader_model.interface),
-                slave=id,
-            )

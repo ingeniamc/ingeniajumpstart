@@ -108,7 +108,7 @@ RowLayout {
             }
             CheckBox {
                 id: leftCheck
-                text: qsTr("Left")
+                text: qsTr("Enable left motor")
                 property string tooltipText
                 ToolTip.visible: tooltipText ? hovered : false
                 ToolTip.text: tooltipText
@@ -131,7 +131,7 @@ RowLayout {
             }
             CheckBox {
                 id: rightCheck
-                text: qsTr("Right")
+                text: qsTr("Enable right motor")
                 property string tooltipText
                 ToolTip.visible: tooltipText ? hovered : false
                 ToolTip.text: tooltipText
