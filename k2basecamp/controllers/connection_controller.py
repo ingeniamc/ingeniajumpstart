@@ -1,7 +1,8 @@
 import os
+from functools import partial
 
 import ingenialogger
-from ingenialink import CAN_BAUDRATE
+from ingenialink import CAN_BAUDRATE, NET_DEV_EVT, SERVO_STATE
 from PySide6.QtCore import QJsonArray, QObject, Signal, Slot
 from PySide6.QtQml import QmlElement
 
@@ -14,6 +15,7 @@ from k2basecamp.utils.types import thread_report
 # (QML_IMPORT_MINOR_VERSION is optional)
 QML_IMPORT_NAME = "qmltypes.controllers"
 QML_IMPORT_MAJOR_VERSION = 1
+MAX_VELOCITY_REGISTER = "CL_VEL_REF_MAX"
 
 logger = ingenialogger.get_logger(__name__)
 
@@ -52,7 +54,7 @@ class ConnectionController(QObject):
         velocity (float): velocity of the new data point.
     """
 
-    dictionary_changed = Signal(str, arguments=["dictionary"])
+    dictionary_changed = Signal(str, int, arguments=["dictionary", "drive"])
     """Triggers when the dictionary file was selected.
 
     Args:
@@ -90,12 +92,23 @@ class ConnectionController(QObject):
     """
 
     emergency_stop_triggered = Signal()
-    """Triggers when the emergency stop button was pressed"""
+    """Triggers when the emergency stop button was pressed."""
+
+    servo_state_changed = Signal(int, int, arguments=["servo_state", "drive"])
+    """Triggers when the state of a servo changes."""
+
+    net_state_changed = Signal(int, arguments=["net_state"])
+    """Triggers when the state of the network changes."""
+
+    max_velocity_value_received = Signal(float, int, arguments=["new_value", "drive"])
+    """Triggers when we received the current value for CL_VEL_REF_MAX in the drive."""
 
     def __init__(self, mcs: MotionControllerService) -> None:
         super().__init__()
         self.mcs = mcs
         self.mcs.error_triggered.connect(self.error_message_callback)
+        self.mcs.servo_state_update_triggered.connect(self.update_servo_state)
+        self.mcs.net_state_update_triggered.connect(self.update_net_state)
         self.connection_model = ConnectionModel()
 
     @Slot()
@@ -219,13 +232,13 @@ class ConnectionController(QObject):
         self.mcs.run(
             self.log_report,
             "communication.set_register",
-            "CL_VEL_REF_MAX",
+            MAX_VELOCITY_REGISTER,
             max_velocity,
             Drive(drive).name,
         )
 
-    @Slot(str)
-    def select_dictionary(self, dictionary: str) -> None:
+    @Slot(str, int)
+    def select_dictionary(self, dictionary: str, drive: int) -> None:
         """Update the DriveModel, setting the dictionary property to the url of the
         file that was uploaded in the UI.
         Also identifies which connection protocol the dictionary belongs to and sets the
@@ -233,20 +246,39 @@ class ConnectionController(QObject):
 
         Args:
             dictionary: the url of the dictionary file
+            drive: the drive the dictionary is for
         """
-        self.connection_model.dictionary = dictionary.removeprefix("file:///")
-        self.connection_model.dictionary_type = self.mcs.check_dictionary_format(
-            self.connection_model.dictionary
-        )
-        self.dictionary_changed.emit(os.path.basename(self.connection_model.dictionary))
+        dictionary = dictionary.removeprefix("file:///")
+        dictionary_type = self.mcs.check_dictionary_format(dictionary)
+        if drive == Drive.Left.value:
+            self.connection_model.left_dictionary = dictionary
+            self.connection_model.left_dictionary_type = dictionary_type
+        elif drive == Drive.Right.value:
+            self.connection_model.right_dictionary = dictionary
+            self.connection_model.right_dictionary_type = dictionary_type
+        elif drive == Drive.Both.value:
+            self.connection_model.left_dictionary = dictionary
+            self.connection_model.left_dictionary_type = dictionary_type
+            self.connection_model.right_dictionary = dictionary
+            self.connection_model.right_dictionary_type = dictionary_type
+        self.dictionary_changed.emit(os.path.basename(dictionary), drive)
         self.update_connect_button_state()
 
-    @Slot()
-    def reset_dictionary(self) -> None:
+    @Slot(int)
+    def reset_dictionary(self, drive: int) -> None:
         """Resets the dictionary file in the DriveModel."""
-        self.connection_model.dictionary = None
-        self.connection_model.dictionary_type = None
-        self.dictionary_changed.emit("")
+        if drive == Drive.Left.value:
+            self.connection_model.left_dictionary = None
+            self.connection_model.left_dictionary_type = None
+        elif drive == Drive.Right.value:
+            self.connection_model.right_dictionary = None
+            self.connection_model.right_dictionary_type = None
+        elif drive == Drive.Both.value:
+            self.connection_model.left_dictionary = None
+            self.connection_model.left_dictionary_type = None
+            self.connection_model.right_dictionary = None
+            self.connection_model.right_dictionary_type = None
+        self.dictionary_changed.emit("", drive)
         self.update_connect_button_state()
 
     @Slot(str, int)
@@ -261,7 +293,10 @@ class ConnectionController(QObject):
         config = config.removeprefix("file:///")
         if drive == Drive.Left.value:
             self.connection_model.left_config = config
-        else:
+        elif drive == Drive.Right.value:
+            self.connection_model.right_config = config
+        elif drive == Drive.Both.value:
+            self.connection_model.left_config = config
             self.connection_model.right_config = config
         self.config_changed.emit(os.path.basename(config), drive)
 
@@ -274,7 +309,10 @@ class ConnectionController(QObject):
         """
         if drive == Drive.Left.value:
             self.connection_model.left_config = None
-        else:
+        elif drive == Drive.Right.value:
+            self.connection_model.right_config = None
+        elif drive == Drive.Both.value:
+            self.connection_model.left_config = None
             self.connection_model.right_config = None
         self.config_changed.emit("", drive)
 
@@ -350,6 +388,35 @@ class ConnectionController(QObject):
                 the callback
         """
         self.drive_connected_triggered.emit()
+        # Get the current value of the CL_VEL_REF_MAX register
+        for drive in [Drive.Left, Drive.Right]:
+            self.mcs.run(
+                partial(self.get_max_velocity_value_callback, drive),
+                "communication.get_register",
+                MAX_VELOCITY_REGISTER,
+                drive.name,
+            )
+
+    def get_max_velocity_value_callback(
+        self, drive: Drive, t_report: thread_report
+    ) -> None:
+        """Callback after we received the value for a certain register from the drive.
+
+        Args:
+            drive: The drive in question.
+            t_report: Thread report.
+        """
+        if t_report.exceptions is None:
+            new_value = t_report.output
+            if not isinstance(new_value, float):
+                logger.debug(
+                    "Invalid max velocity value type. Expected type float, got type "
+                    + f"{type(new_value)}"
+                )
+                return
+            self.max_velocity_value_received.emit(new_value, drive.value)
+        else:
+            logger.warning(f"Could not read register. Exception: {t_report.exceptions}")
 
     def disconnect_callback(self, thread_report: thread_report) -> None:
         """Callback after the drives where disconnected. Emits a signal to the UI.
@@ -359,6 +426,8 @@ class ConnectionController(QObject):
                 the callback
         """
 
+        self.update_servo_state(Drive.Right, SERVO_STATE.DISABLED)
+        self.update_servo_state(Drive.Left, SERVO_STATE.DISABLED)
         self.drive_disconnected_triggered.emit()
         self.update_connect_button_state()
 
@@ -447,6 +516,32 @@ class ConnectionController(QObject):
         self.emergency_stop()
         self.error_triggered.emit(error_message)
         self.update_connect_button_state()
+
+    @Slot(Drive, SERVO_STATE)
+    def update_servo_state(self, drive: Drive, state: SERVO_STATE) -> None:
+        """Send a signal to the GUI to update the servo state image of the affected
+        drive.
+
+        Args:
+            drive: the affected drive
+            state: the new state
+        """
+        self.servo_state_changed.emit(state.value, drive.value)
+
+    @Slot(Drive, NET_DEV_EVT)
+    def update_net_state(self, drive: Drive, state: NET_DEV_EVT) -> None:
+        """Send a signal to the GUI to update the interface when the network state
+        changes.
+        Also stops related poller threads if the drive was disconnected.
+
+        Args:
+            drive: the affected drive
+            state: the new state
+        """
+        if state == NET_DEV_EVT.REMOVED:
+            self.mcs.stop_poller_thread(drive.name)
+            self.error_triggered.emit("Network connection lost.")
+        self.net_state_changed.emit(state.value)
 
     def log_report(self, report: thread_report) -> None:
         """Generic callback that simply logs the result of the operation.

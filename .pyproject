@@ -15,10 +15,12 @@
         "k2basecamp/views/ControlsPage.qml",
         "k2basecamp/views/SelectionPage.qml",
         "k2basecamp/views/BootloaderPage.qml",
-        "k2basecamp/views/components/Button.qml",
+        "k2basecamp/views/components/StyledButton.qml",
         "k2basecamp/views/components/Selection.qml",
         "k2basecamp/views/components/SpacerH.qml",
         "k2basecamp/views/components/SpacerW.qml",
-        "k2basecamp/views/components/StateButton.qml"
+        "k2basecamp/views/components/StateButton.qml",
+        "k2basecamp/views/components/StateImage.qml",
+        "k2basecamp/views/components/UploadButton.qml"
     ]
 }

@@ -33,16 +33,40 @@ RowLayout {
             PlotJS.initSeries(chartR, xAxisR, yAxisR, "Right");
         }
         function onDrive_disconnected_triggered() {
-            leftCheck.checked = false;
-            rightCheck.checked = false;
+            ControlsJS.resetControls()
             PlotJS.resetPlot(chartL);
             PlotJS.resetPlot(chartR);
         }
         function onEmergency_stop_triggered() {
-            leftCheck.checked = false;
-            rightCheck.checked = false;
-            for (const button of [upButton, downButton, leftButton, rightButton]) {
-                button.state = Enums.ButtonState.Disabled;
+            ControlsJS.resetControls()
+        }
+        function onServo_state_changed(servoState, drive) {
+            switch (drive) {
+                case Enums.Drive.Left:
+                    leftState.state = servoState;
+                    break;
+                case Enums.Drive.Right:
+                    rightState.state = servoState;
+                    break;
+                default:
+                    console.log("Drive not found:", drive);
+            }
+        }
+        function onNet_state_changed(netState) {
+            ControlsJS.resetControls(netState != Enums.NET_DEV_EVT.REMOVED)
+        }
+        function onMax_velocity_value_received(newValue, drive) {
+            switch (drive) {
+                case Enums.Drive.Left:
+                    maxVelocityLeft.value = newValue;
+                    velocitySliderL.to = newValue;
+                    break;
+                case Enums.Drive.Right:
+                    maxVelocityRight.value = newValue;
+                    velocitySliderR.to = newValue;
+                    break;
+                default:
+                    console.log("Drive not found:", drive);
             }
         }
     }
@@ -80,12 +104,14 @@ RowLayout {
         RowLayout {
             // Checkboxes to enable / disable motors.
             Layout.fillHeight: true
-
             SpacerW {
             }
             CheckBox {
                 id: leftCheck
-                text: qsTr("Left")
+                text: qsTr("Enable left motor")
+                property string tooltipText
+                ToolTip.visible: tooltipText ? hovered : false
+                ToolTip.text: tooltipText
                 onToggled: () => {
                     PlotJS.resetPlot(chartL);
                     PlotJS.initSeries(chartL, xAxisL, yAxisL, "Left");
@@ -97,9 +123,18 @@ RowLayout {
                     ControlsJS.updateKeyState();
                 }
             }
+            StateImage {
+                id: leftState
+            }
+            SpacerW {
+                Layout.preferredWidth: 2
+            }
             CheckBox {
                 id: rightCheck
-                text: qsTr("Right")
+                text: qsTr("Enable right motor")
+                property string tooltipText
+                ToolTip.visible: tooltipText ? hovered : false
+                ToolTip.text: tooltipText
                 onToggled: () => {
                     PlotJS.resetPlot(chartR);
                     PlotJS.initSeries(chartR, xAxisR, yAxisR, "Right");
@@ -110,6 +145,9 @@ RowLayout {
                     }
                     ControlsJS.updateKeyState();
                 }
+            }
+            StateImage {
+                id: rightState
             }
             SpacerW {
             }
@@ -200,10 +238,12 @@ RowLayout {
                     }
                 }
                 SpinBox {
+                    id: maxVelocityLeft
                     from: 0
-                    value: 10
+                    to: 1000
                     editable: true
                     onValueModified: () => {
+                        velocitySliderL.to = value;
                         grid.connectionController.set_register_max_velocity(value, Enums.Drive.Left);
                     }
                 }
@@ -261,10 +301,12 @@ RowLayout {
                     }
                 }
                 SpinBox {
+                    id: maxVelocityRight
                     from: 0
-                    value: 10
+                    to: 1000
                     editable: true
                     onValueModified: () => {
+                        velocitySliderR.to = value;
                         grid.connectionController.set_register_max_velocity(value, Enums.Drive.Right);
                     }
                 }

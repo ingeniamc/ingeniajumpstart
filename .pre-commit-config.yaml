@@ -26,7 +26,7 @@ repos:
         # print the number of files as a sanity-check
         verbose: true
         # the hook is using it's own virtual environment.
-        # we have to maintain it's dependecies seperately!
+        # we have to maintain it's dependecies separately!
         # make sure to add new dependencies here, otherwise your commits will fail!
         additional_dependencies:
           - mypy
@@ -49,7 +49,7 @@ repos:
         # print the number of files as a sanity-check
         verbose: true
         # the hook is using it's own virtual environment.
-        # we have to maintain it's dependecies seperately!
+        # we have to maintain it's dependecies separately!
         # make sure to add new dependencies here, otherwise your commits will fail!
         additional_dependencies:
           - pyside6
