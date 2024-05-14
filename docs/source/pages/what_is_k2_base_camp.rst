@@ -12,20 +12,20 @@ It is an open source application that is meant to serve as a demo that can be a 
 Features
 ========
 
-At its core, **K2 Base Camp** is a minimal interface that lets you connect to both drives of the K2 simultaneously using one of two connection protocols (`EtherCAT <https://en.wikipedia.org/wiki/EtherCAT>`_ and `CANopen <https://en.wikipedia.org/wiki/CANopen>`_).
+At its core, **K2 Base Camp** is a minimal interface that lets you connect to both drives of the K2 simultaneously using one of two communication protocols (`EtherCAT <https://en.wikipedia.org/wiki/EtherCAT>`_ and `CANopen <https://en.wikipedia.org/wiki/CANopen>`_).
 
 You also have the option to provide files with configurations for the drives that are loaded when you make the connection.
 
 You can then enable / disable the servo motors and get them moving using the arrow keys (or pressing the corresponding buttons).
 
-The interface includes a LED for each motor that displays its current status.
+The interface includes a LED for each motor that displays its current status (**Red** = Disabled, **Yellow** = Ready, **Green** = Enabled).
 
 Graphs display the velocity of the motors over time, and the input boxes and sliders can be used to set additional parameters related to the velocity of the motors.
 
 Usage
 =====
 
-The application is devided into three pages - a "Bootloader"-page to install firmware, a "Connection"-page to connect to the drive, and a "Controls"-page where you can enable and move the motors.
+The application is divided into three pages - a "Bootloader"-page to install firmware, a "Connection"-page to connect to the drive, and a "Controls"-page where you can enable and move the motors.
 
 Connection Page
 ---------------
