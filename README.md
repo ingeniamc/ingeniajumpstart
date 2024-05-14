@@ -1,8 +1,8 @@
 # K2 Base Camp
 
-Simple open source app to plug &amp; play with your servo drive.
+[![Documentation Status](https://readthedocs.org/projects/k2-base-camp/badge/?version=latest)](https://k2-base-camp.readthedocs.io/en/latest/?badge=latest)
 
-🔗[Full documentation](https://k2-base-camp.readthedocs.io/en/latest/index.html)
+Simple open source app to plug &amp; play with your servo drive.
 
 ## Getting started
 
