@@ -333,6 +333,7 @@ ColumnLayout {
             id: combinedConfigUploadBtn
             drive: Enums.Drive.Both
             fileType: Components.UploadButton.FileType.Config
+            text: "(Optional) Choose config..."
         }
         Components.SpacerW {
         }
@@ -349,6 +350,7 @@ ColumnLayout {
             id: leftConfigUploadBtn
             drive: Enums.Drive.Left
             fileType: Components.UploadButton.FileType.Config
+            text: "(Optional) Choose config left..."
         }
         Components.SpacerW {
         }
@@ -356,6 +358,7 @@ ColumnLayout {
             id: rightConfigUploadBtn
             drive: Enums.Drive.Right
             fileType: Components.UploadButton.FileType.Config
+            text: "(Optional) Choose config right..."
         }
         Components.SpacerW {
         }
@@ -386,6 +389,7 @@ ColumnLayout {
             id: combinedDictionaryUploadBtn
             drive: Enums.Drive.Both
             fileType: Components.UploadButton.FileType.Dictionary
+            text: "(Optional) Choose dictionary..."
         }
         Components.SpacerW {
         }
@@ -402,6 +406,7 @@ ColumnLayout {
             id: leftDictionaryUploadBtn
             drive: Enums.Drive.Left
             fileType: Components.UploadButton.FileType.Dictionary
+            text: "(Optional) Choose dictionary left..."
         }
         Components.SpacerW {
         }
@@ -409,6 +414,7 @@ ColumnLayout {
             id: rightDictionaryUploadBtn
             drive: Enums.Drive.Right
             fileType: Components.UploadButton.FileType.Dictionary
+            text: "(Optional) Choose dictionary right..."
         }
         Components.SpacerW {
         }

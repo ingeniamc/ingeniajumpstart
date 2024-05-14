@@ -24,6 +24,7 @@ ColumnLayout {
 
     property int fileType
     property int drive
+    property string text
 
 
     function resetUpload() {
@@ -41,7 +42,7 @@ ColumnLayout {
     
     StyledButton {
         id: uploadBtn
-        text: "(Optional) Choose config..."
+        text: uploadComponent.text
         onClicked: {
             switch (uploadComponent.fileType) {
                 case UploadButton.FileType.Config:

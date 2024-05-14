@@ -13,7 +13,7 @@ Prerequisites
 Installing python
 =================
 
-K2 Base Camp needs a specific python version to run (3.9).
+**K2 Base Camp** needs a specific python version to run (3.9).
 
 To install python, go to the official `website <https://www.python.org/downloads/release/python-390/>`_.
 
@@ -32,7 +32,7 @@ Subsequently, the quickstart commands would be adapted to::
 Installation
 ============
 
-If you have python 3.9 and pipenv installed on your system, running K2 Base Camp is as simple as:
+If you have python 3.9 and pipenv installed on your system, running **K2 Base Camp** is as simple as:
 
 #. Cloning the repository from `github <https://github.com/ingeniamc/k2-base-camp.git>`_
 #. Installing the dependencies::

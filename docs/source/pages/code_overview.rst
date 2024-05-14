@@ -2,7 +2,7 @@
 Codebase
 ********
 
-K2 Base Camp is meant to serve as a starting point for futher development.
+**K2 Base Camp** is meant to serve as a starting point for futher development.
 
 Before we get into the details of how to properly set up the development environment, let's get an overview of how the codebase of the project is structured.
 
@@ -16,7 +16,7 @@ Here's a list of the most important libraries and frameworks we are using:
 
 * `PySide6 <https://doc.qt.io/qtforpython-6/>`_ - main graphics framework
 * `QML <https://doc.qt.io/qt-6/qmlapplications.html>`_ - declarative language for creating interfaces
-* `javascript <https://en.wikipedia.org/wiki/JavaScript>`_ - small parts of the logic in the QML code is written in this language
+* `javascript <https://en.wikipedia.org/wiki/JavaScript>`_ - some parts of the logic in the QML code is written in this language
 * `ingeniamotion <https://distext.ingeniamc.com/doc/ingeniamotion/0.7.0/>`_ - communication library for Ingenia servo drives 
 * `pytest <https://docs.pytest.org/en/7.4.x/>`_ - testing library 
 * `sphinx <https://www.sphinx-doc.org/en/master/>`_ - facilitates creating documentation 
@@ -27,7 +27,6 @@ Project folder structure
 ========================
 
 | root
-| ├── assets *(static files such as images)*
 | ├── docs *(this documentation)*
 | ├── k2basecamp
 | │   ├── assets
@@ -75,7 +74,7 @@ To illustrate the flow of the application while it is running, consider the foll
 
     #. We choose a different *connection protocol* using the dropdown in the GUI:
     
-        .. image:: ../_static/select_connection.png
+        .. image:: ../_static/connection_page_select_protocol.png
             :width: 400
             :alt: The interface with the dropdown for connections expanded
 
@@ -86,7 +85,7 @@ To illustrate the flow of the application while it is running, consider the foll
 
     #. We configured the connection parameters correctly and hit the *Connect* - button:
 
-        .. image:: ../_static/connect.png
+        .. image:: ../_static/connection_page_connect.png
             :width: 400
             :alt: The interface with an active connect button
         
@@ -98,7 +97,7 @@ To illustrate the flow of the application while it is running, consider the foll
     #. The callback function is used to emit a signal that the connection has been completed successfully.
     #. The frontend receives the signal and exectues a javascript function that opens a new page in the interface:
 
-        .. image:: ../_static/control.png
+        .. image:: ../_static/controls_page.png
             :width: 400
             :alt: The control interface
 
@@ -108,7 +107,7 @@ To illustrate the flow of the application while it is running, consider the foll
 
     #. We press one of the checkboxes that enable a motor in the GUI.
 
-        .. image:: ../_static/motor_button.png
+        .. image:: ../_static/controls_page_enable_motors.png
             :width: 400
             :alt: The control interface with one motor enable button highlighted
 
@@ -118,7 +117,7 @@ To illustrate the flow of the application while it is running, consider the foll
     #. The connected function in turn emits a ``signal`` that is received by the GUI.
     #. The GUI updates the graph when it receives new data through the ``signal``:
 
-        .. image:: ../_static/graph.png
+        .. image:: ../_static/controls_page_plot.png
             :width: 400
             :alt: The control interface with a velocity graph
 
@@ -129,7 +128,7 @@ To illustrate the flow of the application while it is running, consider the foll
     #. In the callback, a signal is sent to the ``controller``, containing the current motor state.
     #. In this case, the ``controller`` simply emits a ``signal`` to the GUI where the corresponding LED is updated.
 
-        .. image:: ../_static/leds.png
+        .. image:: ../_static/controls_page_led.png
             :width: 400
             :alt: 
             
@@ -140,7 +139,7 @@ To illustrate the flow of the application while it is running, consider the foll
     #. Here we might run additional code depending on the state (e.g. stopping running poller threads when the connection was lost).
     #. Lastly, we inform the GUI about the occurence via ``signals``. This could mean displaying an error message or changing button states (disabled / re-enabled).
 
-        .. image:: ../_static/connection_lost.png
+        .. image:: ../_static/controls_page_connection_lost.png
             :width: 400
             :alt: 
 
