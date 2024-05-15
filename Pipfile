@@ -1,0 +1,29 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+pyside6 = "==6.6.0"
+ingenialink = "==7.1.1"
+ingeniamotion = "==0.7.0"
+ingenialogger = "==0.3.0"
+
+[dev-packages]
+pytest = "==7.4.3"
+mypy = "==1.6.1"
+black = "==23.10.1"
+ruff = "==0.1.3"
+sphinx = "==7.2.6"
+pytest-qt = "==4.2.0"
+pre-commit = "==3.5.0"
+pytest-env = "==1.1.1"
+exceptiongroup = "==1.1.3"
+tomli = "==2.0.1"
+pytest-mock = "==3.12.0"
+sphinx-rtd-theme = "==2.0.0"
+requests = "==2.31.0"
+sphobjinv = "==2.3.1"
+
+[requires]
+python_version = "3.9"
