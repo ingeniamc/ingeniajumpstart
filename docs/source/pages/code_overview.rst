@@ -2,7 +2,7 @@
 Codebase
 ********
 
-K2 Base Camp is meant to serve as a starting point for futher development.
+**K2 Base Camp** is meant to serve as a starting point for futher development.
 
 Before we get into the details of how to properly set up the development environment, let's get an overview of how the codebase of the project is structured.
 
@@ -16,8 +16,8 @@ Here's a list of the most important libraries and frameworks we are using:
 
 * `PySide6 <https://doc.qt.io/qtforpython-6/>`_ - main graphics framework
 * `QML <https://doc.qt.io/qt-6/qmlapplications.html>`_ - declarative language for creating interfaces
-* `javascript <https://en.wikipedia.org/wiki/JavaScript>`_ - small parts of the logic in the QML code is written in this language
-* `ingeniamotion <https://distext.ingeniamc.com/doc/ingeniamotion/0.7.0/>`_ - communication library for Ingenia servo drives 
+* `javascript <https://en.wikipedia.org/wiki/JavaScript>`_ - some parts of the logic in the QML code is written in this language
+* `ingeniamotion <https://distext.ingeniamc.com/doc/ingeniamotion/0.8.0/>`_ - communication library for Ingenia servo drives 
 * `pytest <https://docs.pytest.org/en/7.4.x/>`_ - testing library 
 * `sphinx <https://www.sphinx-doc.org/en/master/>`_ - facilitates creating documentation 
 * `mypy <https://mypy.readthedocs.io/en/stable/index.html>`_ (typing), `black <https://black.readthedocs.io/en/stable/>`_ (formatting), `ruff <https://docs.astral.sh/ruff/>`_ (linting) - improve code quality
@@ -27,9 +27,9 @@ Project folder structure
 ========================
 
 | root
-| ├── assets *(static files such as images)*
 | ├── docs *(this documentation)*
-| ├── src
+| ├── k2basecamp
+| │   ├── assets
 | │   ├── controllers
 | │   ├── models
 | │   ├── services
@@ -43,7 +43,7 @@ Project folder structure
 Architecture
 ============
 
-The ``src`` directory contains the application code and is composed of several important parts.
+The ``k2basecamp`` directory contains the application code and is composed of several important parts.
 
 Everything that is visible to the user is contained in the ``views`` folder and written in QML (all QML and javascript code is contained in the ``views`` folder). 
 The user interface and all it's components are defined here. 
@@ -74,7 +74,7 @@ To illustrate the flow of the application while it is running, consider the foll
 
     #. We choose a different *connection protocol* using the dropdown in the GUI:
     
-        .. image:: ../_static/select_connection.png
+        .. image:: ../_static/connection_page_select_protocol.png
             :width: 400
             :alt: The interface with the dropdown for connections expanded
 
@@ -85,7 +85,7 @@ To illustrate the flow of the application while it is running, consider the foll
 
     #. We configured the connection parameters correctly and hit the *Connect* - button:
 
-        .. image:: ../_static/connect.png
+        .. image:: ../_static/connection_page_connect.png
             :width: 400
             :alt: The interface with an active connect button
         
@@ -97,7 +97,7 @@ To illustrate the flow of the application while it is running, consider the foll
     #. The callback function is used to emit a signal that the connection has been completed successfully.
     #. The frontend receives the signal and exectues a javascript function that opens a new page in the interface:
 
-        .. image:: ../_static/control.png
+        .. image:: ../_static/controls_page.png
             :width: 400
             :alt: The control interface
 
@@ -107,7 +107,7 @@ To illustrate the flow of the application while it is running, consider the foll
 
     #. We press one of the checkboxes that enable a motor in the GUI.
 
-        .. image:: ../_static/motor_button.png
+        .. image:: ../_static/controls_page_enable_motors.png
             :width: 400
             :alt: The control interface with one motor enable button highlighted
 
@@ -117,9 +117,31 @@ To illustrate the flow of the application while it is running, consider the foll
     #. The connected function in turn emits a ``signal`` that is received by the GUI.
     #. The GUI updates the graph when it receives new data through the ``signal``:
 
-        .. image:: ../_static/graph.png
+        .. image:: ../_static/controls_page_plot.png
             :width: 400
             :alt: The control interface with a velocity graph
+
+* The library that we use to communicate with the drive (ingeniamotion) also allows us to get periodic updates about certain states. For example, we can display LEDs that inform the user about the state of the motor (**Red** = Disabled, **Yellow** = Ready, **Green** = Enabled).
+    
+    #. The subscription to the motor state is done in the ``service`` when we connect to the drives.
+    #. When making the subscription, we also define a callback function in the ``service`` that handles the information we will now periodically receive from the drives.
+    #. In the callback, a signal is sent to the ``controller``, containing the current motor state.
+    #. In this case, the ``controller`` simply emits a ``signal`` to the GUI where the corresponding LED is updated.
+
+        .. image:: ../_static/controls_page_led.png
+            :width: 400
+            :alt: 
+            
+* Another subscription that we make is to the network state. This allows us to update the interface when the drives are suddenly disconnected (e.g. when the cable gets pulled) or when the connection becomes available again.
+
+    #. Just as in the previous example, the subscription is made in the ``service`` when connecting to the drives.
+    #. The callback in the ``service`` passes the information to the ``controller``.
+    #. Here we might run additional code depending on the state (e.g. stopping running poller threads when the connection was lost).
+    #. Lastly, we inform the GUI about the occurence via ``signals``. This could mean displaying an error message or changing button states (disabled / re-enabled).
+
+        .. image:: ../_static/controls_page_connection_lost.png
+            :width: 400
+            :alt: 
 
 .. NOTE::
 

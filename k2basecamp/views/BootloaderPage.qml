@@ -415,7 +415,7 @@ ColumnLayout {
         }
         Components.StyledButton {
             id: installBtn
-            text: "Install firmware"
+            text: "Load firmware"
             Material.background: '#2ffcab'
             Material.foreground: '#1b1b1b'
             hoverColor: '#acfedd'

@@ -9,7 +9,7 @@ Installing for the development environment is much like outlined in :ref:`quicks
 
 The only difference is that we need to include the ``-d`` flag when installing the dependencies::
 
-    pipenv install -d --ignore-pipfile
+    pipenv sync -d
 
 .. WARNING::
     Unless otherwise specified, all commands should be run inside the virtual environment. If you get errors about missing packages, it's likely you forgot to do so or are using the wrong environment.
@@ -19,7 +19,7 @@ The only difference is that we need to include the ``-d`` flag when installing t
     
 Running the program::
 
-    python src/__main__.py
+    python -m k2basecamp
 
 .. NOTE::
     When debuggin or running the program in an IDE such as `VS-Code <https://code.visualstudio.com/>`_, the IDE might have to be configured to use the virtual environment.
@@ -33,7 +33,7 @@ Style
 We defined a custom style in **qtquickcontrols2.conf** for this application. 
 However, it is not automatically included in the application, instead it has to be compiled with the help of **resources.qrc** (do this after making changes to the style)::
 
-    pyside6-rcc resources.qrc -o src/resources.py
+    pyside6-rcc resources.qrc -o k2basecamp/resources.py
 
 Pre-commit
 ==========
@@ -74,7 +74,7 @@ We use the `google style <https://google.github.io/styleguide/pyguide.html#38-co
 
 When creating new files that contain docstrings, their documentation files can be generated using::
 
-    sphinx-apidoc -o ./source ../src
+    sphinx-apidoc -o ./source ../k2basecamp
 
 Either way, after making changes to the files in ``docs/source``, the documentation has to be recompiled::
 

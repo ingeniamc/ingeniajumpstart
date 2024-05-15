@@ -10,24 +10,10 @@ Prerequisites
 * `python 3.9 <https://www.python.org/downloads/release/python-390/>`_ 
 * `pipenv <https://pipenv.pypa.io/en/latest/installation/>`_
 
-Installation
-============
-
-If you have python 3.9 and pipenv installed on your system, running K2 Base Camp is as simple as:
-
-#. Cloning the repository from `github <https://github.com/ingeniamc/k2-base-camp.git>`_
-#. Installing the dependencies::
-
-    pipenv install --ignore-pipfile
-
-#. Running the program::
-
-    pipenv run python src/__main__.py
-
 Installing python
 =================
 
-K2 Base Camp needs a specific python version to run (3.9).
+**K2 Base Camp** needs a specific python version to run (3.9).
 
 To install python, go to the official `website <https://www.python.org/downloads/release/python-390/>`_.
 
@@ -40,5 +26,19 @@ You might have to explicitly specify the python location when creating the virtu
 
 Subsequently, the quickstart commands would be adapted to::
 
-    py -3.9 -m pipenv install --ignore-pipfile
-    py -3.9 -m pipenv run python src/__main__.py
+    py -3.9 -m pipenv sync
+    py -3.9 -m pipenv run python -m k2basecamp
+
+Installation
+============
+
+If you have python 3.9 and pipenv installed on your system, running **K2 Base Camp** is as simple as:
+
+#. Cloning the repository from `github <https://github.com/ingeniamc/k2-base-camp.git>`_
+#. Installing the dependencies::
+
+    pipenv sync
+
+#. Running the program::
+
+    pipenv run python -m k2basecamp
