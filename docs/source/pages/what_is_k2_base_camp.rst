@@ -25,7 +25,11 @@ Graphs display the velocity of the motors over time, and the input boxes and sli
 Usage
 =====
 
-The application is divided into three pages - a "Bootloader"-page to install firmware, a "Connection"-page to connect to the drive, and a "Controls"-page where you can enable and move the motors.
+The application is divided into three pages:
+
+* *Bootloader* - install firmware
+* *Connection* - connect to the drive
+* *Controls* - enable and move the motors
 
 Connection Page
 ---------------
@@ -71,15 +75,15 @@ Upon opening the application, this is the first page that is shown. The purpose 
 Controls Page
 -------------
 
-Upon connecting, the "Controls"-page opens where you can start moving the motors.
+Upon connecting, the *Controls* page opens where you can start moving the motors.
 
-#. Check one of the "Enable motor"-boxes to enable the corresponding motor:
+#. Check one of the *Enable motor* boxes to enable the corresponding motor:
 
     .. image:: ../_static/controls_page_enable_motors.png
                 :width: 400
                 :alt: Controls page with enable motor button highlighted
 
-#. The LED next to the checkbox will inform you about the state of the motor:
+#. The LED next to the checkbox will inform you about the state of the motor (**Red** = Disabled, **Yellow** = Ready, **Green** = Enabled):
 
     .. image:: ../_static/controls_page_led.png
                 :width: 400
@@ -103,7 +107,7 @@ Upon connecting, the "Controls"-page opens where you can start moving the motors
                 :width: 400
                 :alt: Controls page with sliders highlighted
 
-#. Hitting the "Disconnect"-button will take you back to the "Connection"-page:
+#. Hitting the *Disconnect* button will take you back to the *Connection* page:
 
     .. image:: ../_static/controls_page_disconnect.png
                 :width: 400
@@ -112,21 +116,21 @@ Upon connecting, the "Controls"-page opens where you can start moving the motors
 Bootloader Page
 ---------------
 
-Pressing the "Bootloader"-button on the "Connection"-page will take you to this page. Here you can install a different firmware to the drives using a .zfu file.
+Pressing the *Bootloader* button on the *Connection* page will take you to this page. Here you can install a different firmware to the drives using a .zfu file.
 
-#. Prepare to connect to the drives just as you do on the "Connection"-page:
+#. Prepare to connect to the drives just as you do on the *Connection* page:
 
     .. image:: ../_static/bootloader_page_configure.png
                 :width: 400
                 :alt: Bootloader page with configuration dropdowns highlighted
 
-#. Upload a .zfu-file using the "Choose firmware.."-button:
+#. Upload a .zfu-file using the _Choose firmware.._ button:
 
     .. image:: ../_static/bootloader_page_firmware.png
                 :width: 400
                 :alt: Bootloader page with firmware file upload highlighted
 
-#. Hit the "Load firmware"-button and confirm the operation in the dialog:
+#. Hit the *Load firmware* button and confirm the operation in the dialog:
 
     .. image:: ../_static/bootloader_page_load_firmware.png
                 :width: 400
