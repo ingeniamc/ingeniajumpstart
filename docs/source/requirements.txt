@@ -1,0 +1,16 @@
+ingenialink==7.3.0
+ingenialogger==0.3.0
+ingeniamotion==0.8.0
+PySide6==6.6.0
+PySide6-Addons==6.6.0
+PySide6-Essentials==6.6.0
+Sphinx==7.2.6
+sphinx-rtd-theme==2.0.0
+sphinxcontrib-applehelp==1.0.8
+sphinxcontrib-devhelp==1.0.6
+sphinxcontrib-htmlhelp==2.0.5
+sphinxcontrib-jquery==4.1
+sphinxcontrib-jsmath==1.0.1
+sphinxcontrib-qthelp==1.0.7
+sphinxcontrib-serializinghtml==1.1.10
+sphobjinv==2.3.1
