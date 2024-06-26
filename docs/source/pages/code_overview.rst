@@ -10,7 +10,7 @@ Tech Stack
 ==========
 The application is built with the `Qt-framework <https://doc.qt.io/>`_, using the open source variant `PySide6 <https://doc.qt.io/qtforpython-6/>`_.
 
-As such, most of the code is writting in python. However, the interface (GUI) is written in `QML <https://doc.qt.io/qt-6/qmlapplications.html>`_.
+As such, most of the code is written in python. However, the interface (GUI) is written in `QML <https://doc.qt.io/qt-6/qmlapplications.html>`_.
 
 Here's a list of the most important libraries and frameworks we are using:
 
@@ -101,7 +101,7 @@ To illustrate the flow of the application while it is running, consider the foll
             :width: 400
             :alt: The control interface
 
-``Services`` can also start additional ``threads`` when necessary, for example it is sometimes necessary to continuosly receive data from a drive.
+``Services`` can also start additional ``threads`` when necessary, for example it is sometimes necessary to continuously receive data from a drive.
 
 * One such example is the data that we use to plot the changes in velocity:
 
@@ -121,7 +121,7 @@ To illustrate the flow of the application while it is running, consider the foll
             :width: 400
             :alt: The control interface with a velocity graph
 
-* The library that we use to communicate with the drive (ingeniamotion) also allows us to get periodic updates about certain states. For example, we can display LEDs that inform the user about the state of the motor (**Red** = Disabled, **Yellow** = Ready, **Green** = Enabled).
+* The library that we use to communicate with the drive (ingeniamotion) also allows us to get periodic updates about certain states. For example, we can display LEDs that inform the user about the state of the motor (**Red** = Fault, **Yellow** = Standby, **Green** = Enabled).
     
     #. The subscription to the motor state is done in the ``service`` when we connect to the drives.
     #. When making the subscription, we also define a callback function in the ``service`` that handles the information we will now periodically receive from the drives.
