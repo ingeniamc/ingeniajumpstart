@@ -8,7 +8,7 @@ import qmltypes.controllers 1.0
 // no longer used, the warning can be re-enabled.
 // qmllint disable missing-property
 
-// Helper component to abstract some of the state logic 
+// Helper component to abstract some of the state logic
 // for displaying info about the drive.
 
 Image {
@@ -19,13 +19,6 @@ Image {
     state: Enums.SERVO_STATE.DISABLED
     states: [
         State {
-            name: Enums.SERVO_STATE.RDY
-            PropertyChanges {
-                target: stateImage
-                source: "images/circle-available.svg"
-            }
-        },
-        State {
             name: Enums.SERVO_STATE.ENABLED
             PropertyChanges {
                 target: stateImage
@@ -34,6 +27,20 @@ Image {
         },
         State {
             name: Enums.SERVO_STATE.DISABLED
+            PropertyChanges {
+                target: stateImage
+                source: "images/circle-available.svg"
+            }
+        },
+        State {
+            name: Enums.SERVO_STATE.FAULT
+            PropertyChanges {
+                target: stateImage
+                source: "images/circle-fault.svg"
+            }
+        },
+        State {
+            name: Enums.SERVO_STATE.FAULTR
             PropertyChanges {
                 target: stateImage
                 source: "images/circle-fault.svg"
