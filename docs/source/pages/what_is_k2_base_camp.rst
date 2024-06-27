@@ -18,7 +18,7 @@ You also have the option to provide files with configurations for the drives tha
 
 You can then enable / disable the servo motors and get them moving using the arrow keys (or pressing the corresponding buttons).
 
-The interface includes a LED for each motor that displays its current status (**Red** = Disabled, **Yellow** = Ready, **Green** = Enabled).
+The interface includes a LED for each motor that displays its current status (**Red** = Fault, **Yellow** = Standby, **Green** = Enabled).
 
 Graphs display the velocity of the motors over time, and the input boxes and sliders can be used to set additional parameters related to the velocity of the motors.
 
@@ -83,7 +83,7 @@ Upon connecting, the *Controls* page opens where you can start moving the motors
                 :width: 400
                 :alt: Controls page with enable motor button highlighted
 
-#. The LED next to the checkbox will inform you about the state of the motor (**Red** = Disabled, **Yellow** = Ready, **Green** = Enabled):
+#. The LED next to the checkbox will inform you about the state of the motor (**Red** = Fault, **Yellow** = Standby, **Green** = Enabled):
 
     .. image:: ../_static/controls_page_led.png
                 :width: 400
