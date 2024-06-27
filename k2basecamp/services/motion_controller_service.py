@@ -21,6 +21,8 @@ INTERFACE_CAN = "CAN"
 INTERFACE_ETH = "ETH"
 DEFAULT_DICTIONARY_PATH = "k2basecamp/assets/eve-net-c_can_2.4.1.xdf"
 EXPECTED_NODE_NR_SCAN = 2
+MAX_VELOCITY_REGISTER = "CL_VEL_REF_MAX"
+MAX_PROFILER_VELOCITY_REGISTER = "PROF_MAX_VEL"
 
 
 class MotionControllerService(QObject):
@@ -522,5 +524,36 @@ class MotionControllerService(QObject):
                     ),
                     slave=left_id,
                 )
+
+        return on_thread
+
+    @run_on_thread
+    def set_max_velocity(
+        self,
+        report_callback: Callable[[thread_report], Any],
+        drive: Drive,
+        max_velocity: float,
+        *args: Any,
+        **kwargs: Any,
+    ) -> Callable[..., Any]:
+        """Set the maximum velocity of the given drive. There are two registers that
+        have an effect on this property - we are simply setting them both to the given
+        value to keep things simple in this application.
+
+        Args:
+            report_callback: callback to invoke after
+                completing the operation.
+            drive: the target drive.
+            max_velocity: the new maximum velocity.
+
+        """
+
+        def on_thread(drive: Drive, max_velocity: float) -> Any:
+            self.__mc.communication.set_register(
+                MAX_VELOCITY_REGISTER, max_velocity, drive.name
+            )
+            self.__mc.communication.set_register(
+                MAX_PROFILER_VELOCITY_REGISTER, max_velocity, drive.name
+            )
 
         return on_thread

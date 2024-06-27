@@ -7,7 +7,10 @@ from PySide6.QtCore import QJsonArray, QObject, Signal, Slot
 from PySide6.QtQml import QmlElement
 
 from k2basecamp.models.connection_model import ConnectionModel
-from k2basecamp.services.motion_controller_service import MotionControllerService
+from k2basecamp.services.motion_controller_service import (
+    MAX_VELOCITY_REGISTER,
+    MotionControllerService,
+)
 from k2basecamp.utils.enums import CanDevice, ConnectionProtocol, Drive
 from k2basecamp.utils.types import thread_report
 
@@ -15,7 +18,6 @@ from k2basecamp.utils.types import thread_report
 # (QML_IMPORT_MINOR_VERSION is optional)
 QML_IMPORT_NAME = "qmltypes.controllers"
 QML_IMPORT_MAJOR_VERSION = 1
-MAX_VELOCITY_REGISTER = "CL_VEL_REF_MAX"
 
 logger = ingenialogger.get_logger(__name__)
 
@@ -221,21 +223,15 @@ class ConnectionController(QObject):
         )
 
     @Slot(float, int)
-    def set_register_max_velocity(self, max_velocity: float, drive: int) -> None:
-        """Set a specific register - in this case the one that controls the maximum
-        velocity - of a given drive using the MotionControllerService.
+    def set_max_velocity(self, max_velocity: float, drive: int) -> None:
+        """Set the registers that control the maximum velocity of a given drive using
+        the MotionControllerService.
 
         Args:
             max_velocity: the value to set the register to
             drive: the drive
         """
-        self.mcs.run(
-            self.log_report,
-            "communication.set_register",
-            MAX_VELOCITY_REGISTER,
-            max_velocity,
-            Drive(drive).name,
-        )
+        self.mcs.set_max_velocity(self.log_report, Drive(drive), max_velocity)
 
     @Slot(str, int)
     def select_dictionary(self, dictionary: str, drive: int) -> None:
@@ -388,7 +384,7 @@ class ConnectionController(QObject):
                 the callback
         """
         self.drive_connected_triggered.emit()
-        # Get the current value of the CL_VEL_REF_MAX register
+        # Get the current value of the MAX_VELOCITY_REGISTER register
         for drive in [Drive.Left, Drive.Right]:
             self.mcs.run(
                 partial(self.get_max_velocity_value_callback, drive),
