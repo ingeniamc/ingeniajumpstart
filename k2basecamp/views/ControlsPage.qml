@@ -59,10 +59,12 @@ RowLayout {
             switch (drive) {
                 case Enums.Drive.Left:
                     maxVelocityLeft.value = newValue;
+                    velocitySliderLValue.text = newValue.toFixed(2);
                     velocitySliderL.to = newValue;
                     break;
                 case Enums.Drive.Right:
                     maxVelocityRight.value = newValue;
+                    velocitySliderRValue.text = newValue.toFixed(2);
                     velocitySliderR.to = newValue;
                     break;
                 default:
@@ -239,12 +241,15 @@ RowLayout {
                 }
                 SpinBox {
                     id: maxVelocityLeft
-                    from: 0
+                    from: 1
                     to: 1000
                     editable: true
                     onValueModified: () => {
+                        if (velocitySliderL.value > value) {
+                            velocitySliderLValue.text = value.toFixed(2);
+                        }
                         velocitySliderL.to = value;
-                        grid.connectionController.set_register_max_velocity(value, Enums.Drive.Left);
+                        grid.connectionController.set_max_velocity(value, Enums.Drive.Left);
                     }
                 }
             }
@@ -262,7 +267,7 @@ RowLayout {
                 }
                 Slider {
                     id: velocitySliderL
-                    from: 1
+                    from: 0
                     to: 10
                     value: 5
                     onMoved: () => {
@@ -302,12 +307,15 @@ RowLayout {
                 }
                 SpinBox {
                     id: maxVelocityRight
-                    from: 0
+                    from: 1
                     to: 1000
                     editable: true
                     onValueModified: () => {
+                        if (velocitySliderR.value > value) {
+                            velocitySliderRValue.text = value.toFixed(2);
+                        }
                         velocitySliderR.to = value;
-                        grid.connectionController.set_register_max_velocity(value, Enums.Drive.Right);
+                        grid.connectionController.set_max_velocity(value, Enums.Drive.Right);
                     }
                 }
             }
@@ -326,7 +334,7 @@ RowLayout {
                 }
                 Slider {
                     id: velocitySliderR
-                    from: 1
+                    from: 0
                     to: 10
                     value: 5
                     onMoved: () => {
