@@ -12,8 +12,8 @@ sys.path.insert(0, os.path.abspath("../.."))
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
 project = "K2 Base Camp"
-copyright = "2023, Ingenia Motion Control"
-author = "Ingenia Motion Control"
+copyright = "2023, Novanta Technologies Spain S.L."
+author = "Novanta"
 release = "unreleased"
 
 # -- General configuration ---------------------------------------------------
