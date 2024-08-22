@@ -110,6 +110,7 @@ class ConnectionController(QObject):
         self.mcs = mcs
         self.mcs.error_triggered.connect(self.error_message_callback)
         self.mcs.servo_state_update_triggered.connect(self.update_servo_state)
+        self.mcs.servo_state_update_triggered.connect(self.get_last_error)
         self.mcs.net_state_update_triggered.connect(self.update_net_state)
         self.connection_model = ConnectionModel()
 
@@ -524,6 +525,18 @@ class ConnectionController(QObject):
         """
         self.servo_state_changed.emit(state.value, drive.value)
 
+    @Slot(Drive, SERVO_STATE)
+    def get_last_error(self, drive: Drive, state: SERVO_STATE) -> None:
+        """Get the last error if the drive goes to the fault state.
+
+        Args:
+            drive: the affected drive
+            state: the new state
+        """
+        if state == SERVO_STATE.FAULT:
+            self.mcs.get_last_error(self.show_last_error, drive)
+
+
     @Slot(Drive, NET_DEV_EVT)
     def update_net_state(self, drive: Drive, state: NET_DEV_EVT) -> None:
         """Send a signal to the GUI to update the interface when the network state
@@ -547,6 +560,15 @@ class ConnectionController(QObject):
                 the callback
         """
         logger.debug(report)
+
+    def show_last_error(self, report: thread_report) -> None:
+        """Callback to display the last error.
+
+        Args:
+            report: the result of the get_last_error method call.
+        """
+        if report.output:
+            self.error_triggered.emit(report.output)
 
     def update_connect_button_state(self) -> None:
         """Helper function that calculates the state of the connect button using the

@@ -557,3 +557,29 @@ class MotionControllerService(QObject):
             )
 
         return on_thread
+
+    @run_on_thread
+    def get_last_error(
+        self,
+        report_callback: Callable[[thread_report], Any],
+        drive: Drive,
+        *args: Any,
+        **kwargs: Any,
+    ) -> Callable[..., Any]:
+        """Get the last error of a given drive.
+
+        Args:
+            report_callback: callback to invoke after
+                completing the operation.
+            drive: the target drive.
+
+        """
+
+        def on_thread(drive: Drive) -> Any:
+            error_code, *_ = self.__mc.errors.get_last_buffer_error(
+                servo=drive.name
+            )
+            *_, error_msg = self.__mc.errors.get_error_data(error_code, servo=drive.name)
+            return error_msg
+
+        return on_thread
