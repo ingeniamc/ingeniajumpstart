@@ -17,6 +17,10 @@ import "js/selection.js" as SelectionJS
 ColumnLayout {
     id: selectionPage
     required property ConnectionController connectionController
+
+    property string dictionaryButtonMessage: "Choose dictionary"
+
+    property string configurationButtonMessage: "(Optional) Choose config"
     
     Connections {
         target: selectionPage.connectionController
@@ -333,7 +337,7 @@ ColumnLayout {
             id: combinedConfigUploadBtn
             drive: Enums.Drive.Both
             fileType: Components.UploadButton.FileType.Config
-            text: "(Optional) Choose config..."
+            text: selectionPage.configurationButtonMessage
         }
         Components.SpacerW {
         }
@@ -350,7 +354,7 @@ ColumnLayout {
             id: leftConfigUploadBtn
             drive: Enums.Drive.Left
             fileType: Components.UploadButton.FileType.Config
-            text: "(Optional) Choose config left..."
+            text: selectionPage.configurationButtonMessage + " left"
         }
         Components.SpacerW {
         }
@@ -358,7 +362,7 @@ ColumnLayout {
             id: rightConfigUploadBtn
             drive: Enums.Drive.Right
             fileType: Components.UploadButton.FileType.Config
-            text: "(Optional) Choose config right..."
+            text: selectionPage.configurationButtonMessage + " right"
         }
         Components.SpacerW {
         }
@@ -389,7 +393,7 @@ ColumnLayout {
             id: combinedDictionaryUploadBtn
             drive: Enums.Drive.Both
             fileType: Components.UploadButton.FileType.Dictionary
-            text: "(Optional) Choose dictionary..."
+            text: selectionPage.dictionaryButtonMessage
         }
         Components.SpacerW {
         }
@@ -406,7 +410,7 @@ ColumnLayout {
             id: leftDictionaryUploadBtn
             drive: Enums.Drive.Left
             fileType: Components.UploadButton.FileType.Dictionary
-            text: "(Optional) Choose dictionary left..."
+            text: selectionPage.dictionaryButtonMessage + " left"
         }
         Components.SpacerW {
         }
@@ -414,7 +418,7 @@ ColumnLayout {
             id: rightDictionaryUploadBtn
             drive: Enums.Drive.Right
             fileType: Components.UploadButton.FileType.Dictionary
-            text: "(Optional) Choose dictionary right..."
+            text: selectionPage.dictionaryButtonMessage + " right"
         }
         Components.SpacerW {
         }
