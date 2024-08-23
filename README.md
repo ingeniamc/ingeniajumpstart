@@ -17,6 +17,7 @@ Simple open source app to plug &amp; play with your servo drive.
 1. Clone the repository
 
    `git clone https://github.com/ingeniamc/k2-base-camp.git`
+   `cd k2-base-camp`
 
 2. Install dependencies
 
