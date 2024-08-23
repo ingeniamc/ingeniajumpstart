@@ -510,7 +510,6 @@ class ConnectionController(QObject):
         Args:
             error_message: the error message.
         """
-        self.emergency_stop()
         self.error_triggered.emit(error_message)
         self.update_connect_button_state()
 
