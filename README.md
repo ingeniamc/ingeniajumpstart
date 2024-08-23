@@ -9,7 +9,7 @@ Simple open source app to plug &amp; play with your servo drive.
 ### Prerequisites
 
 - [python 3.9](https://www.python.org/downloads/release/python-390/)
-- [pipenv](https://pipenv.pypa.io/en/latest/installation/)
+- [pipenv](https://pipenv.pypa.io/en/latest/)
 - [WinPcap](https://www.winpcap.org/install/default.htm)
 
 ### Installation

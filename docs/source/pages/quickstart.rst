@@ -11,7 +11,7 @@ Prerequisites
 =============
 
 * `python 3.9 <https://www.python.org/downloads/release/python-390/>`_ 
-* `pipenv <https://pipenv.pypa.io/en/latest/installation/>`_
+* `pipenv <https://pipenv.pypa.io/en/latest/>`_
 * `WinPcap <https://www.winpcap.org/install/default.htm>`_
 
 Installing python
