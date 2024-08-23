@@ -576,10 +576,10 @@ class MotionControllerService(QObject):
         """
 
         def on_thread(drive: Drive) -> Any:
-            error_code, *_ = self.__mc.errors.get_last_buffer_error(
-                servo=drive.name
+            error_code, *_ = self.__mc.errors.get_last_buffer_error(servo=drive.name)
+            *_, error_msg = self.__mc.errors.get_error_data(
+                error_code, servo=drive.name
             )
-            *_, error_msg = self.__mc.errors.get_error_data(error_code, servo=drive.name)
             return error_msg
 
         return on_thread

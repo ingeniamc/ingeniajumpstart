@@ -536,7 +536,6 @@ class ConnectionController(QObject):
         if state == SERVO_STATE.FAULT:
             self.mcs.get_last_error(self.show_last_error, drive)
 
-
     @Slot(Drive, NET_DEV_EVT)
     def update_net_state(self, drive: Drive, state: NET_DEV_EVT) -> None:
         """Send a signal to the GUI to update the interface when the network state
