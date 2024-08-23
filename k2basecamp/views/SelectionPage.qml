@@ -337,7 +337,7 @@ ColumnLayout {
             id: combinedConfigUploadBtn
             drive: Enums.Drive.Both
             fileType: Components.UploadButton.FileType.Config
-            text: configurationButtonMessage
+            text: selectionPage.configurationButtonMessage
         }
         Components.SpacerW {
         }
@@ -354,7 +354,7 @@ ColumnLayout {
             id: leftConfigUploadBtn
             drive: Enums.Drive.Left
             fileType: Components.UploadButton.FileType.Config
-            text: configurationButtonMessage + " left"
+            text: selectionPage.configurationButtonMessage + " left"
         }
         Components.SpacerW {
         }
@@ -362,7 +362,7 @@ ColumnLayout {
             id: rightConfigUploadBtn
             drive: Enums.Drive.Right
             fileType: Components.UploadButton.FileType.Config
-            text: configurationButtonMessage + " right"
+            text: selectionPage.configurationButtonMessage + " right"
         }
         Components.SpacerW {
         }
@@ -393,7 +393,7 @@ ColumnLayout {
             id: combinedDictionaryUploadBtn
             drive: Enums.Drive.Both
             fileType: Components.UploadButton.FileType.Dictionary
-            text: dictionaryButtonMessage
+            text: selectionPage.dictionaryButtonMessage
         }
         Components.SpacerW {
         }
@@ -410,7 +410,7 @@ ColumnLayout {
             id: leftDictionaryUploadBtn
             drive: Enums.Drive.Left
             fileType: Components.UploadButton.FileType.Dictionary
-            text: dictionaryButtonMessage + " left"
+            text: selectionPage.dictionaryButtonMessage + " left"
         }
         Components.SpacerW {
         }
@@ -418,7 +418,7 @@ ColumnLayout {
             id: rightDictionaryUploadBtn
             drive: Enums.Drive.Right
             fileType: Components.UploadButton.FileType.Dictionary
-            text: dictionaryButtonMessage + " right"
+            text: selectionPage.dictionaryButtonMessage + " right"
         }
         Components.SpacerW {
         }
