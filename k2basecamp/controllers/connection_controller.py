@@ -1,4 +1,5 @@
 import os
+from collections import defaultdict
 from functools import partial
 
 import ingenialogger
@@ -112,9 +113,7 @@ class ConnectionController(QObject):
         self.mcs.servo_state_update_triggered.connect(self.update_servo_state)
         self.mcs.net_state_update_triggered.connect(self.update_net_state)
         self.connection_model = ConnectionModel()
-        self.number_of_errors: dict[Drive, int] = {
-            drive: 0 for drive in [Drive.Left, Drive.Right]
-        }
+        self.__number_of_errors: dict[Drive, int] = defaultdict(int)
 
     @Slot()
     def connect(self) -> None:
@@ -389,6 +388,7 @@ class ConnectionController(QObject):
         self.drive_connected_triggered.emit()
         # Get the current value of the MAX_VELOCITY_REGISTER register
         for drive in [Drive.Left, Drive.Right]:
+            self.mcs.get_number_of_errors(self.__set_number_of_errors, drive)
             self.mcs.run(
                 partial(self.get_max_velocity_value_callback, drive),
                 "communication.get_register",
@@ -524,11 +524,12 @@ class ConnectionController(QObject):
         Args:
             report: the result of the get_number_of_errors method call.
         """
-        if report.output:
-            drive, current_number_of_errors = report.output
-            if current_number_of_errors > self.number_of_errors[drive]:
-                self.mcs.get_last_error_message(self.show_last_error, drive)
-                self.number_of_errors[drive] = current_number_of_errors
+        if report.drive is None or report.output is None:
+            return
+        current_number_of_errors = report.output
+        if current_number_of_errors > self.__number_of_errors[report.drive]:
+            self.mcs.get_last_error_message(self.show_last_error, report.drive)
+            self.__number_of_errors[report.drive] = current_number_of_errors
 
     @Slot(Drive, SERVO_STATE)
     def update_servo_state(self, drive: Drive, state: SERVO_STATE) -> None:
@@ -583,3 +584,9 @@ class ConnectionController(QObject):
         self.connect_button_state_changed.emit(
             self.connection_model.connect_button_state().value
         )
+
+    def __set_number_of_errors(self, t_report: thread_report) -> None:
+        """Store the current number of errors of a given drive."""
+        if t_report.drive is None or t_report.output is None:
+            return
+        self.__number_of_errors[t_report.drive] = t_report.output

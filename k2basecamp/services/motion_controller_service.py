@@ -598,6 +598,6 @@ class MotionControllerService(QObject):
             num_current_errors = self.__mc.errors.get_number_total_errors(
                 servo=drive.name
             )
-            return drive, num_current_errors
+            return num_current_errors
 
         return on_thread
