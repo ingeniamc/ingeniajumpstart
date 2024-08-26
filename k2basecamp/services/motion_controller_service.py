@@ -32,7 +32,7 @@ class MotionControllerService(QObject):
 
     """
 
-    error_triggered = Signal(str, arguments=["error_message"])
+    error_triggered = Signal(thread_report, arguments=["thread_report"])
     """Triggers when an error occurs while communicating with the drive"""
 
     servo_state_update_triggered: Signal = Signal(Drive, SERVO_STATE)

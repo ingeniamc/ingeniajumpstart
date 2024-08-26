@@ -514,15 +514,14 @@ class ConnectionController(QObject):
         self.error_triggered.emit(error_message)
         self.update_connect_button_state()
 
-    def get_number_of_errors(self, error_message: str) -> None:
+    def get_number_of_errors(self, report: thread_report) -> None:
         """Callback when an error occured in a MotionControllerThread.
         Emits a signal to the UI that contains the error message.
 
         Args:
             error_message: the error message.
         """
-        for drive in [Drive.Left, Drive.Right]:
-            self.mcs.get_number_of_errors(self.update_number_of_errors, drive)
+        self.mcs.get_number_of_errors(self.update_number_of_errors, report.drive)
 
     def update_number_of_errors(self, report: thread_report):
         """Callback to display the last error.
