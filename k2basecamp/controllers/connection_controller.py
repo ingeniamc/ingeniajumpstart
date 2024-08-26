@@ -112,7 +112,9 @@ class ConnectionController(QObject):
         self.mcs.servo_state_update_triggered.connect(self.update_servo_state)
         self.mcs.net_state_update_triggered.connect(self.update_net_state)
         self.connection_model = ConnectionModel()
-        self.number_of_errors: dict[Drive, int] = {drive: -1 for drive in [Drive.Left, Drive.Right]}
+        self.number_of_errors: dict[Drive, int] = {
+            drive: -1 for drive in [Drive.Left, Drive.Right]
+        }
 
     @Slot()
     def connect(self) -> None:
@@ -505,18 +507,18 @@ class ConnectionController(QObject):
 
     def get_number_of_errors(self, report: thread_report) -> None:
         """Callback when an error occured in a MotionControllerThread.
-        Emits a signal to the UI that contains the error message.
+        Update the number of errors and display it if there is a new one.
 
         Args:
             error_message: the error message.
         """
         self.mcs.get_number_of_errors(self.update_number_of_errors, report.drive)
 
-    def update_number_of_errors(self, report: thread_report):
-        """Callback to display the last error.
+    def update_number_of_errors(self, report: thread_report) -> None:
+        """Callback to update the number of errors of a given drive.
 
         Args:
-            report: the result of the get_last_error method call.
+            report: the result of the get_number_of_errors method call.
         """
         if report.output:
             drive, number_of_errors = report.output

@@ -9,6 +9,7 @@ from k2basecamp.utils.enums import Drive
 class thread_report:
     """Type for thread reports that are returned by threads. They contain information
     about the execution result of the thread."""
+
     drive: Optional[Drive]
     method: str
     output: Optional[Any]
