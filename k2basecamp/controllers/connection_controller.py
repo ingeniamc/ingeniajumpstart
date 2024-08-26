@@ -108,7 +108,7 @@ class ConnectionController(QObject):
     def __init__(self, mcs: MotionControllerService) -> None:
         super().__init__()
         self.mcs = mcs
-        self.mcs.error_triggered.connect(self.get_number_of_errors)
+        self.mcs.error_triggered.connect(self.handle_error)
         self.mcs.servo_state_update_triggered.connect(self.update_servo_state)
         self.mcs.net_state_update_triggered.connect(self.update_net_state)
         self.connection_model = ConnectionModel()
@@ -505,17 +505,21 @@ class ConnectionController(QObject):
     def emergency_stop_callback(self, thread_report: thread_report) -> None:
         self.emergency_stop_triggered.emit()
 
-    def get_number_of_errors(self, report: thread_report) -> None:
+    def handle_error(self, report: thread_report) -> None:
         """Callback when an error occured in a MotionControllerThread.
-        Update the number of errors and display it if there is a new one.
+        Display the error in a pop-up window.
 
         Args:
-            error_message: the error message.
+            report: The error thread report.
         """
-        self.mcs.get_number_of_errors(self.update_number_of_errors, report.drive)
+        if report.drive is not None:
+            self.mcs.get_number_of_errors(self.update_number_of_errors, report.drive)
+        else:
+            self.error_triggered.emit(str(report.exceptions))
 
     def update_number_of_errors(self, report: thread_report) -> None:
         """Callback to update the number of errors of a given drive.
+        If there is a new error, display it in a pop-up window.
 
         Args:
             report: the result of the get_number_of_errors method call.
