@@ -112,7 +112,7 @@ class ConnectionController(QObject):
         self.mcs.servo_state_update_triggered.connect(self.update_servo_state)
         self.mcs.net_state_update_triggered.connect(self.update_net_state)
         self.connection_model = ConnectionModel()
-        self.number_of_errors: dict[Drive, int] = {Drive.Left: 0, Drive.Right: 0}
+        self.number_of_errors: dict[Drive, int] = {drive: -1 for drive in [Drive.Left, Drive.Right]}
 
     @Slot()
     def connect(self) -> None:
@@ -531,7 +531,7 @@ class ConnectionController(QObject):
         """
         if report.output:
             drive, number_of_errors = report.output
-            if self.number_of_errors[drive] < number_of_errors:
+            if 0 < self.number_of_errors[drive] < number_of_errors:
                 self.mcs.get_last_error_message(self.show_last_error, drive)
             self.number_of_errors[drive] = number_of_errors
 
