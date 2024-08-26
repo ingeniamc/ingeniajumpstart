@@ -108,11 +108,11 @@ class ConnectionController(QObject):
     def __init__(self, mcs: MotionControllerService) -> None:
         super().__init__()
         self.mcs = mcs
-        self.mcs.error_triggered.connect(self.error_message_callback)
+        self.mcs.error_triggered.connect(self.get_number_of_errors)
         self.mcs.servo_state_update_triggered.connect(self.update_servo_state)
-        self.mcs.servo_state_update_triggered.connect(self.get_last_error)
         self.mcs.net_state_update_triggered.connect(self.update_net_state)
         self.connection_model = ConnectionModel()
+        self.number_of_errors: dict[Drive, int] = {Drive.Left: 0, Drive.Right: 0}
 
     @Slot()
     def connect(self) -> None:
@@ -514,6 +514,28 @@ class ConnectionController(QObject):
         self.error_triggered.emit(error_message)
         self.update_connect_button_state()
 
+    def get_number_of_errors(self, error_message: str) -> None:
+        """Callback when an error occured in a MotionControllerThread.
+        Emits a signal to the UI that contains the error message.
+
+        Args:
+            error_message: the error message.
+        """
+        for drive in [Drive.Left, Drive.Right]:
+            self.mcs.get_number_of_errors(self.update_number_of_errors, drive)
+
+    def update_number_of_errors(self, report: thread_report):
+        """Callback to display the last error.
+
+        Args:
+            report: the result of the get_last_error method call.
+        """
+        if report.output:
+            drive, number_of_errors = report.output
+            if self.number_of_errors[drive] < number_of_errors:
+                self.mcs.get_last_error_message(self.show_last_error, drive)
+            self.number_of_errors[drive] = number_of_errors
+
     @Slot(Drive, SERVO_STATE)
     def update_servo_state(self, drive: Drive, state: SERVO_STATE) -> None:
         """Send a signal to the GUI to update the servo state image of the affected
@@ -524,17 +546,8 @@ class ConnectionController(QObject):
             state: the new state
         """
         self.servo_state_changed.emit(state.value, drive.value)
-
-    @Slot(Drive, SERVO_STATE)
-    def get_last_error(self, drive: Drive, state: SERVO_STATE) -> None:
-        """Get the last error if the drive goes to the fault state.
-
-        Args:
-            drive: the affected drive
-            state: the new state
-        """
         if state == SERVO_STATE.FAULT:
-            self.mcs.get_last_error(self.show_last_error, drive)
+            self.mcs.get_number_of_errors(self.update_number_of_errors, drive)
 
     @Slot(Drive, NET_DEV_EVT)
     def update_net_state(self, drive: Drive, state: NET_DEV_EVT) -> None:

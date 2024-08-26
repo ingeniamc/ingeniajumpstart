@@ -559,7 +559,7 @@ class MotionControllerService(QObject):
         return on_thread
 
     @run_on_thread
-    def get_last_error(
+    def get_last_error_message(
         self,
         report_callback: Callable[[thread_report], Any],
         drive: Drive,
@@ -583,3 +583,27 @@ class MotionControllerService(QObject):
             return error_msg
 
         return on_thread
+
+    @run_on_thread
+    def get_number_of_errors(
+        self,
+        report_callback: Callable[[thread_report], Any],
+        drive: Drive,
+        *args: Any,
+        **kwargs: Any,
+    ) -> Callable[..., Any]:
+        """Get the total number of errors of a given drive.
+
+        Args:
+            report_callback: callback to invoke after
+                completing the operation.
+            drive: the target drive.
+
+        """
+
+        def on_thread(drive: Drive) -> Any:
+            num_current_errors = self.__mc.errors.get_number_total_errors(servo=drive.name)
+            return drive, num_current_errors
+
+        return on_thread
+
