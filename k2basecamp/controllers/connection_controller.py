@@ -520,7 +520,7 @@ class ConnectionController(QObject):
         """
         if report.output:
             drive, number_of_errors = report.output
-            if 0 < self.number_of_errors[drive] < number_of_errors:
+            if 0 <= self.number_of_errors[drive] < number_of_errors:
                 self.mcs.get_last_error_message(self.show_last_error, drive)
             self.number_of_errors[drive] = number_of_errors
 
