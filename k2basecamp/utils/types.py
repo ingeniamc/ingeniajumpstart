@@ -2,7 +2,7 @@ from dataclasses import dataclass
 from functools import partial
 from typing import Any, Callable, Optional, Union
 
-from k2basecamp.utils.enums import CanDevice, ConnectionProtocol, Drive
+from k2basecamp.utils.enums import Drive
 
 
 @dataclass

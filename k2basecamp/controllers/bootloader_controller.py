@@ -80,7 +80,6 @@ class BootloaderController(QObject):
     def __init__(self, mcs: MotionControllerService) -> None:
         super().__init__()
         self.mcs = mcs
-        self.mcs.error_triggered.connect(self.error_message_callback)
         self.bootloader_model = BootloaderModel()
         self.errors: list[str] = []
 
@@ -130,6 +129,12 @@ class BootloaderController(QObject):
         sequentially (one drive after the other) or can be done in parallel (this is
         handled automatically by ingeniamotion).
         """
+        if not self.bootloader_model.install_prerequisites_met():
+            self.error_triggered.emit(
+                "Incorrect or insufficient configuration. Make sure to provide the "
+                + "right parameters for the selected connection protocol."
+            )
+            return
         if (
             self.bootloader_model.firmware
             and self.bootloader_model.left_id
@@ -143,6 +148,7 @@ class BootloaderController(QObject):
                 self.bootloader_model.left_id,
                 self.bootloader_model.right_id,
             )
+            self.mcs.error_triggered.connect(self.error_message_callback)
         self.firmware_installation_started.emit()
 
     def progress_callback(self, progress: int) -> None:
@@ -228,7 +234,7 @@ class BootloaderController(QObject):
             self.servo_ids_changed.emit(QJsonArray.fromVariantList(servo_ids))
             self.update_install_button_state()
 
-    def error_message_callback(self, error_message: str) -> None:
+    def error_message_callback(self, report: thread_report) -> None:
         """Callback when an error occured in a MotionControllerThread.
         Emits a signal to the UI that contains the error message.
         If the installation is still in progress (e.g. when two drives are being updated
@@ -238,7 +244,8 @@ class BootloaderController(QObject):
         Args:
             error_message: the error message.
         """
-        self.error_triggered.emit(error_message)
+        if report.exceptions:
+            self.error_triggered.emit(str(report.exceptions))
 
     @Slot()
     def install_firmware_callback(self, thread_report: thread_report) -> None:

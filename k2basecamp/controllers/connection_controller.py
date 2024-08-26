@@ -503,17 +503,6 @@ class ConnectionController(QObject):
     def emergency_stop_callback(self, thread_report: thread_report) -> None:
         self.emergency_stop_triggered.emit()
 
-    def error_message_callback(self, error_message: str) -> None:
-        """Callback when an error occured in a MotionControllerThread.
-        Emits a signal to the UI that contains the error message.
-
-        Args:
-            error_message: the error message.
-        """
-        self.emergency_stop()
-        self.error_triggered.emit(error_message)
-        self.update_connect_button_state()
-
     def get_number_of_errors(self, report: thread_report) -> None:
         """Callback when an error occured in a MotionControllerThread.
         Emits a signal to the UI that contains the error message.

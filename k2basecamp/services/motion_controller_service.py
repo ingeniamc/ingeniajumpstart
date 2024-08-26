@@ -484,13 +484,6 @@ class MotionControllerService(QObject):
             left_id: int,
             right_id: int,
         ) -> Any:
-            if not bootloader_model.install_prerequisites_met():
-                self.error_triggered.emit(
-                    "Incorrect or insufficient configuration. Make sure to provide the "
-                    + "right parameters for the selected connection protocol."
-                )
-                return
-
             if bootloader_model.connection == ConnectionProtocol.CANopen:
                 self.__mc.communication.connect_servo_canopen(
                     baudrate=bootloader_model.can_baudrate,
