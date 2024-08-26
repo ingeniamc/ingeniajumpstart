@@ -548,6 +548,7 @@ class ConnectionController(QObject):
         """
         if state == NET_DEV_EVT.REMOVED:
             self.mcs.stop_poller_thread(drive.name)
+            self.drive_disconnected_triggered.emit()
             self.error_triggered.emit("Network connection lost.")
         self.net_state_changed.emit(state.value)
 
