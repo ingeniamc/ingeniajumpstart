@@ -212,7 +212,7 @@ class BootloaderController(QObject):
             node_id: the selected node / slave ID.
             drive: the drive the ID belongs to.
         """
-        if drive == Drive.Left.value:
+        if drive == Drive.Axis1.value:
             self.bootloader_model.left_id = node_id
         else:
             self.bootloader_model.right_id = node_id

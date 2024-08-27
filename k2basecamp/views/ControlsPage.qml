@@ -29,8 +29,8 @@ RowLayout {
             PlotJS.updatePlot(chartR, timestamp, velocity);
         }
         function onDrive_connected_triggered() {
-            PlotJS.initSeries(chartL, xAxisL, yAxisL, "Left");
-            PlotJS.initSeries(chartR, xAxisR, yAxisR, "Right");
+            PlotJS.initSeries(chartL, xAxisL, yAxisL, "Axis1");
+            PlotJS.initSeries(chartR, xAxisR, yAxisR, "Axis2");
         }
         function onDrive_disconnected_triggered() {
             ControlsJS.resetControls()
@@ -42,10 +42,10 @@ RowLayout {
         }
         function onServo_state_changed(servoState, drive) {
             switch (drive) {
-                case Enums.Drive.Left:
+                case Enums.Drive.Axis1:
                     leftState.state = servoState;
                     break;
-                case Enums.Drive.Right:
+                case Enums.Drive.Axis2:
                     rightState.state = servoState;
                     break;
                 default:
@@ -57,12 +57,12 @@ RowLayout {
         }
         function onMax_velocity_value_received(newValue, drive) {
             switch (drive) {
-                case Enums.Drive.Left:
+                case Enums.Drive.Axis1:
                     maxVelocityLeft.value = newValue;
                     velocitySliderLValue.text = newValue.toFixed(2);
                     velocitySliderL.to = newValue;
                     break;
-                case Enums.Drive.Right:
+                case Enums.Drive.Axis2:
                     maxVelocityRight.value = newValue;
                     velocitySliderRValue.text = newValue.toFixed(2);
                     velocitySliderR.to = newValue;
@@ -110,17 +110,17 @@ RowLayout {
             }
             CheckBox {
                 id: leftCheck
-                text: qsTr("Enable left motor")
+                text: qsTr("Enable Axis 1")
                 property string tooltipText
                 ToolTip.visible: tooltipText ? hovered : false
                 ToolTip.text: tooltipText
                 onToggled: () => {
                     PlotJS.resetPlot(chartL);
-                    PlotJS.initSeries(chartL, xAxisL, yAxisL, "Left");
+                    PlotJS.initSeries(chartL, xAxisL, yAxisL, "Axis1");
                     if (leftCheck.checked) {
-                        grid.connectionController.enable_motor(Enums.Drive.Left);
+                        grid.connectionController.enable_motor(Enums.Drive.Axis1);
                     } else {
-                        grid.connectionController.disable_motor(Enums.Drive.Left);
+                        grid.connectionController.disable_motor(Enums.Drive.Axis1);
                     }
                     ControlsJS.updateKeyState();
                 }
@@ -133,17 +133,17 @@ RowLayout {
             }
             CheckBox {
                 id: rightCheck
-                text: qsTr("Enable right motor")
+                text: qsTr("Enable Axis 2")
                 property string tooltipText
                 ToolTip.visible: tooltipText ? hovered : false
                 ToolTip.text: tooltipText
                 onToggled: () => {
                     PlotJS.resetPlot(chartR);
-                    PlotJS.initSeries(chartR, xAxisR, yAxisR, "Right");
+                    PlotJS.initSeries(chartR, xAxisR, yAxisR, "Axis2");
                     if (rightCheck.checked) {
-                        grid.connectionController.enable_motor(Enums.Drive.Right);
+                        grid.connectionController.enable_motor(Enums.Drive.Axis2);
                     } else {
-                        grid.connectionController.disable_motor(Enums.Drive.Right);
+                        grid.connectionController.disable_motor(Enums.Drive.Axis2);
                     }
                     ControlsJS.updateKeyState();
                 }
@@ -236,7 +236,7 @@ RowLayout {
                 RowLayout {
                     Text {
                         color: "#e0e0e0"
-                        text: "Maximum Velocity L"
+                        text: "Maximum Velocity Axis 1"
                     }
                 }
                 SpinBox {
@@ -249,7 +249,7 @@ RowLayout {
                             velocitySliderLValue.text = value.toFixed(2);
                         }
                         velocitySliderL.to = value;
-                        grid.connectionController.set_max_velocity(value, Enums.Drive.Left);
+                        grid.connectionController.set_max_velocity(value, Enums.Drive.Axis1);
                     }
                 }
             }
@@ -257,7 +257,7 @@ RowLayout {
                 RowLayout {
                     Text {
                         color: "#e0e0e0"
-                        text: "Target Velocity L -"
+                        text: "Target Velocity Axis 1 -"
                     }
                     Text {
                         id: velocitySliderLValue
@@ -302,7 +302,7 @@ RowLayout {
                 RowLayout {
                     Text {
                         color: "#e0e0e0"
-                        text: "Maximum Velocity R"
+                        text: "Maximum Velocity Axis 2"
                     }
                 }
                 SpinBox {
@@ -315,7 +315,7 @@ RowLayout {
                             velocitySliderRValue.text = value.toFixed(2);
                         }
                         velocitySliderR.to = value;
-                        grid.connectionController.set_max_velocity(value, Enums.Drive.Right);
+                        grid.connectionController.set_max_velocity(value, Enums.Drive.Axis2);
                     }
                 }
             }
@@ -324,7 +324,7 @@ RowLayout {
                 RowLayout {
                     Text {
                         color: "#e0e0e0"
-                        text: "Target Velocity R -"
+                        text: "Target Velocity Axis 2 -"
                     }
                     Text {
                         id: velocitySliderRValue
