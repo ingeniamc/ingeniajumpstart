@@ -78,7 +78,4 @@ function resetControls(drivesConnected = true) {
     for (const button of [upButton, downButton, leftButton, rightButton]) {
         button.state = Enums.ButtonState.Disabled
     }
-    for (const stateLED of [leftState, rightState]) {
-        stateLED.state = Enums.SERVO_STATE.DISABLED
-    }
 }
