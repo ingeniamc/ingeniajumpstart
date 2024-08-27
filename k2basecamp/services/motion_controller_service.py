@@ -32,7 +32,7 @@ class MotionControllerService(QObject):
 
     """
 
-    error_triggered = Signal(str, arguments=["error_message"])
+    error_triggered = Signal(thread_report, arguments=["thread_report"])
     """Triggers when an error occurs while communicating with the drive"""
 
     servo_state_update_triggered: Signal = Signal(Drive, SERVO_STATE)
@@ -484,13 +484,6 @@ class MotionControllerService(QObject):
             left_id: int,
             right_id: int,
         ) -> Any:
-            if not bootloader_model.install_prerequisites_met():
-                self.error_triggered.emit(
-                    "Incorrect or insufficient configuration. Make sure to provide the "
-                    + "right parameters for the selected connection protocol."
-                )
-                return
-
             if bootloader_model.connection == ConnectionProtocol.CANopen:
                 self.__mc.communication.connect_servo_canopen(
                     baudrate=bootloader_model.can_baudrate,
@@ -559,7 +552,7 @@ class MotionControllerService(QObject):
         return on_thread
 
     @run_on_thread
-    def get_last_error(
+    def get_last_error_message(
         self,
         report_callback: Callable[[thread_report], Any],
         drive: Drive,
@@ -581,5 +574,30 @@ class MotionControllerService(QObject):
                 error_code, servo=drive.name
             )
             return error_msg
+
+        return on_thread
+
+    @run_on_thread
+    def get_number_of_errors(
+        self,
+        report_callback: Callable[[thread_report], Any],
+        drive: Drive,
+        *args: Any,
+        **kwargs: Any,
+    ) -> Callable[..., Any]:
+        """Get the total number of errors of a given drive.
+
+        Args:
+            report_callback: callback to invoke after
+                completing the operation.
+            drive: the target drive.
+
+        """
+
+        def on_thread(drive: Drive) -> Any:
+            num_current_errors = self.__mc.errors.get_number_total_errors(
+                servo=drive.name
+            )
+            return num_current_errors
 
         return on_thread

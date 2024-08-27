@@ -1,4 +1,5 @@
 import os
+from collections import defaultdict
 from functools import partial
 
 import ingenialogger
@@ -108,11 +109,11 @@ class ConnectionController(QObject):
     def __init__(self, mcs: MotionControllerService) -> None:
         super().__init__()
         self.mcs = mcs
-        self.mcs.error_triggered.connect(self.error_message_callback)
+        self.mcs.error_triggered.connect(self.handle_error)
         self.mcs.servo_state_update_triggered.connect(self.update_servo_state)
-        self.mcs.servo_state_update_triggered.connect(self.get_last_error)
         self.mcs.net_state_update_triggered.connect(self.update_net_state)
         self.connection_model = ConnectionModel()
+        self.__number_of_errors: dict[Drive, int] = defaultdict(int)
 
     @Slot()
     def connect(self) -> None:
@@ -387,6 +388,7 @@ class ConnectionController(QObject):
         self.drive_connected_triggered.emit()
         # Get the current value of the MAX_VELOCITY_REGISTER register
         for drive in [Drive.Left, Drive.Right]:
+            self.mcs.get_number_of_errors(self.__set_number_of_errors, drive)
             self.mcs.run(
                 partial(self.get_max_velocity_value_callback, drive),
                 "communication.get_register",
@@ -503,15 +505,31 @@ class ConnectionController(QObject):
     def emergency_stop_callback(self, thread_report: thread_report) -> None:
         self.emergency_stop_triggered.emit()
 
-    def error_message_callback(self, error_message: str) -> None:
+    def handle_error(self, report: thread_report) -> None:
         """Callback when an error occured in a MotionControllerThread.
-        Emits a signal to the UI that contains the error message.
+        Display the error in a pop-up window.
 
         Args:
-            error_message: the error message.
+            report: The error thread report.
         """
-        self.error_triggered.emit(error_message)
-        self.update_connect_button_state()
+        if report.drive is not None:
+            self.mcs.get_number_of_errors(self.update_number_of_errors, report.drive)
+        else:
+            self.error_triggered.emit(str(report.exceptions))
+
+    def update_number_of_errors(self, report: thread_report) -> None:
+        """Callback to update the number of errors of a given drive.
+        If there is a new error, display it in a pop-up window.
+
+        Args:
+            report: the result of the get_number_of_errors method call.
+        """
+        if report.drive is None or report.output is None:
+            return
+        current_number_of_errors = report.output
+        if current_number_of_errors > self.__number_of_errors[report.drive]:
+            self.mcs.get_last_error_message(self.show_last_error, report.drive)
+            self.__number_of_errors[report.drive] = current_number_of_errors
 
     @Slot(Drive, SERVO_STATE)
     def update_servo_state(self, drive: Drive, state: SERVO_STATE) -> None:
@@ -523,17 +541,8 @@ class ConnectionController(QObject):
             state: the new state
         """
         self.servo_state_changed.emit(state.value, drive.value)
-
-    @Slot(Drive, SERVO_STATE)
-    def get_last_error(self, drive: Drive, state: SERVO_STATE) -> None:
-        """Get the last error if the drive goes to the fault state.
-
-        Args:
-            drive: the affected drive
-            state: the new state
-        """
         if state == SERVO_STATE.FAULT:
-            self.mcs.get_last_error(self.show_last_error, drive)
+            self.mcs.get_number_of_errors(self.update_number_of_errors, drive)
 
     @Slot(Drive, NET_DEV_EVT)
     def update_net_state(self, drive: Drive, state: NET_DEV_EVT) -> None:
@@ -576,3 +585,9 @@ class ConnectionController(QObject):
         self.connect_button_state_changed.emit(
             self.connection_model.connect_button_state().value
         )
+
+    def __set_number_of_errors(self, t_report: thread_report) -> None:
+        """Store the current number of errors of a given drive."""
+        if t_report.drive is None or t_report.output is None:
+            return
+        self.__number_of_errors[t_report.drive] = t_report.output
