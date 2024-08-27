@@ -575,7 +575,7 @@ class ConnectionController(QObject):
         """
         if report.output:
             if report.drive:
-                error_message = f"{report.drive.name} motor: {report.output}"
+                error_message = f"{report.drive.name}: {report.output}"
             else:
                 error_message = report.output
             self.error_triggered.emit(error_message)
