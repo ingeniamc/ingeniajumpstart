@@ -138,7 +138,7 @@ class ConnectionController(QObject):
             drive: the drive to enable
         """
         target = Drive(drive)
-        if target == Drive.Left:
+        if target == Drive.Axis1:
             self.mcs.enable_motor(self.enable_motor_l_callback, target)
         else:
             self.mcs.enable_motor(self.enable_motor_r_callback, target)
@@ -150,17 +150,17 @@ class ConnectionController(QObject):
         Args:
             drive: the drive to disable
         """
-        if drive == Drive.Left.value:
+        if drive == Drive.Axis1.value:
             self.mcs.run(
                 self.disable_motor_l_callback,
                 "motion.motor_disable",
-                Drive.Left.name,
+                Drive.Axis1.name,
             )
         else:
             self.mcs.run(
                 self.disable_motor_r_callback,
                 "motion.motor_disable",
-                Drive.Right.name,
+                Drive.Axis2.name,
             )
 
     @Slot()
@@ -248,10 +248,10 @@ class ConnectionController(QObject):
         """
         dictionary = dictionary.removeprefix("file:///")
         dictionary_type = self.mcs.check_dictionary_format(dictionary)
-        if drive == Drive.Left.value:
+        if drive == Drive.Axis1.value:
             self.connection_model.left_dictionary = dictionary
             self.connection_model.left_dictionary_type = dictionary_type
-        elif drive == Drive.Right.value:
+        elif drive == Drive.Axis2.value:
             self.connection_model.right_dictionary = dictionary
             self.connection_model.right_dictionary_type = dictionary_type
         elif drive == Drive.Both.value:
@@ -265,10 +265,10 @@ class ConnectionController(QObject):
     @Slot(int)
     def reset_dictionary(self, drive: int) -> None:
         """Resets the dictionary file in the DriveModel."""
-        if drive == Drive.Left.value:
+        if drive == Drive.Axis1.value:
             self.connection_model.left_dictionary = None
             self.connection_model.left_dictionary_type = None
-        elif drive == Drive.Right.value:
+        elif drive == Drive.Axis2.value:
             self.connection_model.right_dictionary = None
             self.connection_model.right_dictionary_type = None
         elif drive == Drive.Both.value:
@@ -289,9 +289,9 @@ class ConnectionController(QObject):
             drive: the drive
         """
         config = config.removeprefix("file:///")
-        if drive == Drive.Left.value:
+        if drive == Drive.Axis1.value:
             self.connection_model.left_config = config
-        elif drive == Drive.Right.value:
+        elif drive == Drive.Axis2.value:
             self.connection_model.right_config = config
         elif drive == Drive.Both.value:
             self.connection_model.left_config = config
@@ -305,9 +305,9 @@ class ConnectionController(QObject):
         Args:
             drive: the drive.
         """
-        if drive == Drive.Left.value:
+        if drive == Drive.Axis1.value:
             self.connection_model.left_config = None
-        elif drive == Drive.Right.value:
+        elif drive == Drive.Axis2.value:
             self.connection_model.right_config = None
         elif drive == Drive.Both.value:
             self.connection_model.left_config = None
@@ -367,7 +367,7 @@ class ConnectionController(QObject):
             node_id: the selected node / slave ID
             drive: the drive the ID belongs to
         """
-        if drive == Drive.Left.value:
+        if drive == Drive.Axis1.value:
             self.connection_model.left_id = node_id
         else:
             self.connection_model.right_id = node_id
@@ -387,7 +387,7 @@ class ConnectionController(QObject):
         """
         self.drive_connected_triggered.emit()
         # Get the current value of the MAX_VELOCITY_REGISTER register
-        for drive in [Drive.Left, Drive.Right]:
+        for drive in [Drive.Axis1, Drive.Axis2]:
             self.mcs.get_number_of_errors(self.__set_number_of_errors, drive)
             self.mcs.run(
                 partial(self.get_max_velocity_value_callback, drive),
@@ -425,8 +425,8 @@ class ConnectionController(QObject):
                 the callback
         """
 
-        self.update_servo_state(Drive.Right, SERVO_STATE.DISABLED)
-        self.update_servo_state(Drive.Left, SERVO_STATE.DISABLED)
+        self.update_servo_state(Drive.Axis2, SERVO_STATE.DISABLED)
+        self.update_servo_state(Drive.Axis1, SERVO_STATE.DISABLED)
         self.drive_disconnected_triggered.emit()
         self.update_connect_button_state()
 
@@ -442,7 +442,7 @@ class ConnectionController(QObject):
                 the callback
         """
         poller_thread = self.mcs.create_poller_thread(
-            Drive.Left.name, [{"name": "CL_VEL_FBK_VALUE", "axis": 1}]
+            Drive.Axis1.name, [{"name": "CL_VEL_FBK_VALUE", "axis": 1}]
         )
         poller_thread.new_data_available_triggered.connect(
             self.handle_new_velocity_data_l
@@ -460,7 +460,7 @@ class ConnectionController(QObject):
                 the callback
         """
         poller_thread = self.mcs.create_poller_thread(
-            Drive.Right.name, [{"name": "CL_VEL_FBK_VALUE", "axis": 1}]
+            Drive.Axis2.name, [{"name": "CL_VEL_FBK_VALUE", "axis": 1}]
         )
         poller_thread.new_data_available_triggered.connect(
             self.handle_new_velocity_data_r
@@ -475,7 +475,7 @@ class ConnectionController(QObject):
             thread_report: the result of the operation that triggered
                 the callback
         """
-        self.mcs.stop_poller_thread(Drive.Left.name)
+        self.mcs.stop_poller_thread(Drive.Axis1.name)
 
     def disable_motor_r_callback(self, thread_report: thread_report) -> None:
         """Callback after the motor of a drive was disabled.
@@ -485,7 +485,7 @@ class ConnectionController(QObject):
             thread_report: the result of the operation that triggered
                 the callback
         """
-        self.mcs.stop_poller_thread(Drive.Right.name)
+        self.mcs.stop_poller_thread(Drive.Axis2.name)
 
     def scan_servos_callback(self, thread_report: thread_report) -> None:
         """Callback after the scan operation was completed. If values where returned,

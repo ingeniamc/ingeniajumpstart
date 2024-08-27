@@ -162,13 +162,13 @@ class MotionControllerService(QObject):
                 raise ILError("Node IDs cannot be the same.")
             for drive, id, config, dictionary in [
                 (
-                    Drive.Left,
+                    Drive.Axis1,
                     connection_model.left_id,
                     connection_model.left_config,
                     connection_model.left_dictionary,
                 ),
                 (
-                    Drive.Right,
+                    Drive.Axis2,
                     connection_model.right_id,
                     connection_model.right_config,
                     connection_model.right_dictionary,
@@ -490,25 +490,25 @@ class MotionControllerService(QObject):
                     can_device=stringify_can_device_enum(bootloader_model.can_device),
                     dict_path=DEFAULT_DICTIONARY_PATH,
                     node_id=left_id,
-                    alias=Drive.Left.name,
+                    alias=Drive.Axis1.name,
                 )
                 self.__mc.communication.connect_servo_canopen(
                     baudrate=bootloader_model.can_baudrate,
                     can_device=stringify_can_device_enum(bootloader_model.can_device),
                     dict_path=DEFAULT_DICTIONARY_PATH,
                     node_id=right_id,
-                    alias=Drive.Right.name,
+                    alias=Drive.Axis2.name,
                 )
                 # We pass one of the two drive aliases to the function. It should
                 # automatically detect that we have a two drive setup based on the
                 # firmware file type and update both drives.
                 self.__mc.communication.load_firmware_canopen(
-                    servo=Drive.Left.name,
+                    servo=Drive.Axis1.name,
                     fw_file=firmware,
                     progress_callback=progress_callback,
                 )
-                self.__mc.communication.disconnect(servo=Drive.Left.name)
-                self.__mc.communication.disconnect(servo=Drive.Right.name)
+                self.__mc.communication.disconnect(servo=Drive.Axis1.name)
+                self.__mc.communication.disconnect(servo=Drive.Axis2.name)
             elif bootloader_model.connection == ConnectionProtocol.EtherCAT:
                 self.__mc.communication.load_firmware_ecat_interface_index(
                     fw_file=firmware,

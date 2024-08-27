@@ -12,8 +12,8 @@ class ButtonState(Enum):
 
 
 class Drive(Enum):
-    Left = auto()
-    Right = auto()
+    Axis1 = auto()
+    Axis2 = auto()
     Both = auto()
 
 
