@@ -576,7 +576,11 @@ class ConnectionController(QObject):
             report: the result of the get_last_error method call.
         """
         if report.output:
-            self.error_triggered.emit(report.output)
+            if report.drive:
+                error_message = f"{report.drive.name}: {report.output}"
+            else:
+                error_message = report.output
+            self.error_triggered.emit(error_message)
 
     def update_connect_button_state(self) -> None:
         """Helper function that calculates the state of the connect button using the
