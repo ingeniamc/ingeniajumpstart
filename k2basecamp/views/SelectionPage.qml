@@ -26,10 +26,10 @@ ColumnLayout {
         target: selectionPage.connectionController
         function onDictionary_changed(dictionary, drive) {
             switch (drive) {
-                case Enums.Drive.Left:
+                case Enums.Drive.Axis1:
                     leftDictionaryUploadBtn.setFile(dictionary);
                     break;
-                case Enums.Drive.Right:
+                case Enums.Drive.Axis2:
                     rightDictionaryUploadBtn.setFile(dictionary);
                     break;
                 case Enums.Drive.Both:
@@ -54,10 +54,10 @@ ColumnLayout {
         }
         function onConfig_changed(config, drive) {
             switch (drive) {
-                case Enums.Drive.Left:
+                case Enums.Drive.Axis1:
                     leftConfigUploadBtn.setFile(config);
                     break;
-                case Enums.Drive.Right:
+                case Enums.Drive.Axis2:
                     rightConfigUploadBtn.setFile(config);
                     break;
                 case Enums.Drive.Both:
@@ -241,7 +241,7 @@ ColumnLayout {
             Layout.preferredWidth: 4
             from: 0
             editable: true
-            onValueModified: () => selectionPage.connectionController.select_node_id(value, Enums.Drive.Left)
+            onValueModified: () => selectionPage.connectionController.select_node_id(value, Enums.Drive.Axis1)
         }
         Components.SpacerW {
         }
@@ -258,7 +258,7 @@ ColumnLayout {
             Layout.preferredWidth: 4
             from: 0
             editable: true
-            onValueModified: () => selectionPage.connectionController.select_node_id(value, Enums.Drive.Right)
+            onValueModified: () => selectionPage.connectionController.select_node_id(value, Enums.Drive.Axis2)
         }
         Components.SpacerW {
         }
@@ -286,7 +286,7 @@ ColumnLayout {
             Layout.fillWidth: true
             Layout.preferredWidth: 2
             Material.foreground: Material.foreground
-            onActivated: () => selectionPage.connectionController.select_node_id(currentValue, Enums.Drive.Left)
+            onActivated: () => selectionPage.connectionController.select_node_id(currentValue, Enums.Drive.Axis1)
         }
         Components.SpacerW {
         }
@@ -306,7 +306,7 @@ ColumnLayout {
             Layout.fillWidth: true
             Layout.preferredWidth: 2
             Material.foreground: Material.foreground
-            onActivated: () => selectionPage.connectionController.select_node_id(currentValue, Enums.Drive.Right)
+            onActivated: () => selectionPage.connectionController.select_node_id(currentValue, Enums.Drive.Axis2)
         }
         Components.SpacerW {
         }
@@ -352,7 +352,7 @@ ColumnLayout {
         }
         Components.UploadButton {
             id: leftConfigUploadBtn
-            drive: Enums.Drive.Left
+            drive: Enums.Drive.Axis1
             fileType: Components.UploadButton.FileType.Config
             text: selectionPage.configurationButtonMessage + " left"
         }
@@ -360,7 +360,7 @@ ColumnLayout {
         }
         Components.UploadButton {
             id: rightConfigUploadBtn
-            drive: Enums.Drive.Right
+            drive: Enums.Drive.Axis2
             fileType: Components.UploadButton.FileType.Config
             text: selectionPage.configurationButtonMessage + " right"
         }
@@ -408,7 +408,7 @@ ColumnLayout {
         }
         Components.UploadButton {
             id: leftDictionaryUploadBtn
-            drive: Enums.Drive.Left
+            drive: Enums.Drive.Axis1
             fileType: Components.UploadButton.FileType.Dictionary
             text: selectionPage.dictionaryButtonMessage + " left"
         }
@@ -416,7 +416,7 @@ ColumnLayout {
         }
         Components.UploadButton {
             id: rightDictionaryUploadBtn
-            drive: Enums.Drive.Right
+            drive: Enums.Drive.Axis2
             fileType: Components.UploadButton.FileType.Dictionary
             text: selectionPage.dictionaryButtonMessage + " right"
         }

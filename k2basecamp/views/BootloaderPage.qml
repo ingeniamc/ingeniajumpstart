@@ -299,7 +299,7 @@ ColumnLayout {
             Layout.preferredWidth: 4
             from: 0
             editable: true
-            onValueModified: () => bootloaderPage.bootloaderController.select_node_id(value, Enums.Drive.Left)
+            onValueModified: () => bootloaderPage.bootloaderController.select_node_id(value, Enums.Drive.Axis1)
         }
         Components.SpacerW {
         }
@@ -316,7 +316,7 @@ ColumnLayout {
             Layout.preferredWidth: 4
             from: 0
             editable: true
-            onValueModified: () => bootloaderPage.bootloaderController.select_node_id(value, Enums.Drive.Right)
+            onValueModified: () => bootloaderPage.bootloaderController.select_node_id(value, Enums.Drive.Axis2)
         }
         Components.SpacerW {
         }
@@ -344,7 +344,7 @@ ColumnLayout {
             Layout.fillWidth: true
             Layout.preferredWidth: 2
             Material.foreground: Material.foreground
-            onActivated: () => bootloaderPage.bootloaderController.select_node_id(currentValue, Enums.Drive.Left)
+            onActivated: () => bootloaderPage.bootloaderController.select_node_id(currentValue, Enums.Drive.Axis1)
         }
         Components.SpacerW {
         }
@@ -364,7 +364,7 @@ ColumnLayout {
             Layout.fillWidth: true
             Layout.preferredWidth: 2
             Material.foreground: Material.foreground
-            onActivated: () => bootloaderPage.bootloaderController.select_node_id(currentValue, Enums.Drive.Right)
+            onActivated: () => bootloaderPage.bootloaderController.select_node_id(currentValue, Enums.Drive.Axis2)
         }
         Components.SpacerW {
         }
