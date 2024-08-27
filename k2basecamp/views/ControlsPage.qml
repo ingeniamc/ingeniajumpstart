@@ -29,8 +29,8 @@ RowLayout {
             PlotJS.updatePlot(chartR, timestamp, velocity);
         }
         function onDrive_connected_triggered() {
-            PlotJS.initSeries(chartL, xAxisL, yAxisL, "Left");
-            PlotJS.initSeries(chartR, xAxisR, yAxisR, "Right");
+            PlotJS.initSeries(chartL, xAxisL, yAxisL, "Axis1");
+            PlotJS.initSeries(chartR, xAxisR, yAxisR, "Axis2");
         }
         function onDrive_disconnected_triggered() {
             ControlsJS.resetControls()
@@ -110,13 +110,13 @@ RowLayout {
             }
             CheckBox {
                 id: leftCheck
-                text: qsTr("Enable left motor")
+                text: qsTr("Enable Axis 1")
                 property string tooltipText
                 ToolTip.visible: tooltipText ? hovered : false
                 ToolTip.text: tooltipText
                 onToggled: () => {
                     PlotJS.resetPlot(chartL);
-                    PlotJS.initSeries(chartL, xAxisL, yAxisL, "Left");
+                    PlotJS.initSeries(chartL, xAxisL, yAxisL, "Axis1");
                     if (leftCheck.checked) {
                         grid.connectionController.enable_motor(Enums.Drive.Axis1);
                     } else {
@@ -133,13 +133,13 @@ RowLayout {
             }
             CheckBox {
                 id: rightCheck
-                text: qsTr("Enable right motor")
+                text: qsTr("Enable Axis 2")
                 property string tooltipText
                 ToolTip.visible: tooltipText ? hovered : false
                 ToolTip.text: tooltipText
                 onToggled: () => {
                     PlotJS.resetPlot(chartR);
-                    PlotJS.initSeries(chartR, xAxisR, yAxisR, "Right");
+                    PlotJS.initSeries(chartR, xAxisR, yAxisR, "Axis2");
                     if (rightCheck.checked) {
                         grid.connectionController.enable_motor(Enums.Drive.Axis2);
                     } else {
@@ -236,7 +236,7 @@ RowLayout {
                 RowLayout {
                     Text {
                         color: "#e0e0e0"
-                        text: "Maximum Velocity L"
+                        text: "Maximum Velocity Axis 1"
                     }
                 }
                 SpinBox {
@@ -257,7 +257,7 @@ RowLayout {
                 RowLayout {
                     Text {
                         color: "#e0e0e0"
-                        text: "Target Velocity L -"
+                        text: "Target Velocity Axis 1 -"
                     }
                     Text {
                         id: velocitySliderLValue
@@ -302,7 +302,7 @@ RowLayout {
                 RowLayout {
                     Text {
                         color: "#e0e0e0"
-                        text: "Maximum Velocity R"
+                        text: "Maximum Velocity Axis 2"
                     }
                 }
                 SpinBox {
@@ -324,7 +324,7 @@ RowLayout {
                 RowLayout {
                     Text {
                         color: "#e0e0e0"
-                        text: "Target Velocity R -"
+                        text: "Target Velocity Axis 2 -"
                     }
                     Text {
                         id: velocitySliderRValue

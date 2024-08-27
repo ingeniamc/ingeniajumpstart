@@ -287,7 +287,7 @@ ColumnLayout {
         Components.SpacerW {
         }
         Text {
-            text: "ID Left:"
+            text: "Axis 1 ID:"
             font.pointSize: 12
             Layout.fillWidth: true
             Layout.preferredWidth: 4
@@ -304,7 +304,7 @@ ColumnLayout {
         Components.SpacerW {
         }
         Text {
-            text: "ID Right:"
+            text: "Axis 2 ID:"
             font.pointSize: 12
             Layout.fillWidth: true
             Layout.preferredWidth: 4
@@ -329,7 +329,7 @@ ColumnLayout {
         Components.SpacerW {
         }
         Text {
-            text: "ID Left:"
+            text: "Axis 1 ID:"
             font.pointSize: 12
             Layout.fillWidth: true
             Layout.preferredWidth: 2
@@ -349,7 +349,7 @@ ColumnLayout {
         Components.SpacerW {
         }
         Text {
-            text: "ID Right:"
+            text: "Axis 2 ID:"
             font.pointSize: 12
             Layout.fillWidth: true
             Layout.preferredWidth: 2

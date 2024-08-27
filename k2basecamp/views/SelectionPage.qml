@@ -229,7 +229,7 @@ ColumnLayout {
         Components.SpacerW {
         }
         Text {
-            text: "ID Left:"
+            text: "Axis 1 ID:"
             font.pointSize: 12
             Layout.fillWidth: true
             Layout.preferredWidth: 4
@@ -246,7 +246,7 @@ ColumnLayout {
         Components.SpacerW {
         }
         Text {
-            text: "ID Right:"
+            text: "Axis 2 ID:"
             font.pointSize: 12
             Layout.fillWidth: true
             Layout.preferredWidth: 4
@@ -271,7 +271,7 @@ ColumnLayout {
         Components.SpacerW {
         }
         Text {
-            text: "ID Left:"
+            text: "Axis 1 ID:"
             font.pointSize: 12
             Layout.fillWidth: true
             Layout.preferredWidth: 2
@@ -291,7 +291,7 @@ ColumnLayout {
         Components.SpacerW {
         }
         Text {
-            text: "ID Right:"
+            text: "Axis 2 ID:"
             font.pointSize: 12
             Layout.fillWidth: true
             Layout.preferredWidth: 2
@@ -354,7 +354,7 @@ ColumnLayout {
             id: leftConfigUploadBtn
             drive: Enums.Drive.Axis1
             fileType: Components.UploadButton.FileType.Config
-            text: selectionPage.configurationButtonMessage + " left"
+            text: selectionPage.configurationButtonMessage + " axis 1"
         }
         Components.SpacerW {
         }
@@ -362,7 +362,7 @@ ColumnLayout {
             id: rightConfigUploadBtn
             drive: Enums.Drive.Axis2
             fileType: Components.UploadButton.FileType.Config
-            text: selectionPage.configurationButtonMessage + " right"
+            text: selectionPage.configurationButtonMessage + " axis 2"
         }
         Components.SpacerW {
         }
@@ -410,7 +410,7 @@ ColumnLayout {
             id: leftDictionaryUploadBtn
             drive: Enums.Drive.Axis1
             fileType: Components.UploadButton.FileType.Dictionary
-            text: selectionPage.dictionaryButtonMessage + " left"
+            text: selectionPage.dictionaryButtonMessage + " axis 1"
         }
         Components.SpacerW {
         }
@@ -418,7 +418,7 @@ ColumnLayout {
             id: rightDictionaryUploadBtn
             drive: Enums.Drive.Axis2
             fileType: Components.UploadButton.FileType.Dictionary
-            text: selectionPage.dictionaryButtonMessage + " right"
+            text: selectionPage.dictionaryButtonMessage + " axis 2"
         }
         Components.SpacerW {
         }
