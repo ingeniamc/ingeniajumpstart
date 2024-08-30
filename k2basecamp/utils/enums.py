@@ -1,6 +1,6 @@
 from enum import Enum, auto
 
-from ingenialink import CAN_BAUDRATE, CAN_DEVICE
+from ingenialink import CAN_BAUDRATE, CAN_DEVICE, NET_DEV_EVT, SERVO_STATE
 from PySide6.QtCore import QEnum, QObject
 from PySide6.QtQml import QmlElement
 
@@ -12,8 +12,9 @@ class ButtonState(Enum):
 
 
 class Drive(Enum):
-    Left = auto()
-    Right = auto()
+    Axis1 = auto()
+    Axis2 = auto()
+    Both = auto()
 
 
 class ConnectionProtocol(Enum):
@@ -64,4 +65,6 @@ class Enums(QObject):
     QEnum(ConnectionProtocol)
     QEnum(CanDevice)
     QEnum(CAN_BAUDRATE)
+    QEnum(SERVO_STATE)
     QEnum(ButtonState)
+    QEnum(NET_DEV_EVT)

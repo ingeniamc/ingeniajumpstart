@@ -11,12 +11,10 @@ class BootloaderModel(BaseModel):
 
     def __init__(
         self,
-        left_firmware: Union[str, None] = None,
-        right_firmware: Union[str, None] = None,
+        firmware: Union[str, None] = None,
     ) -> None:
         super().__init__()
-        self.left_firmware = left_firmware
-        self.right_firmware = right_firmware
+        self.firmware = firmware
 
     def install_prerequisites_met(self) -> bool:
         """Calculate if the application is in the right state to perform the
@@ -27,8 +25,11 @@ class BootloaderModel(BaseModel):
         """
         return (
             (
-                (self.left_id is not None and self.left_firmware is not None)
-                or (self.right_id is not None and self.right_firmware is not None)
+                (
+                    self.left_id is not None
+                    and self.right_id is not None
+                    and self.firmware is not None
+                )
             )
             and self.left_id != self.right_id
             and (
@@ -39,7 +40,7 @@ class BootloaderModel(BaseModel):
                 )
                 or (
                     self.connection == ConnectionProtocol.EtherCAT
-                    and self.interface_index is not None
+                    and self.interface is not None
                 )
             )
         )

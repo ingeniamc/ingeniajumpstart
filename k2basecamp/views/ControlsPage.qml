@@ -29,30 +29,59 @@ RowLayout {
             PlotJS.updatePlot(chartR, timestamp, velocity);
         }
         function onDrive_connected_triggered() {
-            PlotJS.initSeries(chartL, xAxisL, yAxisL, "Left");
-            PlotJS.initSeries(chartR, xAxisR, yAxisR, "Right");
+            PlotJS.initSeries(chartL, xAxisL, yAxisL, "Axis1");
+            PlotJS.initSeries(chartR, xAxisR, yAxisR, "Axis2");
         }
         function onDrive_disconnected_triggered() {
-            leftCheck.checked = false;
-            rightCheck.checked = false;
+            ControlsJS.resetControls()
             PlotJS.resetPlot(chartL);
             PlotJS.resetPlot(chartR);
         }
         function onEmergency_stop_triggered() {
-            leftCheck.checked = false;
-            rightCheck.checked = false;
+            ControlsJS.resetControls()
+        }
+        function onServo_state_changed(servoState, drive) {
+            switch (drive) {
+                case Enums.Drive.Axis1:
+                    leftState.state = servoState;
+                    break;
+                case Enums.Drive.Axis2:
+                    rightState.state = servoState;
+                    break;
+                default:
+                    console.log("Drive not found:", drive);
+            }
+        }
+        function onNet_state_changed(netState) {
+            ControlsJS.resetControls(netState != Enums.NET_DEV_EVT.REMOVED)
+        }
+        function onMax_velocity_value_received(newValue, drive) {
+            switch (drive) {
+                case Enums.Drive.Axis1:
+                    maxVelocityLeft.value = newValue;
+                    velocitySliderLValue.text = newValue.toFixed(2);
+                    velocitySliderL.to = newValue;
+                    break;
+                case Enums.Drive.Axis2:
+                    maxVelocityRight.value = newValue;
+                    velocitySliderRValue.text = newValue.toFixed(2);
+                    velocitySliderR.to = newValue;
+                    break;
+                default:
+                    console.log("Drive not found:", drive);
+            }
         }
     }
 
     // Bind velocity controls to the arrow keys on the keyboard.
 
-    Keys.onUpPressed: event => ControlsJS.handleButtonPressed(upButton, -1, 1, event)
+    Keys.onUpPressed: event => ControlsJS.handleButtonPressed(upButton, -1, 1)
 
-    Keys.onDownPressed: event => ControlsJS.handleButtonPressed(downButton, 1, -1, event)
+    Keys.onDownPressed: event => ControlsJS.handleButtonPressed(downButton, 1, -1)
 
-    Keys.onLeftPressed: event => ControlsJS.handleButtonPressed(leftButton, 1, 1, event)
+    Keys.onLeftPressed: event => ControlsJS.handleButtonPressed(leftButton, 1, 1)
 
-    Keys.onRightPressed: event => ControlsJS.handleButtonPressed(rightButton, -1, -1, event)
+    Keys.onRightPressed: event => ControlsJS.handleButtonPressed(rightButton, -1, -1)
 
     Keys.onReleased: event => {
         if (event.isAutoRepeat)
@@ -77,42 +106,56 @@ RowLayout {
         RowLayout {
             // Checkboxes to enable / disable motors.
             Layout.fillHeight: true
-
             SpacerW {
             }
             CheckBox {
                 id: leftCheck
-                text: qsTr("Left")
+                text: qsTr("Enable Axis 1")
+                property string tooltipText
+                ToolTip.visible: tooltipText ? hovered : false
+                ToolTip.text: tooltipText
                 onToggled: () => {
                     PlotJS.resetPlot(chartL);
-                    PlotJS.initSeries(chartL, xAxisL, yAxisL, "Left");
+                    PlotJS.initSeries(chartL, xAxisL, yAxisL, "Axis1");
                     if (leftCheck.checked) {
-                        grid.connectionController.enable_motor(Enums.Drive.Left);
+                        grid.connectionController.enable_motor(Enums.Drive.Axis1);
                     } else {
-                        grid.connectionController.disable_motor(Enums.Drive.Left);
+                        grid.connectionController.disable_motor(Enums.Drive.Axis1);
                     }
                     ControlsJS.updateKeyState();
                 }
             }
+            StateImage {
+                id: leftState
+            }
+            SpacerW {
+                Layout.preferredWidth: 2
+            }
             CheckBox {
                 id: rightCheck
-                text: qsTr("Right")
+                text: qsTr("Enable Axis 2")
+                property string tooltipText
+                ToolTip.visible: tooltipText ? hovered : false
+                ToolTip.text: tooltipText
                 onToggled: () => {
                     PlotJS.resetPlot(chartR);
-                    PlotJS.initSeries(chartR, xAxisR, yAxisR, "Right");
+                    PlotJS.initSeries(chartR, xAxisR, yAxisR, "Axis2");
                     if (rightCheck.checked) {
-                        grid.connectionController.enable_motor(Enums.Drive.Right);
+                        grid.connectionController.enable_motor(Enums.Drive.Axis2);
                     } else {
-                        grid.connectionController.disable_motor(Enums.Drive.Right);
+                        grid.connectionController.disable_motor(Enums.Drive.Axis2);
                     }
                     ControlsJS.updateKeyState();
                 }
+            }
+            StateImage {
+                id: rightState
             }
             SpacerW {
             }
         }
         RowLayout {
-            // Graphs to display motor velocities over time. 
+            // Graphs to display motor velocities over time.
             Layout.fillHeight: true
 
             Rectangle {
@@ -164,7 +207,7 @@ RowLayout {
         }
 
         GridLayout {
-            /** Buttons to control velocities. 
+            /** Buttons to control velocities.
              * The arrow key buttons are bound to click events.
              * Sliders to control the target velocities.
              * Inputs to control the maximum velocities.
@@ -193,15 +236,20 @@ RowLayout {
                 RowLayout {
                     Text {
                         color: "#e0e0e0"
-                        text: "Maximum Velocity L"
+                        text: "Maximum Velocity Axis 1"
                     }
                 }
                 SpinBox {
-                    from: 0
-                    value: 10
+                    id: maxVelocityLeft
+                    from: 1
+                    to: 1000
                     editable: true
                     onValueModified: () => {
-                        grid.connectionController.set_register_max_velocity(value, Enums.Drive.Left);
+                        if (velocitySliderL.value > value) {
+                            velocitySliderLValue.text = value.toFixed(2);
+                        }
+                        velocitySliderL.to = value;
+                        grid.connectionController.set_max_velocity(value, Enums.Drive.Axis1);
                     }
                 }
             }
@@ -209,7 +257,7 @@ RowLayout {
                 RowLayout {
                     Text {
                         color: "#e0e0e0"
-                        text: "Target Velocity L -"
+                        text: "Target Velocity Axis 1 -"
                     }
                     Text {
                         id: velocitySliderLValue
@@ -219,7 +267,7 @@ RowLayout {
                 }
                 Slider {
                     id: velocitySliderL
-                    from: 1
+                    from: 0
                     to: 10
                     value: 5
                     onMoved: () => {
@@ -254,15 +302,20 @@ RowLayout {
                 RowLayout {
                     Text {
                         color: "#e0e0e0"
-                        text: "Maximum Velocity R"
+                        text: "Maximum Velocity Axis 2"
                     }
                 }
                 SpinBox {
-                    from: 0
-                    value: 10
+                    id: maxVelocityRight
+                    from: 1
+                    to: 1000
                     editable: true
                     onValueModified: () => {
-                        grid.connectionController.set_register_max_velocity(value, Enums.Drive.Right);
+                        if (velocitySliderR.value > value) {
+                            velocitySliderRValue.text = value.toFixed(2);
+                        }
+                        velocitySliderR.to = value;
+                        grid.connectionController.set_max_velocity(value, Enums.Drive.Axis2);
                     }
                 }
             }
@@ -271,7 +324,7 @@ RowLayout {
                 RowLayout {
                     Text {
                         color: "#e0e0e0"
-                        text: "Target Velocity R -"
+                        text: "Target Velocity Axis 2 -"
                     }
                     Text {
                         id: velocitySliderRValue
@@ -281,7 +334,7 @@ RowLayout {
                 }
                 Slider {
                     id: velocitySliderR
-                    from: 1
+                    from: 0
                     to: 10
                     value: 5
                     onMoved: () => {

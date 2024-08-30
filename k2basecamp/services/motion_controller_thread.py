@@ -1,13 +1,15 @@
 import time
+from functools import partial
 from queue import Queue
 from typing import Union
 
 import ingenialogger
-from ingenialink.exceptions import ILError, ILIOError
+from ingenialink.exceptions import ILError
 from ingeniamotion.exceptions import IMException
 from PySide6.QtCore import QThread, Signal
 
 from k2basecamp.utils.types import motion_controller_task, thread_report
+from k2basecamp.utils.enums import Drive
 
 logger = ingenialogger.get_logger(__name__)
 
@@ -19,7 +21,7 @@ class MotionControllerThread(QThread):
 
     """
 
-    task_errored: Signal = Signal(str, arguments=["error_message"])
+    task_errored: Signal = Signal(thread_report, arguments=["thread_report"])
     """Signal emitted when a task fails.
     The error message is returned by the thread"""
 
@@ -75,8 +77,19 @@ class MotionControllerThread(QThread):
             ) as e:
                 raised_exception = e
             duration = time.time() - timestamp
+            if isinstance(task.callback, partial):
+                func_name = task.callback.func.__qualname__
+            else:
+                func_name = task.callback.__qualname__
+            drive = None
+            if task.args:
+                for arg in task.args:
+                    if isinstance(arg, Drive):
+                        drive = arg
+                        break
             report = thread_report(
-                task.callback.__qualname__,
+                drive,
+                func_name,
                 output,
                 timestamp,
                 duration,
@@ -86,10 +99,7 @@ class MotionControllerThread(QThread):
                 self.task_completed.emit(task.callback, report)
             else:
                 logger.error(report)
-                # We only log ILIOErrors, because they are not important enough to
-                # warrant displaying a error dialog.
-                if not isinstance(raised_exception, ILIOError):
-                    self.task_errored.emit(str(report.exceptions))
+                self.task_errored.emit(report)
             self.queue.task_done()
 
     def stop(self) -> None:

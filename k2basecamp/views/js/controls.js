@@ -6,16 +6,22 @@
  * @param {int} rightFactor 
  * @param {KeyEvent} event 
  */
-function handleButtonPressed(button, leftFactor, rightFactor, event) {
-    // KeyEvents will fire repeatedly if held down (autoRepeat).
-    if (event?.isAutoRepeat || button.state == Enums.ButtonState.Disabled)
+function handleButtonPressed(button, leftFactor, rightFactor) {
+    if (button.state != Enums.ButtonState.Enabled)
         return;
+
+    // Reset all other buttons
+    for (const otherButton of [upButton, downButton, leftButton, rightButton]) {
+        if (button == otherButton || otherButton.state != Enums.ButtonState.Active) continue;
+        otherButton.state = Enums.ButtonState.Enabled;
+    }
+
     button.state = Enums.ButtonState.Active;
     if (leftCheck.checked) {
-        grid.connectionController.set_velocity(velocitySliderL.value * leftFactor, Enums.Drive.Left);
+        grid.connectionController.set_velocity(velocitySliderL.value * leftFactor, Enums.Drive.Axis1);
     }
     if (rightCheck.checked) {
-        grid.connectionController.set_velocity(velocitySliderR.value * rightFactor, Enums.Drive.Right);
+        grid.connectionController.set_velocity(velocitySliderR.value * rightFactor, Enums.Drive.Axis2);
     }
 }
 
@@ -25,14 +31,14 @@ function handleButtonPressed(button, leftFactor, rightFactor, event) {
  * @param {Button} button 
  */
 function handleButtonReleased(button) {
-    if (button.state == Enums.ButtonState.Disabled)
+    if (button.state != Enums.ButtonState.Active)
         return;
     button.state = Enums.ButtonState.Enabled;
     if (leftCheck.checked) {
-        grid.connectionController.set_velocity(0, Enums.Drive.Left);
+        grid.connectionController.set_velocity(0, Enums.Drive.Axis1);
     }
     if (rightCheck.checked) {
-        grid.connectionController.set_velocity(0, Enums.Drive.Right);
+        grid.connectionController.set_velocity(0, Enums.Drive.Axis2);
     }
 }
 
@@ -56,5 +62,20 @@ function updateKeyState() {
     } else {
         leftButton.state = Enums.ButtonState.Disabled;
         rightButton.state = Enums.ButtonState.Disabled;
+    }
+}
+
+/**
+ * Reset all the control elements of the interface to their initial state
+ * @param {boolean} drivesConnected
+ */
+function resetControls(drivesConnected = true) {
+    for (const checkbox of [leftCheck, rightCheck]) {
+        checkbox.checked = false;
+        checkbox.enabled = drivesConnected;
+        checkbox.tooltipText = drivesConnected ? null : "Drive not connected."
+    }
+    for (const button of [upButton, downButton, leftButton, rightButton]) {
+        button.state = Enums.ButtonState.Disabled
     }
 }

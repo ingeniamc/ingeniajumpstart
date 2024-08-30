@@ -1,34 +1,37 @@
 # K2 Base Camp
+
+[![Documentation Status](https://readthedocs.org/projects/k2-base-camp/badge/?version=latest)](https://k2-base-camp.readthedocs.io/en/latest/?badge=latest)
+
 Simple open source app to plug &amp; play with your servo drive.
 
-Getting started
----------------
+## Getting started
 
 ### Prerequisites
 
-The project requires [python 3.9](https://www.python.org/downloads/release/python-390/) and [pipenv](https://pipenv.pypa.io/en/latest/installation/).
+- [python 3.9](https://www.python.org/downloads/release/python-390/)
+- [pipenv](https://pipenv.pypa.io/en/latest/)
+- [WinPcap](https://www.winpcap.org/install/default.htm)
 
 ### Installation
 
 1. Clone the repository
 
-    `git clone https://github.com/ingeniamc/k2-base-camp.git`
+   `git clone https://github.com/ingeniamc/k2-base-camp.git`
+   `cd k2-base-camp`
 
 2. Install dependencies
 
-    `pipenv install --ignore-pipfile`
+   `pipenv sync`
 
 3. Run the project
 
-    `pipenv run python src/main.py`
+   `pipenv run python -m k2basecamp`
 
-Development
------------
+## Development
 
 ### Install development dependencies
 
-`pipenv install -d --ignore-pipfile`
-
+`pipenv sync -d`
 
 ### Pre-commit hooks (optional)
 
@@ -50,11 +53,11 @@ For this to work properly, we need to create some qml types from our python file
 
 Documentation added to the source code can be compiled into several output formats using [sphinx](https://www.sphinx-doc.org/en/master/)
 
-~~~~
+```
 cd docs
 pipenv run make clean
 pipenv run make html
-~~~~
+```
 
 ### Running tests
 
@@ -62,7 +65,6 @@ Run tests using pytest
 
 `pipenv run pytest src/tests`
 
-License
--------
+## License
 
 The project is licensed under the Creative Commons Public Licenses.

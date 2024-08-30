@@ -11,14 +11,18 @@ class ConnectionModel(BaseModel):
 
     def __init__(
         self,
-        dictionary: Union[str, None] = None,
-        dictionary_type: Union[ConnectionProtocol, None] = None,
+        left_dictionary: Union[str, None] = None,
+        left_dictionary_type: Union[ConnectionProtocol, None] = None,
+        right_dictionary: Union[str, None] = None,
+        right_dictionary_type: Union[ConnectionProtocol, None] = None,
         left_config: Union[str, None] = None,
         right_config: Union[str, None] = None,
     ) -> None:
         super().__init__()
-        self.dictionary = dictionary
-        self.dictionary_type = dictionary_type
+        self.left_dictionary = left_dictionary
+        self.left_dictionary_type = left_dictionary_type
+        self.right_dictionary = right_dictionary
+        self.right_dictionary_type = right_dictionary_type
         self.left_config = left_config
         self.right_config = right_config
 
@@ -30,9 +34,12 @@ class ConnectionModel(BaseModel):
             utils.enums.ButtonState: the button state.
         """
         if (
-            self.dictionary is None
-            or self.dictionary_type is None
-            or self.connection != self.dictionary_type
+            self.left_dictionary is None
+            or self.left_dictionary_type is None
+            or self.connection != self.left_dictionary_type
+            or self.right_dictionary is None
+            or self.right_dictionary_type is None
+            or self.connection != self.right_dictionary_type
             or self.left_id is None
             or self.right_id is None
             or self.left_id == self.right_id
@@ -42,7 +49,7 @@ class ConnectionModel(BaseModel):
             )
             or (
                 self.connection == ConnectionProtocol.EtherCAT
-                and (self.interface_index is None)
+                and (self.interface is None)
             )
         ):
             return ButtonState.Disabled

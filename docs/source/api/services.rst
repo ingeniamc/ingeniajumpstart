@@ -21,10 +21,3 @@ Poller Thread
 .. automodule:: k2basecamp.services.poller_thread
    :members:
    :show-inheritance:
-
-Bootloader Thread
------------------
-
-.. automodule:: k2basecamp.services.bootloader_thread
-   :members:
-   :show-inheritance:

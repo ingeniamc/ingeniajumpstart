@@ -5,8 +5,8 @@ name = "pypi"
 
 [packages]
 pyside6 = "==6.6.0"
-ingenialink = "==7.1.1"
-ingeniamotion = "==0.7.0"
+ingenialink = "==7.3.5"
+ingeniamotion = "==0.8.4"
 ingenialogger = "==0.3.0"
 
 [dev-packages]
@@ -24,6 +24,7 @@ pytest-mock = "==3.12.0"
 sphinx-rtd-theme = "==2.0.0"
 requests = "==2.31.0"
 sphobjinv = "==2.3.1"
+importlib-metadata = "==7.1.0"
 
 [requires]
 python_version = "3.9"

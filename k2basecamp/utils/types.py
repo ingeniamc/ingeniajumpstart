@@ -1,5 +1,8 @@
 from dataclasses import dataclass
-from typing import Any, Callable, Optional
+from functools import partial
+from typing import Any, Callable, Optional, Union
+
+from k2basecamp.utils.enums import Drive
 
 
 @dataclass
@@ -7,6 +10,7 @@ class thread_report:
     """Type for thread reports that are returned by threads. They contain information
     about the execution result of the thread."""
 
+    drive: Optional[Drive]
     method: str
     output: Optional[Any]
     timestamp: float
@@ -22,6 +26,6 @@ class motion_controller_task:
     """
 
     action: Callable[..., Any]
-    callback: Callable[..., Any]
+    callback: Union[Callable[..., Any], partial[Callable[..., Any]]]
     args: Any
     kwargs: Any

@@ -12,8 +12,8 @@ sys.path.insert(0, os.path.abspath("../.."))
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
 project = "K2 Base Camp"
-copyright = "2023, Ingenia Motion Control"
-author = "Ingenia Motion Control"
+copyright = "2023, Novanta Technologies Spain S.L."
+author = "Novanta"
 release = "unreleased"
 
 # -- General configuration ---------------------------------------------------
@@ -38,11 +38,11 @@ html_static_path = ["_static"]
 intersphinx_mapping = {
     "python": ("https://docs.python.org/3.6", None),
     "ingenialink": (
-        "https://distext.ingeniamc.com/doc/ingenialink-python/7.1.0",
+        "https://distext.ingeniamc.com/doc/ingenialink-python/latest",
         None,
     ),
     "ingeniamotion": (
-        "https://distext.ingeniamc.com/doc/ingeniamotion/0.7.0",
+        "https://distext.ingeniamc.com/doc/ingeniamotion/0.8.0",
         None,
     ),
     "PySide6": ("https://doc.qt.io/qtforpython-6", "PySide6.inv"),

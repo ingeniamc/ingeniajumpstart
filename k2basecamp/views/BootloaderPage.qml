@@ -19,8 +19,8 @@ ColumnLayout {
 
     Connections {
         target: bootloaderPage.bootloaderController
-        function onFirmware_changed(firmware, drive) {
-            BootloaderJS.setFirmware(firmware, drive);
+        function onFirmware_changed(firmware) {
+            BootloaderJS.setFirmware(firmware);
         }
         function onInstall_button_state_changed(new_state) {
             installBtn.state = new_state;
@@ -28,23 +28,20 @@ ColumnLayout {
         function onServo_ids_changed(servoIDs) {
             BootloaderJS.setServoIDs(servoIDs);
         }
-        function onFirmware_left_installation_progress_changed(progress) {
-            progressLeftDialogBar.value = progress;
-            progressLeftDialogBar.indeterminate = progress < 100 ? false : true;
-        }
-        function onFirmware_right_installation_progress_changed(progress) {
-            progressRightDialogBar.value = progress;
-            progressRightDialogBar.indeterminate = progress < 100 ? false : true;
+        function onFirmware_installation_progress_changed(progress) {
+            progressDialogBar.value = progress;
+            progressDialogBar.indeterminate = progress < 100 ? false : true;
         }
         function onFirmware_installation_complete_triggered() {
-            BootloaderJS.resetDialog()
+            BootloaderJS.resetDialog();
+            successMessageDialog.open();
         }
         function onError_triggered(error_message) {
             // Error message handled in main.qml
-            BootloaderJS.resetDialog()
+            BootloaderJS.resetDialog();
         }
-        function onFirmware_installation_started(drives) {
-            BootloaderJS.showInstallationProgress(drives)
+        function onFirmware_installation_started() {
+            BootloaderJS.showInstallationProgress();
         }
     }
 
@@ -52,10 +49,10 @@ ColumnLayout {
         // Dialog to confirm the installation of firmware. 
         // Will block the application during installation and show a progress bar.
         // Closes and resets on error or completion.
-        id: progressDialog
+        id: installDialog
         modal: true
         closePolicy: Popup.NoAutoClose
-        title: qsTr("Installing firmware..")
+        title: qsTr("Load firmware..")
         x: (parent.width - width) / 2
         y: (parent.height - height) / 2
         
@@ -69,6 +66,18 @@ ColumnLayout {
                 text: "Please do not disconnect the drive while the process is in progress!"
                 Layout.fillHeight: true
             }
+            RowLayout {
+                Image {
+                    id: stateImage
+                    sourceSize.width: 10
+                    sourceSize.height: 10
+                    source: "images/exclamation-triangle-warning.svg"
+                }
+                Label {
+                    text: "On 'Load Firmware', the current Firmware of the Drive will be lost"
+                    Layout.fillHeight: true
+                }
+            }
             Label {
                 id: isInProgress
                 visible: false
@@ -77,60 +86,33 @@ ColumnLayout {
             }
             Components.SpacerH {}
             RowLayout {
-                id: progressLeftDialog
+                id: progressDialog
                 visible: false
                 Layout.fillHeight: true
                 Layout.fillWidth: true
-                Label {
-                    text: "Left drive:"
-                    Layout.fillHeight: true
-                    Layout.preferredWidth: 1
-                }
-                Components.SpacerW {}
                 ProgressBar {
-                    id: progressLeftDialogBar
+                    id: progressDialogBar
                     from: 0
                     to: 100
                     value: 0
                     indeterminate: true
                     Layout.fillHeight: true
                     Layout.fillWidth: true
-                    Layout.preferredWidth: 4
-                }
-            }
-            Components.SpacerH {}
-            RowLayout {
-                id: progressRightDialog
-                visible: false
-                Layout.fillHeight: true
-                Layout.fillWidth: true
-                Label {
-                    text: "Right drive:"
-                    Layout.fillHeight: true
-                    Layout.preferredWidth: 1
-                }
-                Components.SpacerW {}
-                ProgressBar {
-                    id: progressRightDialogBar
-                    from: 0
-                    to: 100
-                    value: 0
-                    indeterminate: true
-                    Layout.fillHeight: true
-                    Layout.fillWidth: true
-                    Layout.preferredWidth: 4
                 }
             }
         }
 
         footer: DialogButtonBox {
             id: progressDialogButtons
+            buttonLayout : DialogButtonBox.WinLayout
+            alignment: Qt.AlignBottom
             Button {
                 text: qsTr("Cancel")
                 DialogButtonBox.buttonRole: DialogButtonBox.RejectRole
             }
+            
             Button {
-                text: qsTr("Install")
+                text: qsTr("Load Firmware")
                 DialogButtonBox.buttonRole: DialogButtonBox.ApplyRole
             }
             
@@ -142,27 +124,29 @@ ColumnLayout {
 
 
     FileDialog {
-        // Input for firmware file (left drive).
-        id: firmwarefileLeftDialog
+        // Input for firmware file.
+        id: firmwareFileDialog
         title: "Please choose a file"
-        defaultSuffix: "lfu"
+        defaultSuffix: "zfu"
         fileMode: FileDialog.OpenFile
-        nameFilters: ["LFU Files (*.lfu)", "SFU Files (*.sfu)"]
+        nameFilters: ["ZFU Files (*.zfu)"]
         onAccepted: {
-            bootloaderPage.bootloaderController.select_firmware(selectedFile, Enums.Drive.Left);
+            bootloaderPage.bootloaderController.select_firmware(selectedFile);
         }
     }
 
-    FileDialog {
-        // Input for firmware file (right drive).
-        id: firmwarefileRightDialog
-        title: "Please choose a file"
-        defaultSuffix: "lfu"
-        fileMode: FileDialog.OpenFile
-        nameFilters: ["LFU Files (*.lfu)", "SFU Files (*.sfu)"]
-        onAccepted: {
-            bootloaderPage.bootloaderController.select_firmware(selectedFile, Enums.Drive.Right);
+    Dialog {
+        // Installation success message is displayed in this dialog.
+        id: successMessageDialog
+        modal: true
+        title: qsTr("Installation complete")
+        x: (parent.width - width) / 2
+        y: (parent.height - height) / 2
+        Label {
+            id: errorMessageDialogLabel
+            text: qsTr("Firmware installation successful.")
         }
+        standardButtons: Dialog.Ok
     }
 
     Components.Selection {
@@ -183,12 +167,9 @@ ColumnLayout {
             idRightAutomatic.model = [];
             idLeftAutomatic.enabled = false;
             idRightAutomatic.enabled = false;
-            bootloaderPage.bootloaderController.reset_firmware(Enums.Drive.Left);
-            resetFirmwareLeft.visible = false;
-            firmwareButtonLeft.enabled = true;
-            bootloaderPage.bootloaderController.reset_firmware(Enums.Drive.Right);
-            resetFirmwareRight.visible = false;
-            firmwareButtonRight.enabled = true;
+            bootloaderPage.bootloaderController.reset_firmware();
+            resetFirmware.visible = false;
+            firmwareButton.enabled = true;
         }
     }
 
@@ -199,9 +180,9 @@ ColumnLayout {
         visible: false
         Component.onCompleted: () => {
             const interface_name_list = bootloaderPage.bootloaderController.get_interface_name_list();
-            selectNetworkAdapter.model = interface_name_list.map((interface_name, index) => {
+            selectNetworkAdapter.model = interface_name_list.map((interface_name) => {
                     return {
-                        value: index,
+                        value: interface_name,
                         text: interface_name
                     };
                 });
@@ -283,7 +264,7 @@ ColumnLayout {
         }
         Components.SpacerW {
         }
-        Components.Button {
+        Components.StyledButton {
             id: scanButton
             text: "Scan"
             Layout.fillWidth: true
@@ -306,7 +287,7 @@ ColumnLayout {
         Components.SpacerW {
         }
         Text {
-            text: "ID Left:"
+            text: "Axis 1 ID:"
             font.pointSize: 12
             Layout.fillWidth: true
             Layout.preferredWidth: 4
@@ -318,12 +299,12 @@ ColumnLayout {
             Layout.preferredWidth: 4
             from: 0
             editable: true
-            onValueModified: () => bootloaderPage.bootloaderController.select_node_id(value, Enums.Drive.Left)
+            onValueModified: () => bootloaderPage.bootloaderController.select_node_id(value, Enums.Drive.Axis1)
         }
         Components.SpacerW {
         }
         Text {
-            text: "ID Right:"
+            text: "Axis 2 ID:"
             font.pointSize: 12
             Layout.fillWidth: true
             Layout.preferredWidth: 4
@@ -335,7 +316,7 @@ ColumnLayout {
             Layout.preferredWidth: 4
             from: 0
             editable: true
-            onValueModified: () => bootloaderPage.bootloaderController.select_node_id(value, Enums.Drive.Right)
+            onValueModified: () => bootloaderPage.bootloaderController.select_node_id(value, Enums.Drive.Axis2)
         }
         Components.SpacerW {
         }
@@ -348,7 +329,7 @@ ColumnLayout {
         Components.SpacerW {
         }
         Text {
-            text: "ID Left:"
+            text: "Axis 1 ID:"
             font.pointSize: 12
             Layout.fillWidth: true
             Layout.preferredWidth: 2
@@ -363,12 +344,12 @@ ColumnLayout {
             Layout.fillWidth: true
             Layout.preferredWidth: 2
             Material.foreground: Material.foreground
-            onActivated: () => bootloaderPage.bootloaderController.select_node_id(currentValue, Enums.Drive.Left)
+            onActivated: () => bootloaderPage.bootloaderController.select_node_id(currentValue, Enums.Drive.Axis1)
         }
         Components.SpacerW {
         }
         Text {
-            text: "ID Right:"
+            text: "Axis 2 ID:"
             font.pointSize: 12
             Layout.fillWidth: true
             Layout.preferredWidth: 2
@@ -383,7 +364,7 @@ ColumnLayout {
             Layout.fillWidth: true
             Layout.preferredWidth: 2
             Material.foreground: Material.foreground
-            onActivated: () => bootloaderPage.bootloaderController.select_node_id(currentValue, Enums.Drive.Right)
+            onActivated: () => bootloaderPage.bootloaderController.select_node_id(currentValue, Enums.Drive.Axis2)
         }
         Components.SpacerW {
         }
@@ -397,53 +378,25 @@ ColumnLayout {
         ColumnLayout {
             Layout.fillWidth: true
             Layout.preferredWidth: 2
-            Components.Button {
-                id: firmwareButtonLeft
-                text: "Choose firmware left..."
-                onClicked: firmwarefileLeftDialog.open()
+            Components.StyledButton {
+                id: firmwareButton
+                text: "Choose firmware..."
+                onClicked: firmwareFileDialog.open()
             }
             RowLayout {
                 Layout.alignment: Qt.AlignHCenter
                 Text {
-                    id: firmwareFileLeft
+                    id: firmwareFile
                     color: '#e0e0e0'
                 }
                 RoundButton {
-                    id: resetFirmwareLeft
+                    id: resetFirmware
                     text: "X"
                     visible: false
                     onClicked: () => {
-                        bootloaderPage.bootloaderController.reset_firmware(Enums.Drive.Left);
-                        resetFirmwareLeft.visible = false;
-                        firmwareButtonLeft.enabled = true;
-                    }
-                }
-            }
-        }
-        Components.SpacerW {
-        }
-        ColumnLayout {
-            Layout.fillWidth: true
-            Layout.preferredWidth: 2
-            Components.Button {
-                id: firmwareButtonRight
-                text: "Choose firmware right..."
-                onClicked: firmwarefileRightDialog.open()
-            }
-            RowLayout {
-                Layout.alignment: Qt.AlignHCenter
-                Text {
-                    id: firmwareFileRight
-                    color: '#e0e0e0'
-                }
-                RoundButton {
-                    id: resetFirmwareRight
-                    text: "X"
-                    visible: false
-                    onClicked: () => {
-                        bootloaderPage.bootloaderController.reset_firmware(Enums.Drive.Right);
-                        resetFirmwareRight.visible = false;
-                        firmwareButtonRight.enabled = true;
+                        bootloaderPage.bootloaderController.reset_firmware();
+                        resetFirmware.visible = false;
+                        firmwareButton.enabled = true;
                     }
                 }
             }
@@ -460,9 +413,9 @@ ColumnLayout {
         // a node was selected for the drive we want to change).
         Components.SpacerW {
         }
-        Components.Button {
+        Components.StyledButton {
             id: installBtn
-            text: "Install firmware"
+            text: "Load firmware"
             Material.background: '#2ffcab'
             Material.foreground: '#1b1b1b'
             hoverColor: '#acfedd'
@@ -486,7 +439,7 @@ ColumnLayout {
                 }
             ]
             onClicked: () => {
-                progressDialog.open()
+                installDialog.open()
             }
         }
         Components.SpacerW {
