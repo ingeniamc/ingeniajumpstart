@@ -5,8 +5,8 @@ name = "pypi"
 
 [packages]
 pyside6 = "==6.6.0"
-ingenialink = "==7.3.0"
-ingeniamotion = "==0.8.0"
+ingenialink = "==7.3.5"
+ingeniamotion = "==0.8.4"
 ingenialogger = "==0.3.0"
 
 [dev-packages]

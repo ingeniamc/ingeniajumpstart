@@ -53,6 +53,6 @@ if __name__ == "__main__":
     # Start the application.
     ret = app.exec()
     mcs.stop_motion_controller_thread()
-    mcs.stop_poller_thread(Drive.Left.name)
-    mcs.stop_poller_thread(Drive.Right.name)
+    mcs.stop_poller_thread(Drive.Axis1.name)
+    mcs.stop_poller_thread(Drive.Axis2.name)
     sys.exit(ret)

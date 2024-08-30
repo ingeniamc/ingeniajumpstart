@@ -17,15 +17,19 @@ import "js/selection.js" as SelectionJS
 ColumnLayout {
     id: selectionPage
     required property ConnectionController connectionController
+
+    property string dictionaryButtonMessage: "Choose dictionary"
+
+    property string configurationButtonMessage: "(Optional) Choose config"
     
     Connections {
         target: selectionPage.connectionController
         function onDictionary_changed(dictionary, drive) {
             switch (drive) {
-                case Enums.Drive.Left:
+                case Enums.Drive.Axis1:
                     leftDictionaryUploadBtn.setFile(dictionary);
                     break;
-                case Enums.Drive.Right:
+                case Enums.Drive.Axis2:
                     rightDictionaryUploadBtn.setFile(dictionary);
                     break;
                 case Enums.Drive.Both:
@@ -50,10 +54,10 @@ ColumnLayout {
         }
         function onConfig_changed(config, drive) {
             switch (drive) {
-                case Enums.Drive.Left:
+                case Enums.Drive.Axis1:
                     leftConfigUploadBtn.setFile(config);
                     break;
-                case Enums.Drive.Right:
+                case Enums.Drive.Axis2:
                     rightConfigUploadBtn.setFile(config);
                     break;
                 case Enums.Drive.Both:
@@ -225,7 +229,7 @@ ColumnLayout {
         Components.SpacerW {
         }
         Text {
-            text: "ID Left:"
+            text: "Axis 1 ID:"
             font.pointSize: 12
             Layout.fillWidth: true
             Layout.preferredWidth: 4
@@ -237,12 +241,12 @@ ColumnLayout {
             Layout.preferredWidth: 4
             from: 0
             editable: true
-            onValueModified: () => selectionPage.connectionController.select_node_id(value, Enums.Drive.Left)
+            onValueModified: () => selectionPage.connectionController.select_node_id(value, Enums.Drive.Axis1)
         }
         Components.SpacerW {
         }
         Text {
-            text: "ID Right:"
+            text: "Axis 2 ID:"
             font.pointSize: 12
             Layout.fillWidth: true
             Layout.preferredWidth: 4
@@ -254,7 +258,7 @@ ColumnLayout {
             Layout.preferredWidth: 4
             from: 0
             editable: true
-            onValueModified: () => selectionPage.connectionController.select_node_id(value, Enums.Drive.Right)
+            onValueModified: () => selectionPage.connectionController.select_node_id(value, Enums.Drive.Axis2)
         }
         Components.SpacerW {
         }
@@ -267,7 +271,7 @@ ColumnLayout {
         Components.SpacerW {
         }
         Text {
-            text: "ID Left:"
+            text: "Axis 1 ID:"
             font.pointSize: 12
             Layout.fillWidth: true
             Layout.preferredWidth: 2
@@ -282,12 +286,12 @@ ColumnLayout {
             Layout.fillWidth: true
             Layout.preferredWidth: 2
             Material.foreground: Material.foreground
-            onActivated: () => selectionPage.connectionController.select_node_id(currentValue, Enums.Drive.Left)
+            onActivated: () => selectionPage.connectionController.select_node_id(currentValue, Enums.Drive.Axis1)
         }
         Components.SpacerW {
         }
         Text {
-            text: "ID Right:"
+            text: "Axis 2 ID:"
             font.pointSize: 12
             Layout.fillWidth: true
             Layout.preferredWidth: 2
@@ -302,7 +306,7 @@ ColumnLayout {
             Layout.fillWidth: true
             Layout.preferredWidth: 2
             Material.foreground: Material.foreground
-            onActivated: () => selectionPage.connectionController.select_node_id(currentValue, Enums.Drive.Right)
+            onActivated: () => selectionPage.connectionController.select_node_id(currentValue, Enums.Drive.Axis2)
         }
         Components.SpacerW {
         }
@@ -333,7 +337,7 @@ ColumnLayout {
             id: combinedConfigUploadBtn
             drive: Enums.Drive.Both
             fileType: Components.UploadButton.FileType.Config
-            text: "(Optional) Choose config..."
+            text: selectionPage.configurationButtonMessage
         }
         Components.SpacerW {
         }
@@ -348,17 +352,17 @@ ColumnLayout {
         }
         Components.UploadButton {
             id: leftConfigUploadBtn
-            drive: Enums.Drive.Left
+            drive: Enums.Drive.Axis1
             fileType: Components.UploadButton.FileType.Config
-            text: "(Optional) Choose config left..."
+            text: selectionPage.configurationButtonMessage + " axis 1"
         }
         Components.SpacerW {
         }
         Components.UploadButton {
             id: rightConfigUploadBtn
-            drive: Enums.Drive.Right
+            drive: Enums.Drive.Axis2
             fileType: Components.UploadButton.FileType.Config
-            text: "(Optional) Choose config right..."
+            text: selectionPage.configurationButtonMessage + " axis 2"
         }
         Components.SpacerW {
         }
@@ -389,7 +393,7 @@ ColumnLayout {
             id: combinedDictionaryUploadBtn
             drive: Enums.Drive.Both
             fileType: Components.UploadButton.FileType.Dictionary
-            text: "(Optional) Choose dictionary..."
+            text: selectionPage.dictionaryButtonMessage
         }
         Components.SpacerW {
         }
@@ -404,17 +408,17 @@ ColumnLayout {
         }
         Components.UploadButton {
             id: leftDictionaryUploadBtn
-            drive: Enums.Drive.Left
+            drive: Enums.Drive.Axis1
             fileType: Components.UploadButton.FileType.Dictionary
-            text: "(Optional) Choose dictionary left..."
+            text: selectionPage.dictionaryButtonMessage + " axis 1"
         }
         Components.SpacerW {
         }
         Components.UploadButton {
             id: rightDictionaryUploadBtn
-            drive: Enums.Drive.Right
+            drive: Enums.Drive.Axis2
             fileType: Components.UploadButton.FileType.Dictionary
-            text: "(Optional) Choose dictionary right..."
+            text: selectionPage.dictionaryButtonMessage + " axis 2"
         }
         Components.SpacerW {
         }

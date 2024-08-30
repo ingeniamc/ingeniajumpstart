@@ -18,10 +18,10 @@ function handleButtonPressed(button, leftFactor, rightFactor) {
 
     button.state = Enums.ButtonState.Active;
     if (leftCheck.checked) {
-        grid.connectionController.set_velocity(velocitySliderL.value * leftFactor, Enums.Drive.Left);
+        grid.connectionController.set_velocity(velocitySliderL.value * leftFactor, Enums.Drive.Axis1);
     }
     if (rightCheck.checked) {
-        grid.connectionController.set_velocity(velocitySliderR.value * rightFactor, Enums.Drive.Right);
+        grid.connectionController.set_velocity(velocitySliderR.value * rightFactor, Enums.Drive.Axis2);
     }
 }
 
@@ -35,10 +35,10 @@ function handleButtonReleased(button) {
         return;
     button.state = Enums.ButtonState.Enabled;
     if (leftCheck.checked) {
-        grid.connectionController.set_velocity(0, Enums.Drive.Left);
+        grid.connectionController.set_velocity(0, Enums.Drive.Axis1);
     }
     if (rightCheck.checked) {
-        grid.connectionController.set_velocity(0, Enums.Drive.Right);
+        grid.connectionController.set_velocity(0, Enums.Drive.Axis2);
     }
 }
 
@@ -77,8 +77,5 @@ function resetControls(drivesConnected = true) {
     }
     for (const button of [upButton, downButton, leftButton, rightButton]) {
         button.state = Enums.ButtonState.Disabled
-    }
-    for (const stateLED of [leftState, rightState]) {
-        stateLED.state = Enums.SERVO_STATE.DISABLED
     }
 }

@@ -18,7 +18,7 @@ The objective of this example is changing the value of a register of the drive u
         SpinBox {
             (component properties)
             onValueModified: () => {
-                grid.connectionController.set_register_max_velocity(value, Enums.Drive.Left);
+                grid.connectionController.set_max_velocity(value, Enums.Drive.Left);
             }
         }
 
@@ -37,13 +37,21 @@ The objective of this example is changing the value of a register of the drive u
 #.  Making a ``controller`` accessible in qml happens in **__main__.py**::
 
         ...
+        # Insert QML Quick view into the application.
+        view = QQuickView()
         qml_file = os.fspath(Path(__file__).resolve().parent / "views/main.qml")
         engine = QQmlApplicationEngine()
 
-        drive_controller = ConnectionController()
-        engine.setInitialProperties({"connectionController": drive_controller})
-
-        engine.load(qml_file)
+        # Init the controllers and make them availble to our .qml files.
+        mcs = MotionControllerService()
+        connection_controller = ConnectionController(mcs)
+        bootloader_controller = BootloaderController(mcs)
+        engine.setInitialProperties(
+            {
+                "bootloaderController": bootloader_controller,
+                "connectionController": connection_controller,
+            }
+        )
         ...
 
 #.  If the ``SpinBox`` is a direct child component of **main.qml**, we can continue with the next step. However, since we have separated our code over several pages, we need to pass the ``connectionController`` to the ``ControlsPage``, which holds the ``SpinBox``::
@@ -60,7 +68,7 @@ The objective of this example is changing the value of a register of the drive u
 #.  Now we can implement the function in the ``ConnectionController``::
 
         @Slot(float, int)
-        def set_register_max_velocity(self, max_velocity: float, drive: int) -> None:
+        def set_max_velocity(self, max_velocity: float, drive: int) -> None:
             self.mcs.run(
                 self.log_report,
                 "communication.set_register",

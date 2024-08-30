@@ -1,4 +1,5 @@
 import os
+from collections import defaultdict
 from functools import partial
 
 import ingenialogger
@@ -7,7 +8,10 @@ from PySide6.QtCore import QJsonArray, QObject, Signal, Slot
 from PySide6.QtQml import QmlElement
 
 from k2basecamp.models.connection_model import ConnectionModel
-from k2basecamp.services.motion_controller_service import MotionControllerService
+from k2basecamp.services.motion_controller_service import (
+    MAX_VELOCITY_REGISTER,
+    MotionControllerService,
+)
 from k2basecamp.utils.enums import CanDevice, ConnectionProtocol, Drive
 from k2basecamp.utils.types import thread_report
 
@@ -15,7 +19,6 @@ from k2basecamp.utils.types import thread_report
 # (QML_IMPORT_MINOR_VERSION is optional)
 QML_IMPORT_NAME = "qmltypes.controllers"
 QML_IMPORT_MAJOR_VERSION = 1
-MAX_VELOCITY_REGISTER = "CL_VEL_REF_MAX"
 
 logger = ingenialogger.get_logger(__name__)
 
@@ -106,10 +109,11 @@ class ConnectionController(QObject):
     def __init__(self, mcs: MotionControllerService) -> None:
         super().__init__()
         self.mcs = mcs
-        self.mcs.error_triggered.connect(self.error_message_callback)
+        self.mcs.error_triggered.connect(self.handle_error)
         self.mcs.servo_state_update_triggered.connect(self.update_servo_state)
         self.mcs.net_state_update_triggered.connect(self.update_net_state)
         self.connection_model = ConnectionModel()
+        self.__number_of_errors: dict[Drive, int] = defaultdict(int)
 
     @Slot()
     def connect(self) -> None:
@@ -134,7 +138,7 @@ class ConnectionController(QObject):
             drive: the drive to enable
         """
         target = Drive(drive)
-        if target == Drive.Left:
+        if target == Drive.Axis1:
             self.mcs.enable_motor(self.enable_motor_l_callback, target)
         else:
             self.mcs.enable_motor(self.enable_motor_r_callback, target)
@@ -146,17 +150,17 @@ class ConnectionController(QObject):
         Args:
             drive: the drive to disable
         """
-        if drive == Drive.Left.value:
+        if drive == Drive.Axis1.value:
             self.mcs.run(
                 self.disable_motor_l_callback,
                 "motion.motor_disable",
-                Drive.Left.name,
+                Drive.Axis1.name,
             )
         else:
             self.mcs.run(
                 self.disable_motor_r_callback,
                 "motion.motor_disable",
-                Drive.Right.name,
+                Drive.Axis2.name,
             )
 
     @Slot()
@@ -221,21 +225,15 @@ class ConnectionController(QObject):
         )
 
     @Slot(float, int)
-    def set_register_max_velocity(self, max_velocity: float, drive: int) -> None:
-        """Set a specific register - in this case the one that controls the maximum
-        velocity - of a given drive using the MotionControllerService.
+    def set_max_velocity(self, max_velocity: float, drive: int) -> None:
+        """Set the registers that control the maximum velocity of a given drive using
+        the MotionControllerService.
 
         Args:
             max_velocity: the value to set the register to
             drive: the drive
         """
-        self.mcs.run(
-            self.log_report,
-            "communication.set_register",
-            MAX_VELOCITY_REGISTER,
-            max_velocity,
-            Drive(drive).name,
-        )
+        self.mcs.set_max_velocity(self.log_report, Drive(drive), max_velocity)
 
     @Slot(str, int)
     def select_dictionary(self, dictionary: str, drive: int) -> None:
@@ -250,10 +248,10 @@ class ConnectionController(QObject):
         """
         dictionary = dictionary.removeprefix("file:///")
         dictionary_type = self.mcs.check_dictionary_format(dictionary)
-        if drive == Drive.Left.value:
+        if drive == Drive.Axis1.value:
             self.connection_model.left_dictionary = dictionary
             self.connection_model.left_dictionary_type = dictionary_type
-        elif drive == Drive.Right.value:
+        elif drive == Drive.Axis2.value:
             self.connection_model.right_dictionary = dictionary
             self.connection_model.right_dictionary_type = dictionary_type
         elif drive == Drive.Both.value:
@@ -267,10 +265,10 @@ class ConnectionController(QObject):
     @Slot(int)
     def reset_dictionary(self, drive: int) -> None:
         """Resets the dictionary file in the DriveModel."""
-        if drive == Drive.Left.value:
+        if drive == Drive.Axis1.value:
             self.connection_model.left_dictionary = None
             self.connection_model.left_dictionary_type = None
-        elif drive == Drive.Right.value:
+        elif drive == Drive.Axis2.value:
             self.connection_model.right_dictionary = None
             self.connection_model.right_dictionary_type = None
         elif drive == Drive.Both.value:
@@ -291,9 +289,9 @@ class ConnectionController(QObject):
             drive: the drive
         """
         config = config.removeprefix("file:///")
-        if drive == Drive.Left.value:
+        if drive == Drive.Axis1.value:
             self.connection_model.left_config = config
-        elif drive == Drive.Right.value:
+        elif drive == Drive.Axis2.value:
             self.connection_model.right_config = config
         elif drive == Drive.Both.value:
             self.connection_model.left_config = config
@@ -307,9 +305,9 @@ class ConnectionController(QObject):
         Args:
             drive: the drive.
         """
-        if drive == Drive.Left.value:
+        if drive == Drive.Axis1.value:
             self.connection_model.left_config = None
-        elif drive == Drive.Right.value:
+        elif drive == Drive.Axis2.value:
             self.connection_model.right_config = None
         elif drive == Drive.Both.value:
             self.connection_model.left_config = None
@@ -369,7 +367,7 @@ class ConnectionController(QObject):
             node_id: the selected node / slave ID
             drive: the drive the ID belongs to
         """
-        if drive == Drive.Left.value:
+        if drive == Drive.Axis1.value:
             self.connection_model.left_id = node_id
         else:
             self.connection_model.right_id = node_id
@@ -388,8 +386,9 @@ class ConnectionController(QObject):
                 the callback
         """
         self.drive_connected_triggered.emit()
-        # Get the current value of the CL_VEL_REF_MAX register
-        for drive in [Drive.Left, Drive.Right]:
+        # Get the current value of the MAX_VELOCITY_REGISTER register
+        for drive in [Drive.Axis1, Drive.Axis2]:
+            self.mcs.get_number_of_errors(self.__set_number_of_errors, drive)
             self.mcs.run(
                 partial(self.get_max_velocity_value_callback, drive),
                 "communication.get_register",
@@ -426,8 +425,8 @@ class ConnectionController(QObject):
                 the callback
         """
 
-        self.update_servo_state(Drive.Right, SERVO_STATE.DISABLED)
-        self.update_servo_state(Drive.Left, SERVO_STATE.DISABLED)
+        self.update_servo_state(Drive.Axis2, SERVO_STATE.DISABLED)
+        self.update_servo_state(Drive.Axis1, SERVO_STATE.DISABLED)
         self.drive_disconnected_triggered.emit()
         self.update_connect_button_state()
 
@@ -443,7 +442,7 @@ class ConnectionController(QObject):
                 the callback
         """
         poller_thread = self.mcs.create_poller_thread(
-            Drive.Left.name, [{"name": "CL_VEL_FBK_VALUE", "axis": 1}]
+            Drive.Axis1.name, [{"name": "CL_VEL_FBK_VALUE", "axis": 1}]
         )
         poller_thread.new_data_available_triggered.connect(
             self.handle_new_velocity_data_l
@@ -461,7 +460,7 @@ class ConnectionController(QObject):
                 the callback
         """
         poller_thread = self.mcs.create_poller_thread(
-            Drive.Right.name, [{"name": "CL_VEL_FBK_VALUE", "axis": 1}]
+            Drive.Axis2.name, [{"name": "CL_VEL_FBK_VALUE", "axis": 1}]
         )
         poller_thread.new_data_available_triggered.connect(
             self.handle_new_velocity_data_r
@@ -476,7 +475,7 @@ class ConnectionController(QObject):
             thread_report: the result of the operation that triggered
                 the callback
         """
-        self.mcs.stop_poller_thread(Drive.Left.name)
+        self.mcs.stop_poller_thread(Drive.Axis1.name)
 
     def disable_motor_r_callback(self, thread_report: thread_report) -> None:
         """Callback after the motor of a drive was disabled.
@@ -486,7 +485,7 @@ class ConnectionController(QObject):
             thread_report: the result of the operation that triggered
                 the callback
         """
-        self.mcs.stop_poller_thread(Drive.Right.name)
+        self.mcs.stop_poller_thread(Drive.Axis2.name)
 
     def scan_servos_callback(self, thread_report: thread_report) -> None:
         """Callback after the scan operation was completed. If values where returned,
@@ -506,16 +505,31 @@ class ConnectionController(QObject):
     def emergency_stop_callback(self, thread_report: thread_report) -> None:
         self.emergency_stop_triggered.emit()
 
-    def error_message_callback(self, error_message: str) -> None:
+    def handle_error(self, report: thread_report) -> None:
         """Callback when an error occured in a MotionControllerThread.
-        Emits a signal to the UI that contains the error message.
+        Display the error in a pop-up window.
 
         Args:
-            error_message: the error message.
+            report: The error thread report.
         """
-        self.emergency_stop()
-        self.error_triggered.emit(error_message)
-        self.update_connect_button_state()
+        if report.drive is not None:
+            self.mcs.get_number_of_errors(self.update_number_of_errors, report.drive)
+        else:
+            self.error_triggered.emit(str(report.exceptions))
+
+    def update_number_of_errors(self, report: thread_report) -> None:
+        """Callback to update the number of errors of a given drive.
+        If there is a new error, display it in a pop-up window.
+
+        Args:
+            report: the result of the get_number_of_errors method call.
+        """
+        if report.drive is None or report.output is None:
+            return
+        current_number_of_errors = report.output
+        if current_number_of_errors > self.__number_of_errors[report.drive]:
+            self.mcs.get_last_error_message(self.show_last_error, report.drive)
+            self.__number_of_errors[report.drive] = current_number_of_errors
 
     @Slot(Drive, SERVO_STATE)
     def update_servo_state(self, drive: Drive, state: SERVO_STATE) -> None:
@@ -527,6 +541,8 @@ class ConnectionController(QObject):
             state: the new state
         """
         self.servo_state_changed.emit(state.value, drive.value)
+        if state == SERVO_STATE.FAULT:
+            self.mcs.get_number_of_errors(self.update_number_of_errors, drive)
 
     @Slot(Drive, NET_DEV_EVT)
     def update_net_state(self, drive: Drive, state: NET_DEV_EVT) -> None:
@@ -540,6 +556,7 @@ class ConnectionController(QObject):
         """
         if state == NET_DEV_EVT.REMOVED:
             self.mcs.stop_poller_thread(drive.name)
+            self.drive_disconnected_triggered.emit()
             self.error_triggered.emit("Network connection lost.")
         self.net_state_changed.emit(state.value)
 
@@ -552,6 +569,19 @@ class ConnectionController(QObject):
         """
         logger.debug(report)
 
+    def show_last_error(self, report: thread_report) -> None:
+        """Callback to display the last error.
+
+        Args:
+            report: the result of the get_last_error method call.
+        """
+        if report.output:
+            if report.drive:
+                error_message = f"{report.drive.name}: {report.output}"
+            else:
+                error_message = report.output
+            self.error_triggered.emit(error_message)
+
     def update_connect_button_state(self) -> None:
         """Helper function that calculates the state of the connect button using the
         DriveModel and emits a signal to the UI with the resulting state.
@@ -559,3 +589,9 @@ class ConnectionController(QObject):
         self.connect_button_state_changed.emit(
             self.connection_model.connect_button_state().value
         )
+
+    def __set_number_of_errors(self, t_report: thread_report) -> None:
+        """Store the current number of errors of a given drive."""
+        if t_report.drive is None or t_report.output is None:
+            return
+        self.__number_of_errors[t_report.drive] = t_report.output

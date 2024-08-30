@@ -4,11 +4,15 @@
 Quickstart
 **********
 
+.. WARNING::
+    **K2 Base Camp** currently only supports Windows. We cannot guarantee that the application works as expected if you are using another operating system.
+
 Prerequisites
 =============
 
 * `python 3.9 <https://www.python.org/downloads/release/python-390/>`_ 
-* `pipenv <https://pipenv.pypa.io/en/latest/installation/>`_
+* `pipenv <https://pipenv.pypa.io/en/latest/>`_
+* `WinPcap <https://www.winpcap.org/install/default.htm>`_
 
 Installing python
 =================
@@ -31,6 +35,9 @@ Subsequently, the quickstart commands would be adapted to::
 
 Installation
 ============
+
+.. NOTE::
+    Some functions of the application require WinPcap to be installed on your system. You can install it using the `Installer for Windows <https://www.winpcap.org/install/default.htm>`_. Once installed, no further action is required.
 
 If you have python 3.9 and pipenv installed on your system, running **K2 Base Camp** is as simple as:
 

@@ -1,18 +1,23 @@
 # K2 Base Camp
 
+[![Documentation Status](https://readthedocs.org/projects/k2-base-camp/badge/?version=latest)](https://k2-base-camp.readthedocs.io/en/latest/?badge=latest)
+
 Simple open source app to plug &amp; play with your servo drive.
 
 ## Getting started
 
 ### Prerequisites
 
-The project requires [python 3.9](https://www.python.org/downloads/release/python-390/) and [pipenv](https://pipenv.pypa.io/en/latest/installation/).
+- [python 3.9](https://www.python.org/downloads/release/python-390/)
+- [pipenv](https://pipenv.pypa.io/en/latest/)
+- [WinPcap](https://www.winpcap.org/install/default.htm)
 
 ### Installation
 
 1. Clone the repository
 
    `git clone https://github.com/ingeniamc/k2-base-camp.git`
+   `cd k2-base-camp`
 
 2. Install dependencies
 

@@ -37,11 +37,11 @@ def test_select_can_baudrate(connection_controller: ConnectionController) -> Non
 
 def test_select_ids(connection_controller: ConnectionController) -> None:
     left_id = 31
-    connection_controller.select_node_id(left_id, Drive.Left.value)
+    connection_controller.select_node_id(left_id, Drive.Axis1.value)
     assert connection_controller.connection_model.left_id == left_id
 
     right_id = 32
-    connection_controller.select_node_id(right_id, Drive.Right.value)
+    connection_controller.select_node_id(right_id, Drive.Axis2.value)
     assert connection_controller.connection_model.right_id == right_id
 
 
@@ -49,7 +49,7 @@ def test_select_dictionary(connection_controller: ConnectionController) -> None:
     dict_signal_spy = QSignalSpy(connection_controller.dictionary_changed)
 
     ethercat_dict = "tests/assets/cap-net-e_eoe_2.4.1.xdf"
-    connection_controller.select_dictionary(ethercat_dict, Drive.Right.value)
+    connection_controller.select_dictionary(ethercat_dict, Drive.Axis2.value)
     assert connection_controller.connection_model.right_dictionary == ethercat_dict
     assert (
         connection_controller.connection_model.right_dictionary_type
@@ -60,7 +60,7 @@ def test_select_dictionary(connection_controller: ConnectionController) -> None:
     ] == ethercat_dict.removeprefix("tests/assets/")
 
     canopen_dict = "tests/assets/eve-xcr-c_can_2.4.1.xdf"
-    connection_controller.select_dictionary(canopen_dict, Drive.Right.value)
+    connection_controller.select_dictionary(canopen_dict, Drive.Axis2.value)
     assert connection_controller.connection_model.right_dictionary == canopen_dict
     assert (
         connection_controller.connection_model.right_dictionary_type
@@ -77,8 +77,8 @@ def test_connect_button(connection_controller: ConnectionController) -> None:
     connection_controller.select_interface(2)
     connection_controller.select_can_device(CanDevice.KVASER.value)
     connection_controller.select_can_baudrate(CAN_BAUDRATE.Baudrate_1M.value)
-    connection_controller.select_node_id(31, Drive.Left.value)
-    connection_controller.select_node_id(32, Drive.Right.value)
+    connection_controller.select_node_id(31, Drive.Axis1.value)
+    connection_controller.select_node_id(32, Drive.Axis2.value)
     # The button should be disabled until everything is seleced.
     assert (
         connect_button_spy.at(connect_button_spy.size() - 1)[0]

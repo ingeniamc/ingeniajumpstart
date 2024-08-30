@@ -2,12 +2,15 @@ from dataclasses import dataclass
 from functools import partial
 from typing import Any, Callable, Optional, Union
 
+from k2basecamp.utils.enums import Drive
+
 
 @dataclass
 class thread_report:
     """Type for thread reports that are returned by threads. They contain information
     about the execution result of the thread."""
 
+    drive: Optional[Drive]
     method: str
     output: Optional[Any]
     timestamp: float

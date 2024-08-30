@@ -21,6 +21,8 @@ INTERFACE_CAN = "CAN"
 INTERFACE_ETH = "ETH"
 DEFAULT_DICTIONARY_PATH = "k2basecamp/assets/eve-net-c_can_2.4.1.xdf"
 EXPECTED_NODE_NR_SCAN = 2
+MAX_VELOCITY_REGISTER = "CL_VEL_REF_MAX"
+MAX_PROFILER_VELOCITY_REGISTER = "PROF_MAX_VEL"
 
 
 class MotionControllerService(QObject):
@@ -30,7 +32,7 @@ class MotionControllerService(QObject):
 
     """
 
-    error_triggered = Signal(str, arguments=["error_message"])
+    error_triggered = Signal(thread_report, arguments=["thread_report"])
     """Triggers when an error occurs while communicating with the drive"""
 
     servo_state_update_triggered: Signal = Signal(Drive, SERVO_STATE)
@@ -160,13 +162,13 @@ class MotionControllerService(QObject):
                 raise ILError("Node IDs cannot be the same.")
             for drive, id, config, dictionary in [
                 (
-                    Drive.Left,
+                    Drive.Axis1,
                     connection_model.left_id,
                     connection_model.left_config,
                     connection_model.left_dictionary,
                 ),
                 (
-                    Drive.Right,
+                    Drive.Axis2,
                     connection_model.right_id,
                     connection_model.right_config,
                     connection_model.right_dictionary,
@@ -482,38 +484,31 @@ class MotionControllerService(QObject):
             left_id: int,
             right_id: int,
         ) -> Any:
-            if not bootloader_model.install_prerequisites_met():
-                self.error_triggered.emit(
-                    "Incorrect or insufficient configuration. Make sure to provide the "
-                    + "right parameters for the selected connection protocol."
-                )
-                return
-
             if bootloader_model.connection == ConnectionProtocol.CANopen:
                 self.__mc.communication.connect_servo_canopen(
                     baudrate=bootloader_model.can_baudrate,
                     can_device=stringify_can_device_enum(bootloader_model.can_device),
                     dict_path=DEFAULT_DICTIONARY_PATH,
                     node_id=left_id,
-                    alias=Drive.Left.name,
+                    alias=Drive.Axis1.name,
                 )
                 self.__mc.communication.connect_servo_canopen(
                     baudrate=bootloader_model.can_baudrate,
                     can_device=stringify_can_device_enum(bootloader_model.can_device),
                     dict_path=DEFAULT_DICTIONARY_PATH,
                     node_id=right_id,
-                    alias=Drive.Right.name,
+                    alias=Drive.Axis2.name,
                 )
                 # We pass one of the two drive aliases to the function. It should
                 # automatically detect that we have a two drive setup based on the
                 # firmware file type and update both drives.
                 self.__mc.communication.load_firmware_canopen(
-                    servo=Drive.Left.name,
+                    servo=Drive.Axis1.name,
                     fw_file=firmware,
                     progress_callback=progress_callback,
                 )
-                self.__mc.communication.disconnect(servo=Drive.Left.name)
-                self.__mc.communication.disconnect(servo=Drive.Right.name)
+                self.__mc.communication.disconnect(servo=Drive.Axis1.name)
+                self.__mc.communication.disconnect(servo=Drive.Axis2.name)
             elif bootloader_model.connection == ConnectionProtocol.EtherCAT:
                 self.__mc.communication.load_firmware_ecat_interface_index(
                     fw_file=firmware,
@@ -522,5 +517,87 @@ class MotionControllerService(QObject):
                     ),
                     slave=left_id,
                 )
+
+        return on_thread
+
+    @run_on_thread
+    def set_max_velocity(
+        self,
+        report_callback: Callable[[thread_report], Any],
+        drive: Drive,
+        max_velocity: float,
+        *args: Any,
+        **kwargs: Any,
+    ) -> Callable[..., Any]:
+        """Set the maximum velocity of the given drive. There are two registers that
+        have an effect on this property - we are simply setting them both to the given
+        value to keep things simple in this application.
+
+        Args:
+            report_callback: callback to invoke after
+                completing the operation.
+            drive: the target drive.
+            max_velocity: the new maximum velocity.
+
+        """
+
+        def on_thread(drive: Drive, max_velocity: float) -> Any:
+            self.__mc.communication.set_register(
+                MAX_VELOCITY_REGISTER, max_velocity, drive.name
+            )
+            self.__mc.communication.set_register(
+                MAX_PROFILER_VELOCITY_REGISTER, max_velocity, drive.name
+            )
+
+        return on_thread
+
+    @run_on_thread
+    def get_last_error_message(
+        self,
+        report_callback: Callable[[thread_report], Any],
+        drive: Drive,
+        *args: Any,
+        **kwargs: Any,
+    ) -> Callable[..., Any]:
+        """Get the last error of a given drive.
+
+        Args:
+            report_callback: callback to invoke after
+                completing the operation.
+            drive: the target drive.
+
+        """
+
+        def on_thread(drive: Drive) -> Any:
+            error_code, *_ = self.__mc.errors.get_last_buffer_error(servo=drive.name)
+            *_, error_msg = self.__mc.errors.get_error_data(
+                error_code, servo=drive.name
+            )
+            return error_msg
+
+        return on_thread
+
+    @run_on_thread
+    def get_number_of_errors(
+        self,
+        report_callback: Callable[[thread_report], Any],
+        drive: Drive,
+        *args: Any,
+        **kwargs: Any,
+    ) -> Callable[..., Any]:
+        """Get the total number of errors of a given drive.
+
+        Args:
+            report_callback: callback to invoke after
+                completing the operation.
+            drive: the target drive.
+
+        """
+
+        def on_thread(drive: Drive) -> Any:
+            num_current_errors = self.__mc.errors.get_number_total_errors(
+                servo=drive.name
+            )
+            return num_current_errors
 
         return on_thread

@@ -9,6 +9,7 @@ from ingeniamotion.exceptions import IMException
 from PySide6.QtCore import QThread, Signal
 
 from k2basecamp.utils.types import motion_controller_task, thread_report
+from k2basecamp.utils.enums import Drive
 
 logger = ingenialogger.get_logger(__name__)
 
@@ -20,7 +21,7 @@ class MotionControllerThread(QThread):
 
     """
 
-    task_errored: Signal = Signal(str, arguments=["error_message"])
+    task_errored: Signal = Signal(thread_report, arguments=["thread_report"])
     """Signal emitted when a task fails.
     The error message is returned by the thread"""
 
@@ -80,7 +81,14 @@ class MotionControllerThread(QThread):
                 func_name = task.callback.func.__qualname__
             else:
                 func_name = task.callback.__qualname__
+            drive = None
+            if task.args:
+                for arg in task.args:
+                    if isinstance(arg, Drive):
+                        drive = arg
+                        break
             report = thread_report(
+                drive,
                 func_name,
                 output,
                 timestamp,
@@ -91,7 +99,7 @@ class MotionControllerThread(QThread):
                 self.task_completed.emit(task.callback, report)
             else:
                 logger.error(report)
-                self.task_errored.emit(str(report.exceptions))
+                self.task_errored.emit(report)
             self.queue.task_done()
 
     def stop(self) -> None:
