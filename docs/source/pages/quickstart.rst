@@ -41,7 +41,11 @@ Installation
 
 If you have python 3.9 and pipenv installed on your system, running **K2 Base Camp** is as simple as:
 
-#. Cloning the repository from `github <https://github.com/ingeniamc/k2-base-camp.git>`_
+#. Cloning the repository from `github <https://github.com/ingeniamc/k2-base-camp.git>`_::
+
+    git clone https://github.com/ingeniamc/k2-base-camp.git
+    cd k2-base-camp
+
 #. Installing the dependencies::
 
     pipenv sync
